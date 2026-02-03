@@ -78,6 +78,25 @@ export default function RoseDayPage() {
     document.getElementById(`section${num}`)?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Keep-alive ping every 1 minute to prevent server sleep
+  useEffect(() => {
+    const pingServer = async () => {
+      try {
+        await fetch('/api/health')
+      } catch (e) {
+        // Silent fail
+      }
+    }
+
+    // Initial ping
+    pingServer()
+
+    // Ping every 60 seconds
+    const keepAliveInterval = setInterval(pingServer, 60000)
+
+    return () => clearInterval(keepAliveInterval)
+  }, [])
+
   // Countdown timer observer
   useEffect(() => {
     const observer = new IntersectionObserver(
