@@ -26,7 +26,34 @@ export default function RoseDayPage() {
   const [nameValid, setNameValid] = useState(false)
   const [formSubmitted, setFormSubmitted] = useState(false)
   const [wrongAttempts, setWrongAttempts] = useState([])
+  const [interactionLogs, setInteractionLogs] = useState([])
   const whatsappNumber = "918512022116"
+
+  // Comprehensive logging function - captures ALL user interactions
+  const logInteraction = (eventType, details) => {
+    const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+    const logEntry = {
+      timestamp,
+      eventType,
+      details,
+      id: Date.now()
+    }
+
+    // Add to state logs
+    setInteractionLogs(prev => [...prev, logEntry])
+
+    // Console log for debugging
+    console.log(`📝 [${timestamp}] ${eventType}:`, details)
+
+    // Store in localStorage for persistence
+    try {
+      const existingLogs = JSON.parse(localStorage.getItem('roseDayLogs') || '[]')
+      existingLogs.push(logEntry)
+      localStorage.setItem('roseDayLogs', JSON.stringify(existingLogs))
+    } catch (e) {
+      console.log('LocalStorage not available')
+    }
+  }
 
   // Send WhatsApp update
   const sendWhatsAppUpdate = (message) => {
@@ -53,6 +80,15 @@ export default function RoseDayPage() {
       case 'form_submit':
         message += `🎁 FORM SUBMITTED!\n\n👸 Name: ${data.name}\n📍 Address: ${data.address}\n\nReady for surprise delivery! 🚚🌹`
         break
+      case 'name_input':
+        message += `⌨️ Name Input:\n"${data.value}"\nValid: ${data.isValid}`
+        break
+      case 'address_input':
+        message += `📍 Address Input:\n"${data}"`
+        break
+      case 'no_button_hover':
+        message += `🏃 No Button Escape Attempt #${data}`
+        break
     }
 
     // For critical updates, open WhatsApp
@@ -60,8 +96,11 @@ export default function RoseDayPage() {
       sendWhatsAppUpdate(message)
     }
 
-    // Log all updates to console (you can implement a backend later)
+    // Log all updates to console
     console.log('Update:', message)
+
+    // Also add to interaction logs
+    logInteraction(updateType, data)
   }
 
   // Name validation with hints
@@ -69,9 +108,13 @@ export default function RoseDayPage() {
     const lowerName = name.toLowerCase().trim()
     setQueenName(name)
 
+    // Log EVERY name input keystroke
+    logInteraction('name_input', { value: name, isValid: lowerName === 'queen' })
+
     if (lowerName === 'queen') {
       setNameHint("👸 Yes! You ARE my Queen! 💕")
       setNameValid(true)
+      logInteraction('name_correct', { finalValue: name })
       return
     }
 
@@ -85,6 +128,7 @@ export default function RoseDayPage() {
     // Track wrong attempts
     if (name.length >= 3 && lowerName !== 'queen'.substring(0, lowerName.length)) {
       setWrongAttempts(prev => [...prev, name])
+      logInteraction('wrong_name_attempt', { value: name, attemptNumber: wrongAttempts.length + 1 })
       // Send update for wrong attempts (every 3rd attempt to avoid spam)
       if (wrongAttempts.length > 0 && wrongAttempts.length % 3 === 0) {
         sendUpdate('wrong_name', name)
@@ -124,17 +168,34 @@ export default function RoseDayPage() {
     }
   }
 
+  // Handle address input with logging
+  const handleAddressChange = (value) => {
+    setQueenAddress(value)
+    // Log address input (debounced by checking length changes)
+    if (value.length % 10 === 0 || value.length === 1) {
+      logInteraction('address_input', { value: value, length: value.length })
+    }
+  }
+
   // Handle form submission
   const handleGiftFormSubmit = () => {
+    logInteraction('form_submit_attempt', { name: queenName, addressLength: queenAddress.length })
+
     if (!nameValid || queenAddress.trim().length < 10) {
       if (!nameValid) {
         setNameHint("❌ Pehle sahi naam daal! Hint: Tu meri _____ hai! 👑")
+        logInteraction('form_submit_failed', { reason: 'invalid_name' })
+      } else {
+        logInteraction('form_submit_failed', { reason: 'address_too_short' })
       }
       return
     }
 
     setFormSubmitted(true)
     triggerConfetti()
+
+    // Log successful submission
+    logInteraction('form_submit_success', { name: queenName, address: queenAddress })
 
     // Send WhatsApp update with details
     sendUpdate('form_submit', { name: queenName, address: queenAddress })
@@ -151,6 +212,7 @@ export default function RoseDayPage() {
 
   // Track Yes click
   const handleYesClickWithUpdate = () => {
+    logInteraction('yes_button_clicked', { timestamp: new Date().toISOString() })
     setYesClicked(true)
     triggerConfetti()
     sendUpdate('yes_clicked', null)
@@ -163,6 +225,25 @@ export default function RoseDayPage() {
       navigator.vibrate([200, 100, 200, 100, 400])
     }
   }
+
+  // Log page visit on mount
+  useEffect(() => {
+    logInteraction('page_visit', {
+      userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
+      screenWidth: typeof window !== 'undefined' ? window.innerWidth : 0,
+      screenHeight: typeof window !== 'undefined' ? window.innerHeight : 0
+    })
+
+    // Log all previous interactions from localStorage
+    try {
+      const existingLogs = JSON.parse(localStorage.getItem('roseDayLogs') || '[]')
+      if (existingLogs.length > 0) {
+        console.log('📊 Previous interaction logs:', existingLogs)
+      }
+    } catch (e) {
+      // Silent fail
+    }
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -228,8 +309,31 @@ export default function RoseDayPage() {
   }
 
   const scrollToSection = (num) => {
+    logInteraction('menu_navigation', { section: num })
     document.getElementById(`section${num}`)?.scrollIntoView({ behavior: 'smooth' })
   }
+
+  // Export all logs to console (for debugging)
+  const exportLogs = () => {
+    try {
+      const allLogs = JSON.parse(localStorage.getItem('roseDayLogs') || '[]')
+      console.log('📊 ===== ALL INTERACTION LOGS =====')
+      console.table(allLogs)
+      console.log('Total interactions:', allLogs.length)
+      return allLogs
+    } catch (e) {
+      console.log('No logs available')
+      return []
+    }
+  }
+
+  // Make exportLogs available globally for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.exportRoseDayLogs = exportLogs
+      console.log('💡 Tip: Run window.exportRoseDayLogs() in console to see all user interactions!')
+    }
+  }, [])
 
   // Valentine Question - Running No Button
   const runawayMessages = [
@@ -246,6 +350,9 @@ export default function RoseDayPage() {
 
     const newAttempts = noAttempts + 1
     setNoAttempts(newAttempts)
+
+    // Log No button hover/touch attempt
+    logInteraction('no_button_escape', { attemptNumber: newAttempts })
 
     // Random position
     const maxX = window.innerWidth - 150
@@ -1336,7 +1443,7 @@ export default function RoseDayPage() {
                     className="address-input"
                     placeholder="Full address with pincode... (min 10 characters)"
                     value={queenAddress}
-                    onChange={(e) => setQueenAddress(e.target.value)}
+                    onChange={(e) => handleAddressChange(e.target.value)}
                     rows={4}
                   />
                   {queenAddress.length > 0 && queenAddress.length < 10 && (
