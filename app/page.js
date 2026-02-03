@@ -19,6 +19,151 @@ export default function RoseDayPage() {
   const [noButtonText, setNoButtonText] = useState("Nahi! 😤")
   const [showRunawayMessage, setShowRunawayMessage] = useState("")
 
+  // Surprise Gift Form states
+  const [queenName, setQueenName] = useState("")
+  const [queenAddress, setQueenAddress] = useState("")
+  const [nameHint, setNameHint] = useState("")
+  const [nameValid, setNameValid] = useState(false)
+  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [wrongAttempts, setWrongAttempts] = useState([])
+  const whatsappNumber = "918512022116"
+
+  // Send WhatsApp update
+  const sendWhatsAppUpdate = (message) => {
+    const encodedMessage = encodeURIComponent(message)
+    // Open in new tab for updates
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank')
+  }
+
+  // Send silent update (background notification concept - will use WhatsApp link)
+  const sendUpdate = (updateType, data) => {
+    const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+    let message = `🌹 ROSE DAY UPDATE 🌹\n⏰ ${timestamp}\n\n`
+
+    switch(updateType) {
+      case 'wrong_name':
+        message += `❌ Wrong Name Attempt:\n"${data}"\n\nHint given to user.`
+        break
+      case 'page_visit':
+        message += `👀 Someone visited the website!`
+        break
+      case 'yes_clicked':
+        message += `💕 SHE CLICKED YES! Valentine accepted! 🎉`
+        break
+      case 'form_submit':
+        message += `🎁 FORM SUBMITTED!\n\n👸 Name: ${data.name}\n📍 Address: ${data.address}\n\nReady for surprise delivery! 🚚🌹`
+        break
+    }
+
+    // For critical updates, open WhatsApp
+    if (updateType === 'form_submit' || updateType === 'yes_clicked') {
+      sendWhatsAppUpdate(message)
+    }
+
+    // Log all updates to console (you can implement a backend later)
+    console.log('Update:', message)
+  }
+
+  // Name validation with hints
+  const validateName = (name) => {
+    const lowerName = name.toLowerCase().trim()
+    setQueenName(name)
+
+    if (lowerName === 'queen') {
+      setNameHint("👸 Yes! You ARE my Queen! 💕")
+      setNameValid(true)
+      return
+    }
+
+    setNameValid(false)
+
+    if (name.length === 0) {
+      setNameHint("")
+      return
+    }
+
+    // Track wrong attempts
+    if (name.length >= 3 && lowerName !== 'queen'.substring(0, lowerName.length)) {
+      setWrongAttempts(prev => [...prev, name])
+      // Send update for wrong attempts (every 3rd attempt to avoid spam)
+      if (wrongAttempts.length > 0 && wrongAttempts.length % 3 === 0) {
+        sendUpdate('wrong_name', name)
+      }
+    }
+
+    // Give progressive hints
+    if (lowerName.startsWith('q')) {
+      if (lowerName === 'q') {
+        setNameHint("🔥 Good start! Q for... what? Keep typing!")
+      } else if (lowerName.startsWith('qu')) {
+        if (lowerName === 'qu') {
+          setNameHint("🔥🔥 Getting warmer! Qu... something royal!")
+        } else if (lowerName.startsWith('que')) {
+          if (lowerName === 'que') {
+            setNameHint("🔥🔥🔥 Almost there! Que... you're royalty!")
+          } else if (lowerName.startsWith('quee')) {
+            if (lowerName === 'quee') {
+              setNameHint("🔥🔥🔥🔥 SO CLOSE! One more letter!")
+            }
+          }
+        }
+      }
+    } else {
+      // Wrong direction hints
+      const hints = [
+        "❌ Hmm... think royalty! 👑",
+        "❌ Nope! What do you call a female ruler? 👸",
+        "❌ Hint: Starts with 'Q'! 🔤",
+        "❌ Tu meri _____ hai! (Royal wali!) 👑",
+        "❌ Drag Queen... Chess Queen... MY ____? 💕",
+        "❌ Rhymes with 'seen'! 👀",
+        "❌ 5 letters, starts with Q, ends with N! 🎯",
+        "❌ Q-U-E-E-? Complete karo! 📝"
+      ]
+      setNameHint(hints[Math.floor(Math.random() * hints.length)])
+    }
+  }
+
+  // Handle form submission
+  const handleGiftFormSubmit = () => {
+    if (!nameValid || queenAddress.trim().length < 10) {
+      if (!nameValid) {
+        setNameHint("❌ Pehle sahi naam daal! Hint: Tu meri _____ hai! 👑")
+      }
+      return
+    }
+
+    setFormSubmitted(true)
+    triggerConfetti()
+
+    // Send WhatsApp update with details
+    sendUpdate('form_submit', { name: queenName, address: queenAddress })
+
+    // Extra celebration
+    for (let i = 0; i < 30; i++) {
+      setTimeout(() => createHeart(), i * 100)
+    }
+
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200, 100, 200, 100, 400])
+    }
+  }
+
+  // Track Yes click
+  const handleYesClickWithUpdate = () => {
+    setYesClicked(true)
+    triggerConfetti()
+    sendUpdate('yes_clicked', null)
+
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => createHeart(), i * 100)
+    }
+
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200, 100, 400])
+    }
+  }
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
@@ -256,6 +401,9 @@ export default function RoseDayPage() {
         </button>
         <button className="menu-item" onClick={() => scrollToSection('valentine')}>
           <span>💘</span>Question
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection('gift')}>
+          <span>🎁</span>Gift
         </button>
       </nav>
 
@@ -1043,7 +1191,7 @@ export default function RoseDayPage() {
             <div className="valentine-buttons">
               <button
                 className="yes-btn"
-                onClick={handleYesClick}
+                onClick={handleYesClickWithUpdate}
               >
                 Haan Ji! 💃❤️
               </button>
@@ -1151,6 +1299,93 @@ export default function RoseDayPage() {
             </p>
           </div>
         )}
+      </section>
+
+      {/* SURPRISE GIFT FORM SECTION */}
+      <section className="section gift-form-section" id="sectiongift">
+        <h2 className="gift-title">🎁 SURPRISE GIFT TIME! 🎁</h2>
+        <p className="gift-subtitle">Real gulab bhejna hai tujhe! 🌹🚚</p>
+
+        {!formSubmitted ? (
+          <div className="gift-form-container">
+            <div className="form-card">
+              <div className="form-icon">👸</div>
+              <h3 className="form-heading">Pehle bata, tu kaun hai? 💕</h3>
+
+              <div className="input-group">
+                <label className="input-label">Tera naam kya hai, meri...?</label>
+                <input
+                  type="text"
+                  className={`name-input ${nameValid ? 'valid' : queenName.length > 0 ? 'invalid' : ''}`}
+                  placeholder="Hint: Tu meri _____ hai! 👑"
+                  value={queenName}
+                  onChange={(e) => validateName(e.target.value)}
+                  maxLength={20}
+                />
+                {nameHint && (
+                  <div className={`hint-text ${nameValid ? 'success' : 'error'}`}>
+                    {nameHint}
+                  </div>
+                )}
+              </div>
+
+              {nameValid && (
+                <div className="input-group address-group">
+                  <label className="input-label">Ab address bata, surprise bhejna hai! 📦</label>
+                  <textarea
+                    className="address-input"
+                    placeholder="Full address with pincode... (min 10 characters)"
+                    value={queenAddress}
+                    onChange={(e) => setQueenAddress(e.target.value)}
+                    rows={4}
+                  />
+                  {queenAddress.length > 0 && queenAddress.length < 10 && (
+                    <div className="hint-text error">
+                      ❌ Thoda aur detail de! Courier wala confuse ho jayega! 📮
+                    </div>
+                  )}
+                  {queenAddress.length >= 10 && (
+                    <div className="hint-text success">
+                      ✅ Perfect! Courier bhai ready hai! 🚚
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button
+                className={`submit-btn ${nameValid && queenAddress.trim().length >= 10 ? 'active' : 'disabled'}`}
+                onClick={handleGiftFormSubmit}
+                disabled={!nameValid || queenAddress.trim().length < 10}
+              >
+                {nameValid && queenAddress.trim().length >= 10 ? '🌹 Bhej Do Surprise! 🎉' : '👆 Pehle form bharo!'}
+              </button>
+            </div>
+
+            <div className="form-fun-facts">
+              <p>🤫 Secret: Real gulab + surprise gift incoming!</p>
+              <p>📦 Delivery: Jaldi hi!</p>
+              <p>💕 Pyar: Unlimited!</p>
+            </div>
+          </div>
+        ) : (
+          <div className="form-success">
+            <div className="success-icon">🎉</div>
+            <h3 className="success-title">DONE! 💕</h3>
+            <p className="success-text">
+              Teri details mil gayi, meri Queen! 👸<br/>
+              Ab bas wait kar surprise ke liye! 🌹📦
+            </p>
+            <div className="success-hearts">💕 💖 💗 💓 💘</div>
+            <p className="success-note">
+              Real gulab + gift jaldi aa raha hai tere paas! 🚚✨
+            </p>
+          </div>
+        )}
+
+        <div className="gift-footer">
+          <p>Made with ❤️ by तुम्हारा Lakshay</p>
+          <p className="footer-small">(Agar surprise boring laga toh blame ChatGPT! 😂)</p>
+        </div>
       </section>
     </>
   )

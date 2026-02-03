@@ -1677,3 +1677,314 @@ body {
   margin-top: 30px;
   font-style: italic;
 }
+
+/* ============ GIFT FORM SECTION ============ */
+.gift-form-section {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 50%, #00b09b 100%);
+  padding-top: 120px;
+  padding-bottom: 60px;
+  min-height: 100vh;
+}
+
+.gift-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2.5rem;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 10px;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  animation: giftTitleBounce 1s ease-in-out infinite;
+}
+
+@keyframes giftTitleBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.gift-subtitle {
+  text-align: center;
+  font-size: 1.2rem;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 30px;
+}
+
+.gift-form-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-card {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 40px 25px;
+  margin: 20px;
+  width: 90%;
+  max-width: 350px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.form-icon {
+  text-align: center;
+  font-size: 4rem;
+  margin-bottom: 15px;
+  animation: formIconFloat 2s ease-in-out infinite;
+}
+
+@keyframes formIconFloat {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.form-heading {
+  font-family: 'Bangers', cursive;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #ffd700;
+  margin-bottom: 25px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.address-group {
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.input-label {
+  display: block;
+  font-size: 1rem;
+  color: #fff;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.name-input {
+  width: 100%;
+  padding: 15px 20px;
+  font-size: 1.1rem;
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  outline: none;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.name-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.name-input:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.name-input.valid {
+  border-color: #00ff88;
+  background: rgba(0, 255, 136, 0.2);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+.name-input.invalid {
+  border-color: #ff6b6b;
+  animation: inputShake 0.3s ease-out;
+}
+
+@keyframes inputShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.address-input {
+  width: 100%;
+  padding: 15px 20px;
+  font-size: 1rem;
+  border: 3px solid rgba(255, 255, 255, 0.5);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  outline: none;
+  resize: none;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+}
+
+.address-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.address-input:focus {
+  border-color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.hint-text {
+  margin-top: 10px;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  animation: hintAppear 0.3s ease-out;
+}
+
+@keyframes hintAppear {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hint-text.success {
+  background: rgba(0, 255, 136, 0.3);
+  color: #00ff88;
+  border: 1px solid #00ff88;
+}
+
+.hint-text.error {
+  background: rgba(255, 107, 107, 0.3);
+  color: #ffd700;
+  border: 1px solid #ffd700;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 18px 30px;
+  font-size: 1.2rem;
+  font-family: 'Bangers', cursive;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+}
+
+.submit-btn.active {
+  background: linear-gradient(45deg, #ff69b4, #ff1493);
+  color: white;
+  animation: submitBtnPulse 1.5s ease-in-out infinite;
+  box-shadow: 0 10px 30px rgba(255, 105, 180, 0.5);
+}
+
+@keyframes submitBtnPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.submit-btn.disabled {
+  background: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: not-allowed;
+}
+
+.form-fun-facts {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 20px;
+  width: 90%;
+  max-width: 350px;
+  text-align: center;
+}
+
+.form-fun-facts p {
+  font-size: 1rem;
+  color: #fff;
+  margin: 10px 0;
+}
+
+/* Form Success State */
+.form-success {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 50px 30px;
+  margin: 20px;
+  width: 90%;
+  max-width: 350px;
+  text-align: center;
+  border: 3px solid #ffd700;
+  animation: successAppear 0.8s ease-out;
+}
+
+@keyframes successAppear {
+  0% { opacity: 0; transform: scale(0.5); }
+  50% { transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.success-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: successIconBounce 1s ease-in-out infinite;
+}
+
+@keyframes successIconBounce {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.2) rotate(-10deg); }
+  50% { transform: scale(1) rotate(0deg); }
+  75% { transform: scale(1.2) rotate(10deg); }
+}
+
+.success-title {
+  font-family: 'Bangers', cursive;
+  font-size: 3rem;
+  color: #ffd700;
+  margin-bottom: 20px;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+}
+
+.success-text {
+  font-size: 1.2rem;
+  color: #fff;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.success-hearts {
+  font-size: 2.5rem;
+  margin: 20px 0;
+  animation: successHeartsFloat 2s ease-in-out infinite;
+}
+
+@keyframes successHeartsFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.success-note {
+  font-size: 1.1rem;
+  color: #ffd700;
+  font-weight: bold;
+  padding: 15px;
+  background: rgba(255, 215, 0, 0.2);
+  border-radius: 15px;
+}
+
+.gift-footer {
+  margin-top: 40px;
+  text-align: center;
+  padding: 20px;
+}
+
+.gift-footer p {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 5px 0;
+}
+
+.footer-small {
+  font-size: 0.85rem !important;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
