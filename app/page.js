@@ -164,6 +164,9 @@ export default function RoseDayPage() {
         <button className="menu-item" onClick={() => scrollToSection('jokes')}>
           <span>😂</span>Jokes
         </button>
+        <button className="menu-item" onClick={() => scrollToSection('shayari')}>
+          <span>📝</span>Shayari
+        </button>
         <button className="menu-item" onClick={() => scrollToSection(7)}>
           <span>🌹</span>Reality
         </button>
@@ -641,6 +644,170 @@ export default function RoseDayPage() {
         <div className="laugh-meter">
           <h4>🎉 Hassi Complete!</h4>
           <p className="laugh-text">Agar has has ke mar gayi taan blame mera nahi, teri hasi da dosh! 😂💕</p>
+        </div>
+      </section>
+
+      {/* SHAYARI SECTION - Dil Ki Baat */}
+      <section className="section shayari-section" id="sectionshayari">
+        <h2 className="shayari-title">📝 SHAYARI CORNER 📝</h2>
+        <p className="shayari-subtitle">🌹 Dil Ki Baat - Romantic & Funny Shayari 💕</p>
+
+        <div className="shayari-category-title">💕 Romantic Shayari 💕</div>
+
+        <div className="shayari-card romantic">
+          <span className="shayari-badge">❤️ Romantic</span>
+          <div className="shayari-icon">🌹</div>
+          <p className="shayari-text">
+            &quot;तू वो गुलाब है जिसमें खूशबू भी है, सुंदरता भी है,<br/>
+            न कांटे हैं न मुरझाने की फितरत है,<br/>
+            बस तुझमें मेरी जिंदगी की हर खुशी है।&quot;
+          </p>
+          <p className="shayari-ending">Happy Rose Day, meri jaan! 🌹❤️</p>
+        </div>
+
+        <div className="shayari-card romantic">
+          <span className="shayari-badge">💖 Filmy</span>
+          <div className="shayari-icon">🎬</div>
+          <p className="shayari-text">
+            &quot;मिले थे तुम जिस रोज, तब से चाहा है तुम्हें हर रोज,<br/>
+            मेरी तरफ से कुबूल कर लेना ये प्यारा सा रेड रोज।<br/>
+            तुझ बिन जिंदगी अधूरी, जैसे बिना खुशबू का गुलाब।&quot;
+          </p>
+          <p className="shayari-ending">Happy Rose Day, sohniye! 🌹</p>
+        </div>
+
+        <div className="shayari-card romantic">
+          <span className="shayari-badge">✨ Sweet</span>
+          <div className="shayari-icon">😘</div>
+          <p className="shayari-text">
+            &quot;गुलाब की तरह तेरी हर बात प्यारी लगे,<br/>
+            तेरी मुस्कान से मेरी दुनिया महक उठे।<br/>
+            तू है मेरी वो खुशबू जो कभी नहीं जाती,<br/>
+            बस तुझसे ही तो दिल की हर धड़कन बढ़ती है।&quot;
+          </p>
+          <p className="shayari-ending">Rose Day Mubarak! 😘🌹</p>
+        </div>
+
+        <div className="shayari-card romantic">
+          <span className="shayari-badge">💫 Dreamy</span>
+          <div className="shayari-icon">💭</div>
+          <p className="shayari-text">
+            &quot;एक खूबसूरत ख्वाब हो तुम,<br/>
+            दिल को छू जाने वाले एहसास हो तुम,<br/>
+            गुलाबों में क्या दूं मैं तुझे,<br/>
+            गुलाबों से भी खूबसूरत गुलाब हो तुम।&quot;
+          </p>
+          <p className="shayari-ending">Happy Rose Day, my love! 💕🌹</p>
+        </div>
+
+        <div className="shayari-card romantic">
+          <span className="shayari-badge">🙏 Emotional</span>
+          <div className="shayari-icon">💗</div>
+          <p className="shayari-text">
+            &quot;हर लम्हा तुझ पर कुर्बान कर दूं,<br/>
+            हर फूल की खुशबू तेरे नाम कर दूं।<br/>
+            बस यही दुआ है इस Rose Day पर,<br/>
+            तुझे खुद से भी ज्यादा प्यार कर दूं।&quot;
+          </p>
+          <p className="shayari-ending">Forever yours! 🌹💕</p>
+        </div>
+
+        <div className="rose-divider">🌹✨🌹✨🌹</div>
+
+        <div className="shayari-category-title">😂 Funny Shayari 😂</div>
+
+        <div className="shayari-card funny">
+          <span className="shayari-badge funny-badge">🤣 Budget Wala</span>
+          <div className="shayari-icon">🚜</div>
+          <p className="shayari-text">
+            &quot;Roses are red, pataka boom boom,<br/>
+            Teri smile dekh ke mera dil &apos;balle balle&apos; zoom zoom!<br/>
+            Par budget khatam, sirf ek gulab laaya hoon,<br/>
+            Baaki pyar free mein, accept kar le yaar!&quot;
+          </p>
+          <p className="shayari-ending">😂🌹🚜</p>
+        </div>
+
+        <div className="shayari-card funny">
+          <span className="shayari-badge funny-badge">😅 Desi Fail</span>
+          <div className="shayari-icon">🤡</div>
+          <p className="shayari-text">
+            &quot;Gulab laaya si gift vich,<br/>
+            par tu boli &apos;oye eh taan gas station da wilted wala ae!&apos;<br/>
+            Budget Jatt da budget,<br/>
+            par dil da pyar full premium!&quot;
+          </p>
+          <p className="shayari-ending">Happy Rose Day, warna ghost mat kar dena! 🤡🌹</p>
+        </div>
+
+        <div className="shayari-card funny">
+          <span className="shayari-badge funny-badge">⚡ Hyena Wali</span>
+          <div className="shayari-icon">😂</div>
+          <p className="shayari-text">
+            &quot;Teri hasi jaise hyena ne tickle fight jeet liya,<br/>
+            Main fake chhink maar ke sunta hoon har roz!<br/>
+            Gulab se zyada teri hasi dangerous ae,<br/>
+            pet dukh jaanda has has ke!&quot;
+          </p>
+          <p className="shayari-ending">😂⚡🌹</p>
+        </div>
+
+        <div className="shayari-card funny">
+          <span className="shayari-badge funny-badge">🔥 Microwave</span>
+          <div className="shayari-icon">🔥</div>
+          <p className="shayari-text">
+            &quot;Rose Day te gulab dena si plan,<br/>
+            Par tu taan microwave vich try kar ke jalaa deti!<br/>
+            Ab virtual gulab hi bhej raha hoon,<br/>
+            real wala wait kar – na jalana!&quot;
+          </p>
+          <p className="shayari-ending">🔥😭🌹</p>
+        </div>
+
+        <div className="shayari-card funny">
+          <span className="shayari-badge funny-badge">🐱 Billi Wala</span>
+          <div className="shayari-icon">🐱</div>
+          <p className="shayari-text">
+            &quot;Tere bina main apne billi nu gulab dinda,<br/>
+            Whiskers boli &apos;oye Jatt, eh fake love ae – asli milk la!&apos;<br/>
+            Tu hi meri asli rose ae,<br/>
+            baaki sab kande!&quot;
+          </p>
+          <p className="shayari-ending">🐱🌹🥛</p>
+        </div>
+
+        <div className="shayari-card funny">
+          <span className="shayari-badge funny-badge">📱 Tilt Wala</span>
+          <div className="shayari-icon">📱</div>
+          <p className="shayari-text">
+            &quot;Phone tilt kar grow karegi gulab,<br/>
+            Par yaad rakh: Main tilt nahi karda,<br/>
+            bas teri photo dekh ke high ho janda!<br/>
+            Oye has le pagli, eh romance nahi comedy show ae!&quot;
+          </p>
+          <p className="shayari-ending">🤣📱🌹</p>
+        </div>
+
+        <div className="shayari-card funny">
+          <span className="shayari-badge funny-badge">😅 Confidence</span>
+          <div className="shayari-icon">😰</div>
+          <p className="shayari-text">
+            &quot;Roses are red, violets are fine,<br/>
+            Tu naal pyar karda, menu lagda full volume mood!<br/>
+            Par agar late hui date te,<br/>
+            wilt ho jaunga jaise mera confidence pehli date te!&quot;
+          </p>
+          <p className="shayari-ending">😅🌹💀</p>
+        </div>
+
+        <div className="shayari-final-card">
+          <div className="shayari-final-icon">🌹</div>
+          <p className="shayari-final-text">
+            &quot;Teri shayari ne doodh snort kara ditta!<br/>
+            Date pakki, par gulab na bhulana<br/>
+            warna kanda wala pyar!&quot;
+          </p>
+          <p className="shayari-final-ending">😂🥛🌹 Jatt da pyar forever! 💪❤️</p>
         </div>
       </section>
 
