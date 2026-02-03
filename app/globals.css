@@ -1378,3 +1378,302 @@ body {
   margin-top: 20px;
   text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
 }
+
+/* ============ VALENTINE QUESTION SECTION ============ */
+.valentine-section {
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 50%, #f093fb 100%);
+  padding-top: 120px;
+  padding-bottom: 60px;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.valentine-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2.8rem;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 10px;
+  text-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+  animation: valentineTitlePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes valentineTitlePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.valentine-subtitle {
+  font-size: 1.5rem;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.valentine-warning {
+  text-align: center;
+  font-size: 1rem;
+  color: #ffd700;
+  background: rgba(0,0,0,0.3);
+  padding: 10px 20px;
+  border-radius: 25px;
+  margin: 20px auto;
+  max-width: 300px;
+  animation: warningBlink 1s infinite;
+}
+
+@keyframes warningBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.runaway-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.9);
+  color: #ffd700;
+  padding: 20px 30px;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  text-align: center;
+  z-index: 1001;
+  animation: messagePopup 0.3s ease-out;
+  border: 3px solid #ffd700;
+}
+
+@keyframes messagePopup {
+  0% { transform: translate(-50%, -50%) scale(0); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.valentine-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  margin: 40px 0;
+  position: relative;
+  min-height: 200px;
+}
+
+.yes-btn {
+  background: linear-gradient(45deg, #00ff88, #00cc66);
+  border: none;
+  color: white;
+  padding: 25px 60px;
+  font-size: 1.8rem;
+  font-family: 'Bangers', cursive;
+  border-radius: 50px;
+  cursor: pointer;
+  animation: yesBtnPulse 1s ease-in-out infinite;
+  box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5);
+  letter-spacing: 2px;
+  z-index: 10;
+}
+
+@keyframes yesBtnPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(0, 255, 136, 0.5); }
+  50% { transform: scale(1.1); box-shadow: 0 15px 60px rgba(0, 255, 136, 0.8); }
+}
+
+.no-btn {
+  background: linear-gradient(45deg, #ff4444, #cc0000);
+  border: none;
+  color: white;
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  font-family: 'Bangers', cursive;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: transform 0.2s ease-out, opacity 0.3s;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  margin-left: -75px;
+  z-index: 5;
+}
+
+.no-btn:hover {
+  background: linear-gradient(45deg, #ff6666, #ff4444);
+}
+
+.attempt-counter {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.attempt-counter p {
+  font-size: 1rem;
+  color: #fff;
+  margin: 10px 0;
+}
+
+.give-up-text {
+  color: #ffd700 !important;
+  font-weight: bold;
+  font-size: 1.2rem !important;
+  animation: giveUpShake 0.5s infinite;
+}
+
+@keyframes giveUpShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.floating-roses {
+  font-size: 3rem;
+  text-align: center;
+  margin-top: 40px;
+  animation: rosesFloat 3s ease-in-out infinite;
+}
+
+@keyframes rosesFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* YES RESPONSE STYLES */
+.yes-response {
+  text-align: center;
+  animation: yesResponseAppear 1s ease-out;
+}
+
+@keyframes yesResponseAppear {
+  0% { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.celebration-hearts {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  animation: heartsFloat 2s ease-in-out infinite;
+}
+
+@keyframes heartsFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.1); }
+}
+
+.yes-title {
+  font-family: 'Bangers', cursive;
+  font-size: 4rem;
+  color: #ffd700;
+  text-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+  margin-bottom: 30px;
+  animation: yesTitleBounce 0.5s ease-out;
+}
+
+@keyframes yesTitleBounce {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.emotional-message {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 40px 25px;
+  margin: 20px auto;
+  max-width: 350px;
+  border: 3px solid rgba(255, 215, 0, 0.5);
+}
+
+.message-rose {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: messageRoseSpin 4s linear infinite;
+}
+
+@keyframes messageRoseSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(10deg) scale(1.1); }
+  50% { transform: rotate(0deg) scale(1); }
+  75% { transform: rotate(-10deg) scale(1.1); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+.message-header {
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  color: #ffd700;
+  margin-bottom: 25px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+}
+
+.hindi-message {
+  font-size: 1.1rem;
+  line-height: 1.9;
+  color: #fff;
+  margin: 20px 0;
+  padding: 15px;
+  border-radius: 15px;
+}
+
+.hindi-message.highlight {
+  background: rgba(255, 215, 0, 0.2);
+  border-left: 4px solid #ffd700;
+}
+
+.hindi-message.promise {
+  background: rgba(255, 105, 180, 0.2);
+  border-left: 4px solid #ff69b4;
+}
+
+.hindi-message.big {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.final-question {
+  font-family: 'Bangers', cursive;
+  font-size: 1.5rem;
+  color: #ff69b4;
+  margin: 30px 0;
+  padding: 20px;
+  background: rgba(255, 105, 180, 0.2);
+  border-radius: 20px;
+  animation: questionPulse 2s ease-in-out infinite;
+}
+
+@keyframes questionPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.english-ending {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #fff;
+  font-style: italic;
+  margin: 25px 0;
+}
+
+.signature {
+  font-size: 1.3rem;
+  color: #ffd700;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px dashed rgba(255, 255, 255, 0.3);
+}
+
+.signature .name {
+  font-family: 'Bangers', cursive;
+  font-size: 1.8rem;
+  display: block;
+  margin-top: 10px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+}
+
+.made-by {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 30px;
+  font-style: italic;
+}

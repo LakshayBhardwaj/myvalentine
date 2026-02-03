@@ -11,6 +11,14 @@ export default function RoseDayPage() {
   const [timerStarted, setTimerStarted] = useState(false)
   const countdownRef = useRef(null)
 
+  // Valentine Question states
+  const [noButtonPosition, setNoButtonPosition] = useState({ x: 0, y: 0 })
+  const [noAttempts, setNoAttempts] = useState(0)
+  const [yesClicked, setYesClicked] = useState(false)
+  const [noButtonSize, setNoButtonSize] = useState(100)
+  const [noButtonText, setNoButtonText] = useState("Nahi! 😤")
+  const [showRunawayMessage, setShowRunawayMessage] = useState("")
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY
@@ -76,6 +84,73 @@ export default function RoseDayPage() {
 
   const scrollToSection = (num) => {
     document.getElementById(`section${num}`)?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  // Valentine Question - Running No Button
+  const runawayMessages = [
+    "Oye arre nahi! Tractor bhi itni fast nahi bhagda! 😂🚜",
+    "Nahi bolke kya fayda? Dil toh pehle hi haan keh chuka ae! ❤️",
+    "Button bhag raha hai tujhse! 🏃💨",
+    "Pakadke dikha agar himmat hai! 😜",
+    "Chole bhature nahi khilaunga agar nahi boli! 🍲",
+    "Arre ruk ja, itni bhi kya jaldi hai nahi bolne ki! 😅"
+  ]
+
+  const handleNoHover = () => {
+    if (yesClicked) return
+
+    const newAttempts = noAttempts + 1
+    setNoAttempts(newAttempts)
+
+    // Random position
+    const maxX = window.innerWidth - 150
+    const maxY = 300
+    const newX = Math.random() * maxX
+    const newY = Math.random() * maxY
+
+    setNoButtonPosition({ x: newX, y: newY })
+
+    // Show random message
+    setShowRunawayMessage(runawayMessages[Math.floor(Math.random() * runawayMessages.length)])
+
+    // Shrink button
+    const newSize = Math.max(20, 100 - (newAttempts * 15))
+    setNoButtonSize(newSize)
+
+    // Change button text after attempts
+    if (newAttempts >= 3) {
+      setNoButtonText("Pakad ke dikha! 🏃")
+    }
+    if (newAttempts >= 5) {
+      setNoButtonText("Main haar gaya! 😭")
+    }
+    if (newAttempts >= 7) {
+      setNoButtonText("...")
+      setNoButtonSize(10)
+    }
+
+    // Vibrate on mobile
+    if (navigator.vibrate) {
+      navigator.vibrate(100)
+    }
+
+    // Clear message after 2 seconds
+    setTimeout(() => setShowRunawayMessage(""), 2000)
+  }
+
+  const handleYesClick = () => {
+    setYesClicked(true)
+    triggerConfetti()
+
+    // Extra celebration
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => createHeart(), i * 100)
+    }
+
+    // Vibrate celebration pattern
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200, 100, 400])
+    }
   }
 
   // Keep-alive ping every 1 minute to prevent server sleep
@@ -178,6 +253,9 @@ export default function RoseDayPage() {
         </button>
         <button className="menu-item" onClick={() => scrollToSection(10)}>
           <span>💖</span>Finale
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection('valentine')}>
+          <span>💘</span>Question
         </button>
       </nav>
 
@@ -946,6 +1024,133 @@ export default function RoseDayPage() {
             🎉 Celebrate My Stupidity 🎉
           </button>
         </div>
+      </section>
+
+      {/* VALENTINE QUESTION - Life/Death Question */}
+      <section className="section valentine-section" id="sectionvalentine">
+        {!yesClicked ? (
+          <>
+            <h2 className="valentine-title">💘 AB BADA SAWAL! 💘</h2>
+            <p className="valentine-subtitle">Will You Be My Valentine? 🌹❤️</p>
+            <p className="valentine-warning">⚠️ No bolne ka chance nahi hai, warning! ⚠️</p>
+
+            {showRunawayMessage && (
+              <div className="runaway-message">
+                {showRunawayMessage}
+              </div>
+            )}
+
+            <div className="valentine-buttons">
+              <button
+                className="yes-btn"
+                onClick={handleYesClick}
+              >
+                Haan Ji! 💃❤️
+              </button>
+
+              <button
+                className="no-btn"
+                style={{
+                  transform: `translate(${noButtonPosition.x}px, ${noButtonPosition.y}px) scale(${noButtonSize / 100})`,
+                  opacity: noButtonSize < 20 ? 0 : 1
+                }}
+                onMouseEnter={handleNoHover}
+                onTouchStart={handleNoHover}
+                onClick={handleNoHover}
+              >
+                {noButtonText}
+              </button>
+            </div>
+
+            <div className="attempt-counter">
+              {noAttempts > 0 && (
+                <p>🏃 Bhagne ki koshish: {noAttempts} baar!</p>
+              )}
+              {noAttempts >= 5 && (
+                <p className="give-up-text">Haar maan le, Yes hi bolna padega! 😂</p>
+              )}
+            </div>
+
+            <div className="floating-roses">
+              🌹 🌹 🌹 🌹 🌹
+            </div>
+          </>
+        ) : (
+          <div className="yes-response">
+            <div className="celebration-hearts">💕💖💗💓💘</div>
+
+            <h2 className="yes-title">🎉 YESSSS! 🎉</h2>
+
+            <div className="emotional-message">
+              <div className="message-rose">🌹</div>
+
+              <h3 className="message-header">Meri Jaan</h3>
+
+              <p className="hindi-message">
+                आज ये &apos;हाँ&apos; सिर्फ एक बटन नहीं, मेरे दिल की हर धड़कन है।
+              </p>
+
+              <p className="hindi-message">
+                तू मेरी वो खुशबू है जो कभी नहीं जाती,<br/>
+                वो रोशनी है जो अंधेरों में भी चमकती है।
+              </p>
+
+              <p className="hindi-message">
+                पहली मुलाकात से लेकर आज तक,<br/>
+                हर पल तूने मुझे पूरा किया है –<br/>
+                मेरी हंसी, मेरी कमजोरियां, मेरे सपने,<br/>
+                सब कुछ तुझमें बस गया है।
+              </p>
+
+              <p className="hindi-message highlight">
+                तू मेरे लिए वो गुलाब है<br/>
+                जिसमें कांटे नहीं,<br/>
+                सिर्फ प्यार की महक है।
+              </p>
+
+              <p className="hindi-message">
+                बिना तेरे जिंदगी अधूरी लगती है,<br/>
+                जैसे बिना खुशबू का फूल।
+              </p>
+
+              <p className="hindi-message promise">
+                मैं वादा करता हूँ,<br/>
+                हर Rose Day, हर Valentine,<br/>
+                हर लम्हा तुझे और ज्यादा प्यार करूंगा,<br/>
+                संभालूंगा, और तेरे साथ हंसता-रोता रहूंगा।
+              </p>
+
+              <p className="hindi-message big">
+                तू मेरी जान है,<br/>
+                मेरी दुनिया है,<br/>
+                मेरी जिंदगी है।
+              </p>
+
+              <div className="final-question">
+                Will you be my Valentine… forever? 💕
+              </div>
+
+              <p className="english-ending">
+                I love you more than words,<br/>
+                more than gulabs,<br/>
+                more than anything.
+              </p>
+
+              <div className="signature">
+                Forever yours,<br/>
+                <span className="name">तुम्हारा Lakshay ❤️🌹</span>
+              </div>
+            </div>
+
+            <button className="celebrate-btn" onClick={triggerConfetti}>
+              🎉 Celebrate Our Love! 🎉
+            </button>
+
+            <p className="made-by">
+              Made with ❤️ (and ChatGPT under record time 😂)
+            </p>
+          </div>
+        )}
       </section>
     </>
   )
