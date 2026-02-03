@@ -141,6 +141,43 @@ export default function RoseDayPage() {
         </span>
       </div>
 
+      {/* Menu Bar */}
+      <nav className="menu-bar">
+        <button className="menu-item" onClick={() => scrollToSection(1)}>
+          <span>🚨</span>Alert
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection(2)}>
+          <span>📖</span>5 Stages
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection(3)}>
+          <span>💭</span>Said vs Actual
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection(4)}>
+          <span>🎤</span>Rap Battle
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection(5)}>
+          <span>🎬</span>Bollywood
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection(6)}>
+          <span>🔬</span>Science
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection('jokes')}>
+          <span>😂</span>Jokes
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection(7)}>
+          <span>🌹</span>Reality
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection(8)}>
+          <span>📋</span>Guide
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection(9)}>
+          <span>⏰</span>Countdown
+        </button>
+        <button className="menu-item" onClick={() => scrollToSection(10)}>
+          <span>💖</span>Finale
+        </button>
+      </nav>
+
       {/* Progress Bar */}
       <div className="progress-container">
         <div className="progress-bar" style={{ width: `${scrollProgress}%` }} />
@@ -452,6 +489,158 @@ export default function RoseDayPage() {
           <p style={{ marginTop: '20px', textAlign: 'center', color: '#888' }}>
             <em>When asked to be romantic → produces dad jokes at 300% speed</em>
           </p>
+        </div>
+      </section>
+
+      {/* JOKES KA PITARA - Gulab Da Hungama */}
+      <section className="section jokes-section" id="sectionjokes">
+        <h2 className="jokes-title">😂 JOKES KA PITARA 😂</h2>
+        <p className="jokes-subtitle">🚜 Gulab Da Hungama - Punjabi Style! 🌹</p>
+
+        <div className="laugh-meter">
+          <h4>📊 Hassi Meter Loading...</h4>
+          <div className="laugh-bar">
+            <div className="laugh-fill"></div>
+          </div>
+          <p className="laugh-text">Warning: Side effects include snorting chai! ☕😂</p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Classic</span>
+          <span className="joke-emoji">🌹</span>
+          <p className="joke-text">
+            <span className="punjabi">&quot;Roses are red, violets are blue,</span> ehni sohni ban ke kithe chali tu?
+            Main tractor te wait karda, par tu Uber book kar leti! 😂🚜&quot;
+          </p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Budget Wala</span>
+          <span className="joke-emoji">💸</span>
+          <p className="joke-text">
+            &quot;Gulab laaya si gift vich, par tu boli <span className="punjabi">&apos;eh taan gas station da wilted wala ae!&apos;</span>
+            Oye, budget Jatt da budget! 🌹😭&quot;
+          </p>
+        </div>
+
+        <div className="tractor-divider">🚜💨</div>
+
+        <div className="joke-card">
+          <span className="joke-category">Deep</span>
+          <span className="joke-emoji">🥀</span>
+          <p className="joke-text">
+            &quot;Happy Rose Day! <span className="punjabi">Menu pyar da gulab chahida si, par life ne menu sirf kanda hi ditte ne.</span>
+            Tu hi meri khushboo ae! (Par allergy na ho jaave 😷)&quot;
+          </p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Filmy</span>
+          <span className="joke-emoji">💃</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Roses are red, pataka boom,</span> teri smile dekh ke mera dil &apos;balle balle&apos; karda zoom! 🕺💃&quot;
+          </p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Warning</span>
+          <span className="joke-emoji">⚠️</span>
+          <p className="joke-text">
+            &quot;Warning: <span className="punjabi">Eh site vich itni bakwas hai ki rose vi sharma jauga.</span>
+            Scroll kar, has has ke pet dukh jauga – par blame mat karna, mainu &apos;pyar vich pagal&apos; keh ke!&quot;
+          </p>
+        </div>
+
+        <div className="tractor-divider">🌹🚜🌹</div>
+
+        <div className="joke-card">
+          <span className="joke-category">First Date</span>
+          <span className="joke-emoji">😅</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Jadon pehli vaar date te gaya:</span> Rose laaya, par hotel vich waiter ne poochya
+            &apos;saab, eh taan plastic da ae?&apos; Beizzati level: Expert! 🤡&quot;
+          </p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Reason #1</span>
+          <span className="joke-emoji">⚡</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Teri hasi – jaise khet vich bijli gir gayi ho!</span>
+            Fake chhink maar ke vi sunna painda, warna full voltage lag jauga 😂⚡&quot;
+          </p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Reason #2</span>
+          <span className="joke-emoji">🚜</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Tu meri Bhangra tolerate kardi.</span>
+            Jo basically tractor di steering ghumande ghumande disco steps lag rahe ne! 💪🕺&quot;
+          </p>
+        </div>
+
+        <div className="tractor-divider">💃🚜💃</div>
+
+        <div className="joke-card">
+          <span className="joke-category">Reason #3</span>
+          <span className="joke-emoji">👀</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Teri akhan – jaise Amritsari jalebi vich extra chashni!</span>
+            Sparkle itna ki main blind ho jaan wala si, par chashma nahi pehna! 🍯✨&quot;
+          </p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Reason #4</span>
+          <span className="joke-emoji">🍲</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Tu mere naal chole bhature khake food poisoning enjoy kardi.</span>
+            Pyar vich zehar vi sweet lagda ae! 🤢❤️&quot;
+          </p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Reason #5</span>
+          <span className="joke-emoji">🔥</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Tu microwave vich rose ton vi hot ae.</span>
+            Par ghar aake try kitti – rose jal gaya, mera ego vi! 🔥😭&quot;
+          </p>
+        </div>
+
+        <div className="tractor-divider">🔥🚜🔥</div>
+
+        <div className="joke-card">
+          <span className="joke-category">Reason #6</span>
+          <span className="joke-emoji">🤗</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Teri hug fix sab kardi.</span> Par romance allergy?
+            Menu chhink aa rahi, tu &apos;bless you&apos; keh ke hasdi rehndi! 🤧😂&quot;
+          </p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Reason #7</span>
+          <span className="joke-emoji">🐱</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Tere bina main apne billi nu gulab dinda.</span>
+            Whiskers boli &apos;oye Jatt, eh taan fake love ae – asli milk la!&apos; 🐱🥛&quot;
+          </p>
+        </div>
+
+        <div className="joke-card">
+          <span className="joke-category">Epic</span>
+          <span className="joke-emoji">🍺</span>
+          <p className="joke-text">
+            &quot;<span className="punjabi">Roses are red, patiala peg blue,</span> tu naal pyar karda,
+            menu lagda &apos;full volume&apos; wala mood! Chal celebrate karange – chole bhature te dance? 💃🕺&quot;
+          </p>
+        </div>
+
+        <div className="laugh-meter">
+          <h4>🎉 Hassi Complete!</h4>
+          <p className="laugh-text">Agar has has ke mar gayi taan blame mera nahi, teri hasi da dosh! 😂💕</p>
         </div>
       </section>
 
