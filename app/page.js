@@ -44,6 +44,7 @@ export default function RoseDayPage() {
   const [interactionLogs, setInteractionLogs] = useState([])
   const [soundEnabled, setSoundEnabled] = useState(false)
   const [sirenPlayed, setSirenPlayed] = useState(false)
+  const [showSoundOverlay, setShowSoundOverlay] = useState(true)
   const audioContextRef = useRef(null)
   const whatsappNumber = "918512022116"
 
@@ -190,13 +191,75 @@ export default function RoseDayPage() {
   const enableSound = () => {
     if (soundEnabled) return
     setSoundEnabled(true)
-    // Play siren on Rose Day after sound is enabled
-    if (activeDay === 'rose' && !sirenPlayed) {
-      setTimeout(() => {
-        playSound('siren')
-        setSirenPlayed(true)
-      }, 500)
+  }
+
+  // Activate sound with hooter - called when user clicks the overlay
+  const activateSoundWithHooter = () => {
+    setShowSoundOverlay(false)
+    setSoundEnabled(true)
+
+    // Initialize audio context
+    const ctx = getAudioContext()
+    if (!ctx) return
+
+    // Resume audio context (required by browsers)
+    if (ctx.state === 'suspended') {
+      ctx.resume()
     }
+
+    // Play war hooter/siren sound immediately
+    if (activeDay === 'rose' && !sirenPlayed) {
+      setSirenPlayed(true)
+
+      // Create a more dramatic war siren
+      const playWarSiren = () => {
+        try {
+          // First siren wave
+          const osc1 = ctx.createOscillator()
+          const gain1 = ctx.createGain()
+          osc1.connect(gain1)
+          gain1.connect(ctx.destination)
+          osc1.type = 'sawtooth'
+          osc1.frequency.setValueAtTime(200, ctx.currentTime)
+          osc1.frequency.linearRampToValueAtTime(600, ctx.currentTime + 1)
+          osc1.frequency.linearRampToValueAtTime(200, ctx.currentTime + 2)
+          osc1.frequency.linearRampToValueAtTime(600, ctx.currentTime + 3)
+          osc1.frequency.linearRampToValueAtTime(200, ctx.currentTime + 4)
+          gain1.gain.setValueAtTime(0.4, ctx.currentTime)
+          gain1.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 2)
+          gain1.gain.linearRampToValueAtTime(0.4, ctx.currentTime + 3)
+          gain1.gain.linearRampToValueAtTime(0, ctx.currentTime + 4)
+          osc1.start(ctx.currentTime)
+          osc1.stop(ctx.currentTime + 4)
+
+          // Add a second oscillator for richer sound
+          const osc2 = ctx.createOscillator()
+          const gain2 = ctx.createGain()
+          osc2.connect(gain2)
+          gain2.connect(ctx.destination)
+          osc2.type = 'square'
+          osc2.frequency.setValueAtTime(150, ctx.currentTime)
+          osc2.frequency.linearRampToValueAtTime(450, ctx.currentTime + 1)
+          osc2.frequency.linearRampToValueAtTime(150, ctx.currentTime + 2)
+          osc2.frequency.linearRampToValueAtTime(450, ctx.currentTime + 3)
+          osc2.frequency.linearRampToValueAtTime(150, ctx.currentTime + 4)
+          gain2.gain.setValueAtTime(0.2, ctx.currentTime)
+          gain2.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 2)
+          gain2.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 3)
+          gain2.gain.linearRampToValueAtTime(0, ctx.currentTime + 4)
+          osc2.start(ctx.currentTime)
+          osc2.stop(ctx.currentTime + 4)
+
+          console.log('🚨 WAR HOOTER ACTIVATED!')
+        } catch (e) {
+          console.log('Siren error:', e)
+        }
+      }
+
+      playWarSiren()
+    }
+
+    logInteraction('sound_enabled', { method: 'overlay_click' })
   }
 
   // Get comprehensive device and browser information
@@ -350,26 +413,10 @@ export default function RoseDayPage() {
         message += `👀 Someone visited the website!`
         break
       case 'yes_clicked':
-        const yesDeviceInfo = getDeviceInfo()
-        const yesVisitorInfo = JSON.parse(localStorage.getItem('lastVisitorInfo') || '{}')
-        message += `💕 SHE CLICKED YES! Valentine accepted! 🎉
-
-📍 From: ${yesVisitorInfo.city || 'unknown'}, ${yesVisitorInfo.country || 'unknown'}
-📱 Device: ${yesDeviceInfo.platform}
-🌐 IP: ${yesVisitorInfo.ip || 'unknown'}`
+        message += `💕 SHE CLICKED YES! Valentine accepted! 🎉`
         break
       case 'form_submit':
-        const formVisitorInfo = JSON.parse(localStorage.getItem('lastVisitorInfo') || '{}')
-        message += `🎁 FORM SUBMITTED!
-
-👸 Name: ${data.name}
-📍 Address: ${data.address}
-
-📍 From: ${formVisitorInfo.city || 'unknown'}, ${formVisitorInfo.country || 'unknown'}
-🌐 IP: ${formVisitorInfo.ip || 'unknown'}
-📱 Device: ${formVisitorInfo.platform || 'unknown'}
-
-Ready for surprise delivery! 🚚🌹`
+        message += `🎁 FORM SUBMITTED!\n\n👸 Name: ${data.name}\n📍 Address: ${data.address}\n\nReady for surprise delivery! 🚚🌹`
         break
       case 'name_input':
         message += `⌨️ Name Input:\n"${data.value}"\nValid: ${data.isValid}`
@@ -922,15 +969,30 @@ ${deviceInfo.userAgent}`
 
   return (
     <div onClick={enableSound}>
+      {/* Sound Enable Overlay - Shows on first visit */}
+      {showSoundOverlay && activeDay === 'rose' && (
+        <div className="sound-overlay" onClick={activateSoundWithHooter}>
+          <div className="sound-overlay-content">
+            <div className="sound-overlay-icon">🚨</div>
+            <h2 className="sound-overlay-title">EMERGENCY ALERT!</h2>
+            <p className="sound-overlay-text">Rose Day Emergency Broadcast</p>
+            <button className="sound-overlay-btn">
+              🔊 Tap to Enable Sound & Start
+            </button>
+            <p className="sound-overlay-hint">Best experience with sound ON!</p>
+          </div>
+        </div>
+      )}
+
       {/* Sound Toggle Button */}
       <button
         className="sound-toggle"
         onClick={(e) => {
           e.stopPropagation()
-          setSoundEnabled(!soundEnabled)
           if (!soundEnabled) {
-            // Play a test sound when enabling
-            setTimeout(() => playSound('click'), 100)
+            activateSoundWithHooter()
+          } else {
+            setSoundEnabled(false)
           }
         }}
         title={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
