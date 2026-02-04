@@ -1977,17 +1977,15 @@ ${deviceInfo.userAgent}`
                 {/* KBC 7 Crore Meme */}
                 {showKBCMeme && (
                   <div className="kbc-meme-container">
-                    <img
-                      src="https://media.tenor.com/images/4e5f1b3c8a8c3b4e9b2a0c1d3e5f7a9b/tenor.gif"
-                      alt="KBC 7 Crore Winner"
-                      className="kbc-meme"
-                      onError={(e) => {
-                        e.target.src = 'https://i.makeagif.com/media/6-18-2015/kqLvFO.gif'
-                      }}
-                    />
+                    <div className="kbc-celebration">
+                      <div className="kbc-big-emoji">🎊👑🎊</div>
+                      <div className="kbc-amount">₹7,00,00,000</div>
+                      <div className="kbc-confetti-text">🎉✨🎉✨🎉</div>
+                    </div>
                     <div className="kbc-text">
-                      <h3>🎉 7 CRORE! 🎉</h3>
-                      <p>Sahi Jawab! You are my QUEEN! 👸💕</p>
+                      <h3>🎉 SAT CRORE! 🎉</h3>
+                      <p>COMPUTERJI, LOCK KAR DIYA JAYE!</p>
+                      <p className="kbc-winner">👸 You are my QUEEN! 💕</p>
                     </div>
                   </div>
                 )}

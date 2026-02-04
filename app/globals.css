@@ -2204,11 +2204,28 @@ body {
   margin-top: 20px;
   text-align: center;
   animation: kbcAppear 0.5s ease-out;
-  background: linear-gradient(135deg, #1a237e 0%, #311b92 50%, #4a148c 100%);
+  background: linear-gradient(135deg, #0d0d3d 0%, #1a0a3e 50%, #2d1b4e 100%);
   border-radius: 20px;
-  padding: 20px;
+  padding: 25px 20px;
   border: 4px solid #ffd700;
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.kbc-meme-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(255, 215, 0, 0.1), transparent, rgba(255, 215, 0, 0.1));
+  animation: kbcRotate 3s linear infinite;
+}
+
+@keyframes kbcRotate {
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes kbcAppear {
@@ -2225,21 +2242,57 @@ body {
   }
 }
 
-.kbc-meme {
-  width: 100%;
-  max-width: 300px;
-  border-radius: 15px;
-  border: 3px solid #ffd700;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+.kbc-celebration {
+  position: relative;
+  z-index: 1;
+}
+
+.kbc-big-emoji {
+  font-size: 3.5rem;
+  margin-bottom: 10px;
+  animation: kbcEmojiPulse 0.6s ease-in-out infinite;
+}
+
+@keyframes kbcEmojiPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+.kbc-amount {
+  font-family: 'Bangers', cursive;
+  font-size: 2.5rem;
+  color: #ffd700;
+  text-shadow: 3px 3px 0 #ff6600, 0 0 30px #ffd700, 0 0 60px #ffd700;
+  animation: kbcAmountFlash 0.3s ease-in-out infinite alternate;
+  letter-spacing: 2px;
+}
+
+@keyframes kbcAmountFlash {
+  from { text-shadow: 3px 3px 0 #ff6600, 0 0 30px #ffd700; }
+  to { text-shadow: 3px 3px 0 #ff6600, 0 0 50px #ffd700, 0 0 80px #ffff00; }
+}
+
+.kbc-confetti-text {
+  font-size: 2rem;
+  margin: 10px 0;
+  animation: kbcConfetti 0.5s ease-in-out infinite;
+}
+
+@keyframes kbcConfetti {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-5px) rotate(-5deg); }
+  75% { transform: translateY(-5px) rotate(5deg); }
 }
 
 .kbc-text {
   margin-top: 15px;
+  position: relative;
+  z-index: 1;
 }
 
 .kbc-text h3 {
   font-family: 'Bangers', cursive;
-  font-size: 2rem;
+  font-size: 1.8rem;
   color: #ffd700;
   text-shadow: 2px 2px 0 #ff6600, 0 0 20px #ffd700;
   animation: kbcTextPulse 0.5s ease-in-out infinite;
@@ -2247,14 +2300,27 @@ body {
 
 @keyframes kbcTextPulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50% { transform: scale(1.05); }
 }
 
 .kbc-text p {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #fff;
-  margin-top: 10px;
+  margin-top: 8px;
   text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+
+.kbc-winner {
+  font-size: 1.3rem !important;
+  color: #ff69b4 !important;
+  margin-top: 12px !important;
+  font-weight: bold;
+  animation: kbcWinnerPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes kbcWinnerPulse {
+  0%, 100% { transform: scale(1); color: #ff69b4; }
+  50% { transform: scale(1.1); color: #ff1493; }
 }
 
 .hint-text.error {
