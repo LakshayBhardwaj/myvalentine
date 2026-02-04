@@ -39,6 +39,7 @@ export default function RoseDayPage() {
   const [queenAddress, setQueenAddress] = useState("")
   const [nameHint, setNameHint] = useState("")
   const [nameValid, setNameValid] = useState(false)
+  const [showKBCMeme, setShowKBCMeme] = useState(false)
   const [formSubmitted, setFormSubmitted] = useState(false)
   const [wrongAttempts, setWrongAttempts] = useState([])
   const [interactionLogs, setInteractionLogs] = useState([])
@@ -452,8 +453,13 @@ export default function RoseDayPage() {
     if (lowerName === 'queen') {
       setNameHint("👸 Yes! You ARE my Queen! 💕")
       setNameValid(true)
+      setShowKBCMeme(true)
       playSound('success')
+      playSound('celebration')
       logInteraction('name_correct', { finalValue: name })
+
+      // Hide meme after 5 seconds
+      setTimeout(() => setShowKBCMeme(false), 5000)
       return
     }
 
@@ -1965,6 +1971,24 @@ ${deviceInfo.userAgent}`
                 {nameHint && (
                   <div className={`hint-text ${nameValid ? 'success' : 'error'}`}>
                     {nameHint}
+                  </div>
+                )}
+
+                {/* KBC 7 Crore Meme */}
+                {showKBCMeme && (
+                  <div className="kbc-meme-container">
+                    <img
+                      src="https://media.tenor.com/images/4e5f1b3c8a8c3b4e9b2a0c1d3e5f7a9b/tenor.gif"
+                      alt="KBC 7 Crore Winner"
+                      className="kbc-meme"
+                      onError={(e) => {
+                        e.target.src = 'https://i.makeagif.com/media/6-18-2015/kqLvFO.gif'
+                      }}
+                    />
+                    <div className="kbc-text">
+                      <h3>🎉 7 CRORE! 🎉</h3>
+                      <p>Sahi Jawab! You are my QUEEN! 👸💕</p>
+                    </div>
                   </div>
                 )}
               </div>

@@ -2199,6 +2199,64 @@ body {
   border: 1px solid #00ff88;
 }
 
+/* ============ KBC 7 CRORE MEME ============ */
+.kbc-meme-container {
+  margin-top: 20px;
+  text-align: center;
+  animation: kbcAppear 0.5s ease-out;
+  background: linear-gradient(135deg, #1a237e 0%, #311b92 50%, #4a148c 100%);
+  border-radius: 20px;
+  padding: 20px;
+  border: 4px solid #ffd700;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.3);
+}
+
+@keyframes kbcAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-10deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.kbc-meme {
+  width: 100%;
+  max-width: 300px;
+  border-radius: 15px;
+  border: 3px solid #ffd700;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+}
+
+.kbc-text {
+  margin-top: 15px;
+}
+
+.kbc-text h3 {
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 0 #ff6600, 0 0 20px #ffd700;
+  animation: kbcTextPulse 0.5s ease-in-out infinite;
+}
+
+@keyframes kbcTextPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.kbc-text p {
+  font-size: 1.1rem;
+  color: #fff;
+  margin-top: 10px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+}
+
 .hint-text.error {
   background: rgba(255, 107, 107, 0.3);
   color: #ffd700;
