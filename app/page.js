@@ -906,8 +906,8 @@ ${deviceInfo.userAgent}`
     }
   }
 
-  // Keep-alive ping every 30 seconds to prevent server sleep
-  // NOTE: This only works when page is open. For 24/7 uptime, use external service like UptimeRobot
+  // Keep-alive ping every 1 minute to prevent server sleep
+  // NOTE: This only works when page is open in browser
   useEffect(() => {
     let pingCount = 0
 
@@ -926,8 +926,8 @@ ${deviceInfo.userAgent}`
     // Initial ping
     pingServer()
 
-    // Ping every 30 seconds (more frequent to prevent sleep)
-    const keepAliveInterval = setInterval(pingServer, 30000)
+    // Ping every 1 minute (60 seconds)
+    const keepAliveInterval = setInterval(pingServer, 60000)
 
     // Also ping on visibility change (when user returns to tab)
     const handleVisibilityChange = () => {
