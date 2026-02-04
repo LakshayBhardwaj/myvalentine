@@ -906,23 +906,42 @@ ${deviceInfo.userAgent}`
     }
   }
 
-  // Keep-alive ping every 1 minute to prevent server sleep
+  // Keep-alive ping every 30 seconds to prevent server sleep
+  // NOTE: This only works when page is open. For 24/7 uptime, use external service like UptimeRobot
   useEffect(() => {
+    let pingCount = 0
+
     const pingServer = async () => {
       try {
-        await fetch('/api/health')
+        const response = await fetch('/api/health')
+        if (response.ok) {
+          pingCount++
+          console.log(`🏓 Keep-alive ping #${pingCount} successful at ${new Date().toLocaleTimeString()}`)
+        }
       } catch (e) {
-        // Silent fail
+        console.log('❌ Keep-alive ping failed:', e.message)
       }
     }
 
     // Initial ping
     pingServer()
 
-    // Ping every 60 seconds
-    const keepAliveInterval = setInterval(pingServer, 60000)
+    // Ping every 30 seconds (more frequent to prevent sleep)
+    const keepAliveInterval = setInterval(pingServer, 30000)
 
-    return () => clearInterval(keepAliveInterval)
+    // Also ping on visibility change (when user returns to tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👀 Tab became visible, sending ping...')
+        pingServer()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      clearInterval(keepAliveInterval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   // Countdown timer observer
