@@ -12,6 +12,234 @@ body {
   min-height: 100vh;
 }
 
+/* ============ VALENTINE WEEK NAVIGATION ============ */
+.week-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #ff69b4 0%, #ff1493 50%, #dc143c 100%);
+  padding: 10px 15px;
+  z-index: 1001;
+  box-shadow: 0 4px 20px rgba(255, 20, 147, 0.5);
+}
+
+.week-nav-title {
+  text-align: center;
+  font-family: 'Bangers', cursive;
+  font-size: 1.3rem;
+  color: #fff;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  animation: titlePulse 2s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.week-nav-items {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding-bottom: 5px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.week-nav-items::-webkit-scrollbar {
+  display: none;
+}
+
+.week-nav-item {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid transparent;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 70px;
+}
+
+.week-nav-item:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.week-nav-item.active {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.week-nav-item.active .week-nav-name,
+.week-nav-item.active .week-nav-date {
+  color: #ff1493;
+}
+
+.week-nav-emoji {
+  font-size: 1.5rem;
+  margin-bottom: 2px;
+}
+
+.week-nav-name {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.week-nav-date {
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ============ COMING SOON SECTIONS ============ */
+.coming-soon-section {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 120px 20px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  animation: gradientShift 10s ease infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.coming-soon-section.chocolate-theme {
+  background: linear-gradient(135deg, #4a2c2a 0%, #6d4c41 50%, #8d6e63 100%);
+}
+
+.coming-soon-section.teddy-theme {
+  background: linear-gradient(135deg, #a1887f 0%, #8d6e63 50%, #bcaaa4 100%);
+}
+
+.coming-soon-section.promise-theme {
+  background: linear-gradient(135deg, #26a69a 0%, #4db6ac 50%, #80cbc4 100%);
+}
+
+.coming-soon-section.hug-theme {
+  background: linear-gradient(135deg, #ff8a65 0%, #ffab91 50%, #ffccbc 100%);
+}
+
+.coming-soon-section.kiss-theme {
+  background: linear-gradient(135deg, #ec407a 0%, #f48fb1 50%, #f8bbd9 100%);
+}
+
+.coming-soon-section.valentine-theme {
+  background: linear-gradient(135deg, #e91e63 0%, #f44336 50%, #ff5722 100%);
+}
+
+.coming-soon-container {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 50px 30px;
+  max-width: 400px;
+  width: 90%;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: containerFloat 3s ease-in-out infinite;
+}
+
+@keyframes containerFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.coming-soon-emoji {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  animation: emojiPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes emojiPulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.1) rotate(-5deg); }
+  50% { transform: scale(1) rotate(0deg); }
+  75% { transform: scale(1.1) rotate(5deg); }
+}
+
+.coming-soon-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 5px;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+}
+
+.coming-soon-date {
+  font-size: 1.3rem;
+  color: #ffd700;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.coming-soon-badge {
+  display: inline-block;
+  background: linear-gradient(45deg, #ffd700, #ffeb3b);
+  color: #333;
+  padding: 12px 25px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 25px;
+  animation: badgePulse 2s ease-in-out infinite;
+  box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
+
+.coming-soon-badge.special {
+  background: linear-gradient(45deg, #ff69b4, #ff1493, #dc143c);
+  color: #fff;
+  font-size: 1.1rem;
+  box-shadow: 0 5px 25px rgba(255, 20, 147, 0.5);
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.coming-soon-text {
+  font-size: 1.1rem;
+  color: #fff;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.coming-soon-hearts {
+  font-size: 2rem;
+  margin: 20px 0;
+  animation: heartsFloat 2s ease-in-out infinite;
+}
+
+@keyframes heartsFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.coming-soon-hint {
+  font-size: 1rem;
+  color: #ffd700;
+  font-style: italic;
+  padding: 15px;
+  background: rgba(255, 215, 0, 0.2);
+  border-radius: 15px;
+  margin-top: 15px;
+}
+
 .section {
   min-height: 100vh;
   padding: 40px 20px;
@@ -36,15 +264,15 @@ body {
 
 .siren {
   position: fixed;
-  top: 0;
+  top: 95px;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 50px;
   background: #ff0000;
   display: flex;
   align-items: center;
   overflow: hidden;
-  z-index: 1000;
+  z-index: 999;
   animation: sirenFlash 0.5s infinite;
 }
 
@@ -956,7 +1184,7 @@ body {
 /* ============ MENU BAR ============ */
 .menu-bar {
   position: fixed;
-  top: 60px;
+  top: 145px;
   left: 0;
   right: 0;
   height: 50px;
@@ -1178,11 +1406,11 @@ body {
 
 /* Adjust section padding for menu */
 .emergency-section {
-  padding-top: 130px;
+  padding-top: 220px;
 }
 
 .section {
-  scroll-margin-top: 120px;
+  scroll-margin-top: 200px;
 }
 
 /* ============ SHAYARI SECTION ============ */

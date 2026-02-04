@@ -3,6 +3,21 @@
 import { useState, useEffect, useRef } from 'react'
 
 export default function RoseDayPage() {
+  // Valentine Week state
+  const [activeDay, setActiveDay] = useState('rose')
+
+  // Valentine Week Days
+  const valentineWeekDays = [
+    { id: 'rose', name: 'Rose Day', emoji: '🌹', date: '7 Feb' },
+    { id: 'propose', name: 'Propose Day', emoji: '💍', date: '8 Feb' },
+    { id: 'chocolate', name: 'Chocolate Day', emoji: '🍫', date: '9 Feb' },
+    { id: 'teddy', name: 'Teddy Day', emoji: '🧸', date: '10 Feb' },
+    { id: 'promise', name: 'Promise Day', emoji: '🤞', date: '11 Feb' },
+    { id: 'hug', name: 'Hug Day', emoji: '🤗', date: '12 Feb' },
+    { id: 'kiss', name: 'Kiss Day', emoji: '💋', date: '13 Feb' },
+    { id: 'valentine', name: "Valentine's Day", emoji: '💕', date: '14 Feb' }
+  ]
+
   const [scrollProgress, setScrollProgress] = useState(0)
   const [showScrollIndicator, setShowScrollIndicator] = useState(true)
   const [hearts, setHearts] = useState([])
@@ -456,10 +471,38 @@ export default function RoseDayPage() {
     }
   }, [timerStarted])
 
+  // Handle day change with logging
+  const handleDayChange = (dayId) => {
+    logInteraction('day_change', { from: activeDay, to: dayId })
+    setActiveDay(dayId)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <>
-      {/* Siren Header */}
-      <div className="siren">
+      {/* Valentine Week Navigation */}
+      <nav className="week-nav">
+        <h2 className="week-nav-title">💕 Valentine Week 2025 💕</h2>
+        <div className="week-nav-items">
+          {valentineWeekDays.map((day) => (
+            <button
+              key={day.id}
+              className={`week-nav-item ${activeDay === day.id ? 'active' : ''}`}
+              onClick={() => handleDayChange(day.id)}
+            >
+              <span className="week-nav-emoji">{day.emoji}</span>
+              <span className="week-nav-name">{day.name}</span>
+              <span className="week-nav-date">{day.date}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {/* ========== ROSE DAY CONTENT ========== */}
+      {activeDay === 'rose' && (
+        <>
+          {/* Siren Header */}
+          <div className="siren">
         <span className="ticker">
           🚨 BREAKING NEWS: Boyfriend attempts romance... results may be disastrous 🚨
           ALERT: Rose Day emergency in progress 🌹
@@ -523,36 +566,6 @@ export default function RoseDayPage() {
       <div className="scroll-indicator" style={{ opacity: showScrollIndicator ? 1 : 0 }}>
         👇 Scroll for chaos 👇
       </div>
-
-      {/* Hearts Container */}
-      <div className="hearts-container">
-        {hearts.map(heart => (
-          <div
-            key={heart.id}
-            className="floating-heart"
-            style={{
-              left: `${heart.left}%`,
-              animationDuration: `${heart.duration}s`
-            }}
-          >
-            {heart.emoji}
-          </div>
-        ))}
-      </div>
-
-      {/* Confetti */}
-      {confetti.map(c => (
-        <div
-          key={c.id}
-          className="confetti"
-          style={{
-            left: `${c.left}%`,
-            background: c.color,
-            animationDelay: `${c.delay}ms`,
-            animationDuration: `${c.duration}s`
-          }}
-        />
-      ))}
 
       {/* SECTION 1: Emergency Broadcast */}
       <section className="section emergency-section" id="section1">
@@ -1494,6 +1507,164 @@ export default function RoseDayPage() {
           <p className="footer-small">(Agar surprise boring laga toh blame ChatGPT! 😂)</p>
         </div>
       </section>
+        </>
+      )}
+
+      {/* ========== PROPOSE DAY - COMING SOON ========== */}
+      {activeDay === 'propose' && (
+        <section className="coming-soon-section">
+          <div className="coming-soon-container">
+            <div className="coming-soon-emoji">💍</div>
+            <h1 className="coming-soon-title">Propose Day</h1>
+            <h2 className="coming-soon-date">8th February</h2>
+            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
+            <p className="coming-soon-text">
+              Propose Day ka content abhi under construction hai! 🏗️<br/>
+              Jaldi hi yahan bhi masti hogi! 💕
+            </p>
+            <div className="coming-soon-hearts">💍 💕 💍 💕 💍</div>
+            <p className="coming-soon-hint">Hint: Kuch special plan ho raha hai... 😉</p>
+          </div>
+        </section>
+      )}
+
+      {/* ========== CHOCOLATE DAY - COMING SOON ========== */}
+      {activeDay === 'chocolate' && (
+        <section className="coming-soon-section chocolate-theme">
+          <div className="coming-soon-container">
+            <div className="coming-soon-emoji">🍫</div>
+            <h1 className="coming-soon-title">Chocolate Day</h1>
+            <h2 className="coming-soon-date">9th February</h2>
+            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
+            <p className="coming-soon-text">
+              Chocolate Day ka meetha content coming soon! 🍬<br/>
+              Dairy Milk se lekar Ferrero Rocher tak sab milega! 🎁
+            </p>
+            <div className="coming-soon-hearts">🍫 🍬 🍫 🍬 🍫</div>
+            <p className="coming-soon-hint">Calories count mat karna! 😂</p>
+          </div>
+        </section>
+      )}
+
+      {/* ========== TEDDY DAY - COMING SOON ========== */}
+      {activeDay === 'teddy' && (
+        <section className="coming-soon-section teddy-theme">
+          <div className="coming-soon-container">
+            <div className="coming-soon-emoji">🧸</div>
+            <h1 className="coming-soon-title">Teddy Day</h1>
+            <h2 className="coming-soon-date">10th February</h2>
+            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
+            <p className="coming-soon-text">
+              Teddy Day pe soft toys ki barish hogi! 🧸<br/>
+              Giant teddy bear dreams coming true! 💕
+            </p>
+            <div className="coming-soon-hearts">🧸 💕 🧸 💕 🧸</div>
+            <p className="coming-soon-hint">Teddy se zyada cute tu hai! 😘</p>
+          </div>
+        </section>
+      )}
+
+      {/* ========== PROMISE DAY - COMING SOON ========== */}
+      {activeDay === 'promise' && (
+        <section className="coming-soon-section promise-theme">
+          <div className="coming-soon-container">
+            <div className="coming-soon-emoji">🤞</div>
+            <h1 className="coming-soon-title">Promise Day</h1>
+            <h2 className="coming-soon-date">11th February</h2>
+            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
+            <p className="coming-soon-text">
+              Promise Day pe dil se waade honge! 🤝<br/>
+              Pinky promise se pakka wala promise tak! 💪
+            </p>
+            <div className="coming-soon-hearts">🤞 💕 🤞 💕 🤞</div>
+            <p className="coming-soon-hint">Promise: Content amazing hoga! 😉</p>
+          </div>
+        </section>
+      )}
+
+      {/* ========== HUG DAY - COMING SOON ========== */}
+      {activeDay === 'hug' && (
+        <section className="coming-soon-section hug-theme">
+          <div className="coming-soon-container">
+            <div className="coming-soon-emoji">🤗</div>
+            <h1 className="coming-soon-title">Hug Day</h1>
+            <h2 className="coming-soon-date">12th February</h2>
+            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
+            <p className="coming-soon-text">
+              Hug Day pe virtual jadu ki jhappi! 🤗<br/>
+              Tight wali hug ka content loading... 💕
+            </p>
+            <div className="coming-soon-hearts">🤗 💕 🤗 💕 🤗</div>
+            <p className="coming-soon-hint">*Virtual Hug* 🫂</p>
+          </div>
+        </section>
+      )}
+
+      {/* ========== KISS DAY - COMING SOON ========== */}
+      {activeDay === 'kiss' && (
+        <section className="coming-soon-section kiss-theme">
+          <div className="coming-soon-container">
+            <div className="coming-soon-emoji">💋</div>
+            <h1 className="coming-soon-title">Kiss Day</h1>
+            <h2 className="coming-soon-date">13th February</h2>
+            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
+            <p className="coming-soon-text">
+              Kiss Day ka romantic content coming soon! 💋<br/>
+              Flying kisses unlimited! 😘
+            </p>
+            <div className="coming-soon-hearts">💋 💕 💋 💕 💋</div>
+            <p className="coming-soon-hint">😘😘😘 (ye le advance mein!)</p>
+          </div>
+        </section>
+      )}
+
+      {/* ========== VALENTINE'S DAY - COMING SOON ========== */}
+      {activeDay === 'valentine' && (
+        <section className="coming-soon-section valentine-theme">
+          <div className="coming-soon-container">
+            <div className="coming-soon-emoji">💕</div>
+            <h1 className="coming-soon-title">Valentine&apos;s Day</h1>
+            <h2 className="coming-soon-date">14th February</h2>
+            <div className="coming-soon-badge special">✨ GRAND FINALE COMING SOON ✨</div>
+            <p className="coming-soon-text">
+              Valentine&apos;s Day ka MEGA content under preparation! 🎉<br/>
+              Sabse special din ke liye sabse special surprise! 💖
+            </p>
+            <div className="coming-soon-hearts">💕 💖 💕 💖 💕</div>
+            <p className="coming-soon-hint">14 Feb ko yahan milna... kuch bada hone wala hai! 🎁</p>
+          </div>
+        </section>
+      )}
+
+      {/* Floating Hearts (visible on all days) */}
+      <div className="hearts-container">
+        {hearts.map(heart => (
+          <div
+            key={heart.id}
+            className="floating-heart"
+            style={{
+              left: `${heart.left}%`,
+              animationDuration: `${heart.duration}s`
+            }}
+          >
+            {heart.emoji}
+          </div>
+        ))}
+      </div>
+
+      {/* Confetti (visible on all days) */}
+      {confetti.map(c => (
+        <div
+          key={c.id}
+          className="confetti"
+          style={{
+            left: `${c.left}%`,
+            background: c.color,
+            animationDelay: `${c.delay}ms`,
+            animationDuration: `${c.duration}s`
+          }}
+        />
+      ))}
     </>
   )
 }
