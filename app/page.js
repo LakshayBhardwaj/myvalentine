@@ -42,7 +42,162 @@ export default function RoseDayPage() {
   const [formSubmitted, setFormSubmitted] = useState(false)
   const [wrongAttempts, setWrongAttempts] = useState([])
   const [interactionLogs, setInteractionLogs] = useState([])
+  const [soundEnabled, setSoundEnabled] = useState(false)
+  const [sirenPlayed, setSirenPlayed] = useState(false)
+  const audioContextRef = useRef(null)
   const whatsappNumber = "918512022116"
+
+  // Initialize Audio Context
+  const getAudioContext = () => {
+    if (!audioContextRef.current && typeof window !== 'undefined') {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)()
+    }
+    return audioContextRef.current
+  }
+
+  // Sound Effects Generator using Web Audio API
+  const playSound = (type) => {
+    if (!soundEnabled) return
+
+    const ctx = getAudioContext()
+    if (!ctx) return
+
+    try {
+      const oscillator = ctx.createOscillator()
+      const gainNode = ctx.createGain()
+      oscillator.connect(gainNode)
+      gainNode.connect(ctx.destination)
+
+      switch(type) {
+        case 'siren':
+          // War hooter/siren sound
+          oscillator.type = 'sawtooth'
+          oscillator.frequency.setValueAtTime(400, ctx.currentTime)
+          oscillator.frequency.linearRampToValueAtTime(800, ctx.currentTime + 0.5)
+          oscillator.frequency.linearRampToValueAtTime(400, ctx.currentTime + 1)
+          oscillator.frequency.linearRampToValueAtTime(800, ctx.currentTime + 1.5)
+          oscillator.frequency.linearRampToValueAtTime(400, ctx.currentTime + 2)
+          gainNode.gain.setValueAtTime(0.3, ctx.currentTime)
+          gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 2)
+          oscillator.start(ctx.currentTime)
+          oscillator.stop(ctx.currentTime + 2)
+          break
+
+        case 'click':
+          // Button click sound
+          oscillator.type = 'sine'
+          oscillator.frequency.setValueAtTime(800, ctx.currentTime)
+          oscillator.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1)
+          gainNode.gain.setValueAtTime(0.3, ctx.currentTime)
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1)
+          oscillator.start(ctx.currentTime)
+          oscillator.stop(ctx.currentTime + 0.1)
+          break
+
+        case 'celebration':
+          // Celebration fanfare
+          const notes = [523, 659, 784, 1047] // C5, E5, G5, C6
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator()
+            const gain = ctx.createGain()
+            osc.connect(gain)
+            gain.connect(ctx.destination)
+            osc.type = 'triangle'
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.15)
+            gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.15)
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.15 + 0.3)
+            osc.start(ctx.currentTime + i * 0.15)
+            osc.stop(ctx.currentTime + i * 0.15 + 0.3)
+          })
+          return // Don't use the main oscillator
+
+        case 'escape':
+          // Funny escape/boing sound
+          oscillator.type = 'sine'
+          oscillator.frequency.setValueAtTime(200, ctx.currentTime)
+          oscillator.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1)
+          oscillator.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.2)
+          gainNode.gain.setValueAtTime(0.4, ctx.currentTime)
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2)
+          oscillator.start(ctx.currentTime)
+          oscillator.stop(ctx.currentTime + 0.2)
+          break
+
+        case 'success':
+          // Success ding
+          oscillator.type = 'sine'
+          oscillator.frequency.setValueAtTime(880, ctx.currentTime)
+          gainNode.gain.setValueAtTime(0.3, ctx.currentTime)
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5)
+          oscillator.start(ctx.currentTime)
+          oscillator.stop(ctx.currentTime + 0.5)
+          break
+
+        case 'error':
+          // Error buzz
+          oscillator.type = 'square'
+          oscillator.frequency.setValueAtTime(150, ctx.currentTime)
+          gainNode.gain.setValueAtTime(0.2, ctx.currentTime)
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2)
+          oscillator.start(ctx.currentTime)
+          oscillator.stop(ctx.currentTime + 0.2)
+          break
+
+        case 'whoosh':
+          // Menu transition whoosh
+          oscillator.type = 'sine'
+          oscillator.frequency.setValueAtTime(100, ctx.currentTime)
+          oscillator.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.15)
+          gainNode.gain.setValueAtTime(0.2, ctx.currentTime)
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15)
+          oscillator.start(ctx.currentTime)
+          oscillator.stop(ctx.currentTime + 0.15)
+          break
+
+        case 'heartbeat':
+          // Heartbeat thump
+          oscillator.type = 'sine'
+          oscillator.frequency.setValueAtTime(60, ctx.currentTime)
+          gainNode.gain.setValueAtTime(0.5, ctx.currentTime)
+          gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1)
+          oscillator.start(ctx.currentTime)
+          oscillator.stop(ctx.currentTime + 0.15)
+          // Second beat
+          setTimeout(() => {
+            if (!soundEnabled) return
+            const osc2 = ctx.createOscillator()
+            const gain2 = ctx.createGain()
+            osc2.connect(gain2)
+            gain2.connect(ctx.destination)
+            osc2.type = 'sine'
+            osc2.frequency.setValueAtTime(50, ctx.currentTime)
+            gain2.gain.setValueAtTime(0.4, ctx.currentTime)
+            gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1)
+            osc2.start(ctx.currentTime)
+            osc2.stop(ctx.currentTime + 0.1)
+          }, 200)
+          break
+
+        default:
+          return
+      }
+    } catch (e) {
+      console.log('Audio error:', e)
+    }
+  }
+
+  // Enable sound on first user interaction
+  const enableSound = () => {
+    if (soundEnabled) return
+    setSoundEnabled(true)
+    // Play siren on Rose Day after sound is enabled
+    if (activeDay === 'rose' && !sirenPlayed) {
+      setTimeout(() => {
+        playSound('siren')
+        setSirenPlayed(true)
+      }, 500)
+    }
+  }
 
   // Comprehensive logging function - captures ALL user interactions
   const logInteraction = (eventType, details) => {
@@ -129,6 +284,7 @@ export default function RoseDayPage() {
     if (lowerName === 'queen') {
       setNameHint("👸 Yes! You ARE my Queen! 💕")
       setNameValid(true)
+      playSound('success')
       logInteraction('name_correct', { finalValue: name })
       return
     }
@@ -209,6 +365,10 @@ export default function RoseDayPage() {
     setFormSubmitted(true)
     triggerConfetti()
 
+    // Play success sounds
+    playSound('success')
+    setTimeout(() => playSound('celebration'), 300)
+
     // Log successful submission
     logInteraction('form_submit_success', { name: queenName, address: queenAddress })
 
@@ -231,6 +391,11 @@ export default function RoseDayPage() {
     setYesClicked(true)
     triggerConfetti()
     sendUpdate('yes_clicked', null)
+
+    // Play celebration sound
+    playSound('celebration')
+    // Play heartbeat after celebration
+    setTimeout(() => playSound('heartbeat'), 800)
 
     for (let i = 0; i < 50; i++) {
       setTimeout(() => createHeart(), i * 100)
@@ -324,6 +489,7 @@ export default function RoseDayPage() {
   }
 
   const scrollToSection = (num) => {
+    playSound('click')
     logInteraction('menu_navigation', { section: num })
     document.getElementById(`section${num}`)?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -365,6 +531,9 @@ export default function RoseDayPage() {
 
     const newAttempts = noAttempts + 1
     setNoAttempts(newAttempts)
+
+    // Play escape sound
+    playSound('escape')
 
     // Log No button hover/touch attempt
     logInteraction('no_button_escape', { attemptNumber: newAttempts })
@@ -473,13 +642,38 @@ export default function RoseDayPage() {
 
   // Handle day change with logging
   const handleDayChange = (dayId) => {
+    playSound('whoosh')
     logInteraction('day_change', { from: activeDay, to: dayId })
     setActiveDay(dayId)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+
+    // Play siren on Rose Day
+    if (dayId === 'rose' && !sirenPlayed) {
+      setTimeout(() => {
+        playSound('siren')
+        setSirenPlayed(true)
+      }, 500)
+    }
   }
 
   return (
-    <>
+    <div onClick={enableSound}>
+      {/* Sound Toggle Button */}
+      <button
+        className="sound-toggle"
+        onClick={(e) => {
+          e.stopPropagation()
+          setSoundEnabled(!soundEnabled)
+          if (!soundEnabled) {
+            // Play a test sound when enabling
+            setTimeout(() => playSound('click'), 100)
+          }
+        }}
+        title={soundEnabled ? 'Mute sounds' : 'Enable sounds'}
+      >
+        {soundEnabled ? '🔊' : '🔇'}
+      </button>
+
       {/* Valentine Week Navigation */}
       <nav className="week-nav">
         <h2 className="week-nav-title">💕 Valentine Week 2025 💕</h2>
@@ -1665,6 +1859,6 @@ export default function RoseDayPage() {
           }}
         />
       ))}
-    </>
+    </div>
   )
 }
