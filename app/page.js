@@ -6,6 +6,21 @@ export default function RoseDayPage() {
   // Valentine Week state
   const [activeDay, setActiveDay] = useState('rose')
 
+  // Propose Day states
+  const [proposeStarted, setProposeStarted] = useState(false)
+  const [proposeFastTap, setProposeFastTap] = useState(0)
+  const [proposeNoJump, setProposeNoJump] = useState(0)
+  const [proposeYesClicked, setProposeYesClicked] = useState(false)
+  const [ringCatchState, setRingCatchState] = useState('idle') // idle, playing, caught, missed
+  const [ringPosition, setRingPosition] = useState({ x: 50, y: -10 })
+  const [fingerPosition, setFingerPosition] = useState(50)
+  const [ringScore, setRingScore] = useState(0)
+  const [ringMisses, setRingMisses] = useState(0)
+  const [ringMessage, setRingMessage] = useState('')
+  const [proposeNoPos, setProposeNoPos] = useState({ x: 0, y: 0 })
+  const ringIntervalRef = useRef(null)
+  const lastTapRef = useRef(0)
+
   // Valentine Week Days
   const valentineWeekDays = [
     { id: 'rose', name: 'Rose Day', emoji: '🌹', date: '7 Feb' },
@@ -991,6 +1006,165 @@ ${deviceInfo.userAgent}`
       }, 500)
     }
   }
+
+  // ========== PROPOSE DAY FUNCTIONS ==========
+
+  const handleProposeEntry = () => {
+    const now = Date.now()
+    const timeSinceLastTap = now - lastTapRef.current
+    lastTapRef.current = now
+
+    if (timeSinceLastTap < 400 && proposeFastTap < 3) {
+      setProposeFastTap(prev => prev + 1)
+      setRingMessage("Arre slow ja! Ring slip ho rahi ae finger te! 😅")
+      setTimeout(() => setRingMessage(''), 2000)
+      return
+    }
+
+    setProposeFastTap(0)
+    setProposeStarted(true)
+    playSound('click')
+    logInteraction('propose_day_entry', { timestamp: new Date().toISOString() })
+
+    // Scroll to Act 1 content
+    setTimeout(() => {
+      document.getElementById('propose-act1-content')?.scrollIntoView({ behavior: 'smooth' })
+    }, 300)
+  }
+
+  // Ring Catch Game
+  const startRingGame = () => {
+    setRingCatchState('playing')
+    setRingScore(0)
+    setRingMisses(0)
+    setRingMessage('')
+    playSound('click')
+    logInteraction('ring_game_start', {})
+    dropNewRing()
+  }
+
+  const dropNewRing = () => {
+    const startX = Math.random() * 80 + 10
+    setRingPosition({ x: startX, y: -10 })
+
+    let currentY = -10
+    if (ringIntervalRef.current) clearInterval(ringIntervalRef.current)
+
+    ringIntervalRef.current = setInterval(() => {
+      currentY += 2
+      setRingPosition(prev => ({ ...prev, y: currentY }))
+
+      if (currentY >= 85) {
+        clearInterval(ringIntervalRef.current)
+        // Check if caught
+        setFingerPosition(prevFinger => {
+          setRingPosition(prevRing => {
+            const distance = Math.abs(prevRing.x - prevFinger)
+            if (distance < 15) {
+              // Caught!
+              setRingScore(prev => {
+                const newScore = prev + 1
+                if (newScore >= 3) {
+                  setRingCatchState('caught')
+                  playSound('celebration')
+                  triggerConfetti()
+                  setRingMessage("Caught! Ab asli wala milega! 💍")
+                  logInteraction('ring_game_won', { score: newScore })
+                } else {
+                  playSound('success')
+                  setRingMessage("Nice catch! Keep going! 💍")
+                  setTimeout(() => {
+                    setRingMessage('')
+                    dropNewRing()
+                  }, 1000)
+                }
+                return newScore
+              })
+            } else {
+              // Missed
+              setRingMisses(prev => {
+                const newMisses = prev + 1
+                playSound('error')
+                const missMessages = [
+                  "Ouch! Dil toot gaya... try again sohniye! 😭",
+                  "Yeet! Abhi ready nahi? 😂",
+                  "Ring bhi tujhse bach ke bhag rahi! 🏃",
+                ]
+                setRingMessage(missMessages[Math.min(newMisses - 1, missMessages.length - 1)])
+                if (newMisses >= 5) {
+                  setRingCatchState('caught') // Let her through anyway
+                  playSound('celebration')
+                  triggerConfetti()
+                  setRingMessage("Chalo ring nahi pakdi but dil toh pakda! 💍😂")
+                  logInteraction('ring_game_mercy_win', { misses: newMisses })
+                } else {
+                  setTimeout(() => {
+                    setRingMessage('')
+                    dropNewRing()
+                  }, 1500)
+                }
+                return newMisses
+              })
+            }
+            return prevRing
+          })
+          return prevFinger
+        })
+      }
+    }, 50)
+  }
+
+  const handleFingerMove = (e) => {
+    if (ringCatchState !== 'playing') return
+    const touch = e.touches ? e.touches[0] : e
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((touch.clientX - rect.left) / rect.width) * 100
+    setFingerPosition(Math.max(5, Math.min(95, x)))
+  }
+
+  const handleProposeYes = () => {
+    setProposeYesClicked(true)
+    playSound('celebration')
+    setTimeout(() => playSound('heartbeat'), 800)
+    triggerConfetti()
+    logInteraction('propose_yes_clicked', { timestamp: new Date().toISOString() })
+    sendUpdate('yes_clicked', null)
+
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => createHeart(), i * 100)
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate([200, 100, 200, 100, 400])
+    }
+  }
+
+  const handleProposeNo = () => {
+    setProposeNoJump(prev => prev + 1)
+    playSound('escape')
+    const maxX = typeof window !== 'undefined' ? window.innerWidth - 150 : 200
+    const maxY = 200
+    setProposeNoPos({ x: Math.random() * maxX, y: Math.random() * maxY })
+
+    if (proposeNoJump >= 1) {
+      // After 1 jump, just say "Just kidding"
+      setRingMessage("Just kidding, haan hi bol! 😂")
+      setTimeout(() => {
+        setRingMessage('')
+        setProposeYesClicked(true)
+        playSound('celebration')
+        triggerConfetti()
+        logInteraction('propose_no_auto_yes', {})
+      }, 1500)
+    }
+  }
+
+  // Cleanup ring game interval on unmount or day change
+  useEffect(() => {
+    return () => {
+      if (ringIntervalRef.current) clearInterval(ringIntervalRef.current)
+    }
+  }, [activeDay])
 
   return (
     <div onClick={enableSound}>
@@ -2071,22 +2245,314 @@ ${deviceInfo.userAgent}`
         </>
       )}
 
-      {/* ========== PROPOSE DAY - COMING SOON ========== */}
+      {/* ========== PROPOSE DAY - FULL PAGE ========== */}
       {activeDay === 'propose' && (
-        <section className="coming-soon-section">
-          <div className="coming-soon-container">
-            <div className="coming-soon-emoji">💍</div>
-            <h1 className="coming-soon-title">Propose Day</h1>
-            <h2 className="coming-soon-date">8th February</h2>
-            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
-            <p className="coming-soon-text">
-              Propose Day ka content abhi under construction hai! 🏗️<br/>
-              Jaldi hi yahan bhi masti hogi! 💕
-            </p>
-            <div className="coming-soon-hearts">💍 💕 💍 💕 💍</div>
-            <p className="coming-soon-hint">Hint: Kuch special plan ho raha hai... 😉</p>
-          </div>
-        </section>
+        <>
+          {/* ACT 1: Grand Entry - Hero Section */}
+          <section className="propose-section propose-hero">
+            <div className="propose-petals-bg">
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className={`propose-petal petal-${i % 4}`} style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${i * 0.8}s`,
+                  animationDuration: `${4 + Math.random() * 3}s`
+                }} />
+              ))}
+              {[...Array(6)].map((_, i) => (
+                <div key={`ring-${i}`} className="propose-falling-ring" style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${i * 1.5 + 2}s`,
+                  animationDuration: `${5 + Math.random() * 2}s`
+                }}>💍</div>
+              ))}
+            </div>
+
+            <div className="propose-hero-content">
+              <div className="propose-groom-emoji">🤵💍</div>
+              <h1 className="propose-hero-title">
+                Happy Propose Day, Meri Jaan! 💍
+              </h1>
+              <p className="propose-hero-subtitle">
+                Oye Hoye, Ab Sirf Valentine Nahi &ndash; Shaadi Da Proposal Time Aa Gaya!
+                <br/>(Par pehle has le thoda! 😂)
+              </p>
+              <p className="propose-hero-warning">
+                Warning: Eh page vich 200% bakwas, 100% dil se dil tak, te full cringe hai.
+                Scroll kar, warna mainu &apos;nahi&apos; bol ke block kar dena! Jatt heartbroken ho jauga! 😭🚜
+              </p>
+
+              {ringMessage && (
+                <div className="propose-ring-message">{ringMessage}</div>
+              )}
+
+              <button className="propose-entry-btn" onClick={handleProposeEntry}>
+                <span className="propose-ring-icon">💍</span>
+                Andar Aa Ja Meri Dulhan-To-Be!
+              </button>
+            </div>
+          </section>
+
+          {/* ACT 2: Meri Proposal Fail History */}
+          {proposeStarted && (
+            <section className="propose-section propose-fails" id="propose-act1-content">
+              <h2 className="propose-section-title">
+                Chapter 2: Kaise Bana Main Propose Da Sabse Bada Loser
+                <br/><span className="propose-section-subtitle">(Tere Aane Se Pehle!)</span>
+              </h2>
+
+              <div className="propose-timeline">
+                <div className="propose-timeline-item" onClick={() => playSound('click')}>
+                  <div className="propose-timeline-dot">🍱</div>
+                  <div className="propose-timeline-card">
+                    <h3>School Time</h3>
+                    <p>Crush nu &apos;I like you&apos; bolna si, par bol diya &apos;I like your lunchbox&apos;! Rejection level: Expert! 🍱😭</p>
+                    <span className="propose-fail-badge">EPIC FAIL #1</span>
+                  </div>
+                </div>
+
+                <div className="propose-timeline-item" onClick={() => playSound('click')}>
+                  <div className="propose-timeline-dot">🍫</div>
+                  <div className="propose-timeline-card">
+                    <h3>College Days</h3>
+                    <p>Ring ki jagah chocolate diya propose karte time &ndash; tu has has ke kha gayi, par &apos;yes&apos; nahi boli! 🍫</p>
+                    <span className="propose-fail-badge">EPIC FAIL #2</span>
+                  </div>
+                </div>
+
+                <div className="propose-timeline-item" onClick={() => playSound('click')}>
+                  <div className="propose-timeline-dot">🧎</div>
+                  <div className="propose-timeline-card">
+                    <h3>Knee Pe Girte Time</h3>
+                    <p>Romantic proposal planned si, par knee pe girte time pant phat gayi! Grace? Negative Jatt! 🤡</p>
+                    <span className="propose-fail-badge">EPIC FAIL #3</span>
+                  </div>
+                </div>
+
+                <div className="propose-timeline-item propose-timeline-success" onClick={() => playSound('success')}>
+                  <div className="propose-timeline-dot">💍</div>
+                  <div className="propose-timeline-card">
+                    <h3>Ab Tere Saath</h3>
+                    <p>Har din propose feel karda, par aaj officially kar raha &ndash; no more fails, promise! 💍</p>
+                    <span className="propose-success-badge">TODAY IS THE DAY!</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ACT 3: Funny Reasons Cards */}
+          {proposeStarted && (
+            <section className="propose-section propose-reasons">
+              <h2 className="propose-section-title">
+                Tujhe Propose Kyun Kar Raha Hoon?
+                <br/><span className="propose-section-subtitle">Funny Reasons (But 100% Sach!)</span>
+              </h2>
+
+              <div className="propose-reasons-grid">
+                <div className="propose-reason-card" onClick={() => { playSound('click'); triggerConfetti() }}>
+                  <div className="propose-reason-number">#1</div>
+                  <p>Tu meri hasi nu full volume kardi &ndash; bina tere ghar mandir jaise silent ho jaanda! 🛕😂</p>
+                </div>
+
+                <div className="propose-reason-card" onClick={() => { playSound('click'); triggerConfetti() }}>
+                  <div className="propose-reason-number">#2</div>
+                  <p>Tu chole bhature fight tolerate kardi bina divorce maang ke! Future wife material! 🍲💍</p>
+                </div>
+
+                <div className="propose-reason-card" onClick={() => { playSound('click'); triggerConfetti() }}>
+                  <div className="propose-reason-number">#3</div>
+                  <p>Teri akhan &ndash; jaise Diwali lights! Propose na kiya taan blackout ho jauga mera dil! 💡</p>
+                </div>
+
+                <div className="propose-reason-card" onClick={() => { playSound('click'); triggerConfetti() }}>
+                  <div className="propose-reason-number">#4</div>
+                  <p>Tu mere naal Bhangra karti &ndash; jo basically do pagals di ladai lagdi! Perfect jodi! 🕺</p>
+                </div>
+
+                <div className="propose-reason-card" onClick={() => { playSound('click'); triggerConfetti() }}>
+                  <div className="propose-reason-number">#5</div>
+                  <p>Tere bina main billi nu propose karda &ndash; Whiskers boli &apos;ring nahi, milk la!&apos; 🐱</p>
+                </div>
+
+                <div className="propose-reason-card propose-reason-boss" onClick={() => { playSound('celebration'); triggerConfetti() }}>
+                  <div className="propose-reason-number">#6</div>
+                  <p>Because tu hi ae oh sohni jehdi naal lifetime hungama karna ae! Accept kar le! 💍</p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ACT 4: Ring Catch Game */}
+          {proposeStarted && (
+            <section className="propose-section propose-game">
+              <h2 className="propose-section-title">
+                Catch The Ring, Jaan! 💍
+                <br/><span className="propose-section-subtitle">(Propose Accept Karne Ka Sign!)</span>
+              </h2>
+
+              {ringCatchState === 'idle' && (
+                <div className="propose-game-intro">
+                  <p>Ring catch kar! Tilt/move your finger to catch the falling rings!</p>
+                  <p>3 rings catch kar le = Propose accepted! 💍</p>
+                  <button className="propose-game-start-btn" onClick={startRingGame}>
+                    🎮 Start Ring Catch!
+                  </button>
+                </div>
+              )}
+
+              {ringCatchState === 'playing' && (
+                <div
+                  className="propose-game-arena"
+                  onTouchMove={handleFingerMove}
+                  onMouseMove={handleFingerMove}
+                >
+                  <div className="propose-game-score">
+                    💍 {ringScore}/3 caught | 💔 {ringMisses} missed
+                  </div>
+
+                  <div className="propose-ring-falling" style={{
+                    left: `${ringPosition.x}%`,
+                    top: `${ringPosition.y}%`
+                  }}>💍</div>
+
+                  <div className="propose-finger" style={{
+                    left: `${fingerPosition}%`
+                  }}>👆</div>
+
+                  {ringMessage && (
+                    <div className="propose-game-message">{ringMessage}</div>
+                  )}
+                </div>
+              )}
+
+              {ringCatchState === 'caught' && (
+                <div className="propose-game-won">
+                  <div className="propose-game-won-emoji">💍🎉💍</div>
+                  <h3>{ringMessage || "Ring pakad li! Ab asli proposal time! 💍"}</h3>
+                  <p>Screen hearts + dhol music... bas ab scroll kar neeche! 🥁</p>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ACT 5: The Real Proposal - Emotional Climax */}
+          {proposeStarted && (
+            <section className="propose-section propose-real">
+              <div className="propose-mandap-bg">
+                {[...Array(20)].map((_, i) => (
+                  <div key={i} className="propose-mandap-light" style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 3}s`
+                  }} />
+                ))}
+              </div>
+
+              <div className="propose-real-content">
+                <h2 className="propose-real-title">Ab Serious Ho Ja, Meri Jaan...</h2>
+
+                <div className="propose-emotional-message">
+                  <p className="propose-hindi-text">
+                    मेरी जान, आज Propose Day पर सिर्फ़ एक सवाल नहीं, मेरे दिल की पूरी कहानी है।
+                  </p>
+
+                  <p className="propose-hindi-text">
+                    तू वो लड़की है जो मेरी हर बकवास पर हंसती है, हर गलती को प्यार से सुधारती है,
+                    और मेरी ज़िंदगी को रंगों से भर देती है।
+                  </p>
+
+                  <p className="propose-hindi-text">
+                    पहली मुलाकात से लेकर आज तक, तूने मुझे बेहतर इंसान बनाया है &ndash;
+                    मेरी हंसी, मेरे सपने, मेरा सब कुछ तुझमें है।
+                  </p>
+
+                  <p className="propose-hindi-text highlight">
+                    बिना तेरे आगे की ज़िंदगी सोच भी नहीं सकता।
+                    तू मेरी दोस्त है, मेरी साथी है, मेरी आने वाली हर खुशी है।
+                  </p>
+
+                  <p className="propose-hindi-text">
+                    वादा करता हूँ &ndash; हर सुख-दुख में साथ रहूंगा, तेरे सपनों को अपना बनाऊंगा,
+                    और तुझे दुनिया का सबसे ख़ुश रखूंगा।
+                  </p>
+
+                  <div className="propose-big-question">
+                    Will you marry me&hellip; one day? 💍
+                    <br/>
+                    <span className="propose-parenthetical">(Ya phir abhi se haan bol de! 💍)</span>
+                  </div>
+
+                  <p className="propose-love-declaration">
+                    I love you more than chole bhature, more than anything.
+                    <br/>Forever tera, <strong>Lakshay</strong> ❤️
+                  </p>
+                </div>
+
+                {/* Proposal Buttons */}
+                {!proposeYesClicked ? (
+                  <div className="propose-buttons">
+                    <button className="propose-yes-btn" onClick={handleProposeYes}>
+                      💍 Haan Ji! 💍
+                    </button>
+
+                    <button
+                      className="propose-no-btn"
+                      style={proposeNoJump > 0 ? {
+                        position: 'absolute',
+                        left: `${proposeNoPos.x}px`,
+                        top: `${proposeNoPos.y}px`
+                      } : {}}
+                      onMouseEnter={handleProposeNo}
+                      onTouchStart={handleProposeNo}
+                    >
+                      {proposeNoJump === 0 ? "Nahi... 😢" : "Just kidding, haan hi bol! 😂"}
+                    </button>
+
+                    {ringMessage && (
+                      <div className="propose-ring-message">{ringMessage}</div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="propose-accepted">
+                    <div className="propose-accepted-emoji">🎉💍🎉</div>
+                    <h3 className="propose-accepted-title">HAAN BOL DITTA! 🥳</h3>
+                    <p className="propose-accepted-text">
+                      Ab ring shopping? 😍<br/>
+                      Tere saath lifetime hungama confirmed! 💕
+                    </p>
+                    <div className="propose-accepted-hearts">💍 💕 💍 💕 💍</div>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* ACT 6: Address/Surprise Tie-In */}
+          {proposeStarted && proposeYesClicked && (
+            <section className="propose-section propose-surprise">
+              <div className="propose-surprise-content">
+                <div className="propose-surprise-emoji">🚚💍</div>
+                <h2 className="propose-surprise-title">Propose Accept Ho Gaya?!</h2>
+                <p className="propose-surprise-text">
+                  Ab address confirm kar de taaki asli ring + gift pahunche! 🚚💍
+                </p>
+                <button className="propose-surprise-btn" onClick={() => {
+                  playSound('click')
+                  handleDayChange('rose')
+                  setTimeout(() => {
+                    document.getElementById('sectiongift')?.scrollIntoView({ behavior: 'smooth' })
+                  }, 500)
+                }}>
+                  🎁 Gift Form Pe Chal! 🌹
+                </button>
+                <p className="propose-surprise-footer">
+                  Made with ❤️ by tumhara Lakshay
+                  <br/><span className="propose-footer-small">(Agar cringe laga toh blame the Jatt romance gene! 😂)</span>
+                </p>
+              </div>
+            </section>
+          )}
+        </>
       )}
 
       {/* ========== CHOCOLATE DAY - COMING SOON ========== */}
