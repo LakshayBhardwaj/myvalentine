@@ -2461,3 +2461,788 @@ body {
   font-style: italic;
   color: rgba(255, 255, 255, 0.6) !important;
 }
+
+/* ============================================================
+   PROPOSE DAY STYLES - "Propose Da Proposal - Jatt Style!"
+   ============================================================ */
+
+/* --- Base Section --- */
+.propose-section {
+  min-height: 100vh;
+  padding: 120px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- ACT 1: Hero Section --- */
+.propose-hero {
+  background: linear-gradient(135deg, #b71c1c 0%, #c62828 25%, #d4a017 50%, #f9a825 75%, #ffd54f 100%);
+  background-size: 300% 300%;
+  animation: proposeShaadi 8s ease infinite;
+  text-align: center;
+}
+
+@keyframes proposeShaadi {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Falling petals & rings */
+.propose-petals-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.propose-petal {
+  position: absolute;
+  top: -30px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50% 0 50% 50%;
+  opacity: 0.7;
+  animation: petalFall linear infinite;
+}
+
+.propose-petal.petal-0 { background: #ff6b6b; transform: rotate(45deg); }
+.propose-petal.petal-1 { background: #ff4757; transform: rotate(90deg); }
+.propose-petal.petal-2 { background: #ff69b4; transform: rotate(135deg); }
+.propose-petal.petal-3 { background: #ffd700; transform: rotate(180deg); }
+
+@keyframes petalFall {
+  0% { top: -30px; opacity: 0.7; transform: rotate(0deg) translateX(0); }
+  25% { transform: rotate(90deg) translateX(30px); }
+  50% { opacity: 0.5; transform: rotate(180deg) translateX(-20px); }
+  75% { transform: rotate(270deg) translateX(25px); }
+  100% { top: 105%; opacity: 0; transform: rotate(360deg) translateX(0); }
+}
+
+.propose-falling-ring {
+  position: absolute;
+  top: -40px;
+  font-size: 1.8rem;
+  animation: ringBoing linear infinite;
+  pointer-events: none;
+}
+
+@keyframes ringBoing {
+  0% { top: -40px; transform: scale(1); }
+  70% { transform: scale(1); }
+  80% { top: 85%; transform: scale(1.3); }
+  85% { top: 80%; transform: scale(0.9); }
+  90% { top: 85%; transform: scale(1.1); }
+  95% { top: 83%; transform: scale(1); }
+  100% { top: 110%; transform: scale(1); opacity: 0; }
+}
+
+.propose-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 400px;
+  width: 90%;
+}
+
+.propose-groom-emoji {
+  font-size: 5rem;
+  margin-bottom: 15px;
+  animation: groomBounce 1.5s ease-in-out infinite;
+}
+
+@keyframes groomBounce {
+  0%, 100% { transform: scale(1) rotate(-5deg); }
+  50% { transform: scale(1.1) rotate(5deg); }
+}
+
+.propose-hero-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2.2rem;
+  color: #fff;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.4), 0 0 20px rgba(255,215,0,0.5);
+  margin-bottom: 15px;
+  line-height: 1.3;
+}
+
+.propose-hero-subtitle {
+  font-size: 1.1rem;
+  color: #fff5e1;
+  line-height: 1.6;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.propose-hero-warning {
+  font-size: 0.9rem;
+  color: #ffe0b2;
+  line-height: 1.6;
+  background: rgba(0,0,0,0.3);
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 25px;
+  border: 1px dashed #ffd700;
+}
+
+.propose-ring-message {
+  background: rgba(0,0,0,0.6);
+  color: #ffd700;
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 15px 0;
+  animation: messageAppear 0.3s ease-out;
+}
+
+@keyframes messageAppear {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.propose-entry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(45deg, #ffd700, #ffb300, #ffd700);
+  color: #4a0000;
+  border: 3px solid #fff;
+  padding: 18px 35px;
+  font-size: 1.2rem;
+  font-family: 'Bangers', cursive;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(255, 215, 0, 0.5);
+  animation: entryBtnPulse 2s ease-in-out infinite;
+  transition: transform 0.2s;
+  letter-spacing: 1px;
+}
+
+.propose-entry-btn:active {
+  transform: scale(0.95);
+}
+
+@keyframes entryBtnPulse {
+  0%, 100% { box-shadow: 0 8px 30px rgba(255, 215, 0, 0.5); transform: scale(1); }
+  50% { box-shadow: 0 8px 50px rgba(255, 215, 0, 0.8); transform: scale(1.03); }
+}
+
+.propose-ring-icon {
+  font-size: 1.5rem;
+  animation: ringSpin 3s linear infinite;
+  display: inline-block;
+}
+
+@keyframes ringSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- ACT 2: Proposal Fail History --- */
+.propose-fails {
+  background: linear-gradient(135deg, #1a1a3e 0%, #2d1b4e 50%, #1a1a3e 100%);
+}
+
+.propose-section-title {
+  font-family: 'Bangers', cursive;
+  font-size: 1.8rem;
+  color: #ffd700;
+  text-align: center;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  margin-bottom: 30px;
+  line-height: 1.4;
+}
+
+.propose-section-subtitle {
+  font-size: 1rem;
+  color: #ff69b4;
+  font-family: 'Comic Neue', cursive;
+}
+
+.propose-timeline {
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  padding-left: 40px;
+}
+
+.propose-timeline::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, #ff69b4, #ffd700);
+  border-radius: 2px;
+}
+
+.propose-timeline-item {
+  position: relative;
+  margin-bottom: 25px;
+  cursor: pointer;
+}
+
+.propose-timeline-dot {
+  position: absolute;
+  left: -32px;
+  top: 15px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  z-index: 2;
+}
+
+.propose-timeline-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.propose-timeline-item:active .propose-timeline-card {
+  transform: scale(0.98);
+  box-shadow: 0 5px 20px rgba(255, 105, 180, 0.4);
+}
+
+.propose-timeline-card h3 {
+  font-family: 'Bangers', cursive;
+  font-size: 1.2rem;
+  color: #ff69b4;
+  margin-bottom: 8px;
+}
+
+.propose-timeline-card p {
+  font-size: 0.95rem;
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+.propose-fail-badge {
+  display: inline-block;
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-top: 10px;
+  letter-spacing: 1px;
+}
+
+.propose-timeline-success .propose-timeline-card {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.15);
+}
+
+.propose-success-badge {
+  display: inline-block;
+  background: linear-gradient(45deg, #ffd700, #ffb300);
+  color: #4a0000;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-top: 10px;
+  letter-spacing: 1px;
+  animation: successBadgePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes successBadgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* --- ACT 3: Funny Reasons --- */
+.propose-reasons {
+  background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #4a1942 100%);
+}
+
+.propose-reasons-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.propose-reason-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 20px;
+  border: 2px solid rgba(255, 105, 180, 0.3);
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.propose-reason-card:active {
+  transform: scale(0.97);
+  border-color: #ffd700;
+  box-shadow: 0 5px 25px rgba(255, 215, 0, 0.4);
+}
+
+.propose-reason-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,215,0,0.1), transparent);
+  transition: left 0.5s;
+}
+
+.propose-reason-card:active::before {
+  left: 100%;
+}
+
+.propose-reason-number {
+  font-family: 'Bangers', cursive;
+  font-size: 1.5rem;
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.propose-reason-card p {
+  font-size: 1rem;
+  color: #e0e0e0;
+  line-height: 1.6;
+}
+
+.propose-reason-boss {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, rgba(255,215,0,0.2) 0%, rgba(255,105,180,0.2) 100%);
+  animation: bossCardGlow 2s ease-in-out infinite;
+}
+
+@keyframes bossCardGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); }
+}
+
+/* --- ACT 4: Ring Catch Game --- */
+.propose-game {
+  background: linear-gradient(135deg, #0d0d2b 0%, #1a1a4e 50%, #0d0d2b 100%);
+}
+
+.propose-game-intro {
+  text-align: center;
+  max-width: 350px;
+  width: 90%;
+}
+
+.propose-game-intro p {
+  font-size: 1rem;
+  color: #e0e0e0;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.propose-game-start-btn {
+  background: linear-gradient(45deg, #ffd700, #ff6b6b);
+  color: #fff;
+  border: none;
+  padding: 15px 35px;
+  font-size: 1.2rem;
+  font-family: 'Bangers', cursive;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 5px 25px rgba(255, 215, 0, 0.4);
+  animation: gameStartPulse 1.5s ease-in-out infinite;
+  transition: transform 0.2s;
+}
+
+.propose-game-start-btn:active { transform: scale(0.95); }
+
+@keyframes gameStartPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.propose-game-arena {
+  width: 90%;
+  max-width: 350px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: none;
+}
+
+.propose-game-score {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffd700;
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.propose-ring-falling {
+  position: absolute;
+  font-size: 2.5rem;
+  transform: translateX(-50%);
+  z-index: 3;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+  transition: none;
+}
+
+.propose-finger {
+  position: absolute;
+  bottom: 10px;
+  font-size: 2.5rem;
+  transform: translateX(-50%);
+  z-index: 4;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+
+.propose-game-message {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd700;
+  padding: 10px 20px;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+  z-index: 6;
+  animation: messageAppear 0.3s ease-out;
+}
+
+.propose-game-won {
+  text-align: center;
+  background: rgba(255, 215, 0, 0.15);
+  border: 2px solid #ffd700;
+  border-radius: 25px;
+  padding: 40px 25px;
+  max-width: 350px;
+  width: 90%;
+  animation: gameWonAppear 0.6s ease-out;
+}
+
+@keyframes gameWonAppear {
+  0% { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+  60% { transform: scale(1.1) rotate(3deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+.propose-game-won-emoji {
+  font-size: 4rem;
+  margin-bottom: 15px;
+  animation: wonEmojiBounce 1s ease-in-out infinite;
+}
+
+@keyframes wonEmojiBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.propose-game-won h3 {
+  font-family: 'Bangers', cursive;
+  font-size: 1.5rem;
+  color: #ffd700;
+  margin-bottom: 10px;
+}
+
+.propose-game-won p {
+  font-size: 1rem;
+  color: #e0e0e0;
+}
+
+/* --- ACT 5: Real Proposal --- */
+.propose-real {
+  background: linear-gradient(135deg, #1a0000 0%, #2d0a0a 30%, #4a1020 60%, #1a0000 100%);
+}
+
+.propose-mandap-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.propose-mandap-light {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #ffd700;
+  border-radius: 50%;
+  animation: mandapTwinkle 2s ease-in-out infinite;
+  box-shadow: 0 0 6px #ffd700, 0 0 12px rgba(255, 215, 0, 0.5);
+}
+
+@keyframes mandapTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+.propose-real-content {
+  position: relative;
+  z-index: 2;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.propose-real-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.5), 0 0 30px rgba(255, 215, 0, 0.3);
+  margin-bottom: 30px;
+}
+
+.propose-emotional-message {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  border-radius: 25px;
+  padding: 30px 20px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  margin-bottom: 30px;
+}
+
+.propose-hindi-text {
+  font-size: 1.05rem;
+  color: #f5f5f5;
+  line-height: 1.8;
+  margin-bottom: 18px;
+}
+
+.propose-hindi-text.highlight {
+  color: #ffd700;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 15px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 15px;
+  border-left: 3px solid #ffd700;
+}
+
+.propose-big-question {
+  font-family: 'Bangers', cursive;
+  font-size: 1.8rem;
+  color: #ff69b4;
+  margin: 25px 0;
+  text-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+  animation: bigQuestionPulse 2s ease-in-out infinite;
+}
+
+@keyframes bigQuestionPulse {
+  0%, 100% { transform: scale(1); text-shadow: 0 0 20px rgba(255, 105, 180, 0.5); }
+  50% { transform: scale(1.03); text-shadow: 0 0 40px rgba(255, 105, 180, 0.8); }
+}
+
+.propose-parenthetical {
+  font-size: 1rem;
+  color: #ffd700;
+  font-family: 'Comic Neue', cursive;
+}
+
+.propose-love-declaration {
+  font-size: 1.1rem;
+  color: #ff69b4;
+  line-height: 1.8;
+  margin-top: 20px;
+}
+
+.propose-love-declaration strong {
+  color: #ffd700;
+  font-size: 1.2rem;
+}
+
+/* Proposal Buttons */
+.propose-buttons {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+  flex-wrap: wrap;
+}
+
+.propose-yes-btn {
+  background: linear-gradient(45deg, #ffd700, #ff69b4, #ffd700);
+  background-size: 200% 200%;
+  animation: yesGradient 3s ease infinite, yesBtnPulse 1.5s ease-in-out infinite;
+  color: #fff;
+  border: 3px solid #fff;
+  padding: 18px 45px;
+  font-size: 1.5rem;
+  font-family: 'Bangers', cursive;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(255, 215, 0, 0.5);
+  transition: transform 0.2s;
+  letter-spacing: 2px;
+}
+
+@keyframes yesGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes yesBtnPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.propose-yes-btn:active { transform: scale(0.95); }
+
+.propose-no-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ccc;
+  border: 1px solid rgba(255,255,255,0.3);
+  padding: 12px 25px;
+  font-size: 1rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.propose-no-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Proposal Accepted */
+.propose-accepted {
+  text-align: center;
+  background: rgba(255, 215, 0, 0.15);
+  border: 3px solid #ffd700;
+  border-radius: 30px;
+  padding: 40px 25px;
+  animation: acceptedAppear 0.8s ease-out;
+}
+
+@keyframes acceptedAppear {
+  0% { opacity: 0; transform: scale(0.3) rotate(-15deg); }
+  50% { transform: scale(1.1) rotate(3deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+.propose-accepted-emoji {
+  font-size: 4rem;
+  margin-bottom: 15px;
+  animation: acceptedEmojiBounce 0.8s ease-in-out infinite;
+}
+
+@keyframes acceptedEmojiBounce {
+  0%, 100% { transform: scale(1) rotate(0); }
+  25% { transform: scale(1.2) rotate(-5deg); }
+  75% { transform: scale(1.2) rotate(5deg); }
+}
+
+.propose-accepted-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2.5rem;
+  color: #ffd700;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  margin-bottom: 15px;
+}
+
+.propose-accepted-text {
+  font-size: 1.1rem;
+  color: #fff;
+  line-height: 1.8;
+  margin-bottom: 15px;
+}
+
+.propose-accepted-hearts {
+  font-size: 2rem;
+  animation: heartsFloat 2s ease-in-out infinite;
+}
+
+/* --- ACT 6: Surprise Section --- */
+.propose-surprise {
+  background: linear-gradient(135deg, #ffd700 0%, #ff69b4 50%, #ffd700 100%);
+  background-size: 200% 200%;
+  animation: proposeShaadi 6s ease infinite;
+}
+
+.propose-surprise-content {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
+  padding: 50px 25px;
+  max-width: 400px;
+  width: 90%;
+  border: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.propose-surprise-emoji {
+  font-size: 4rem;
+  margin-bottom: 15px;
+}
+
+.propose-surprise-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  color: #4a0000;
+  margin-bottom: 15px;
+}
+
+.propose-surprise-text {
+  font-size: 1.1rem;
+  color: #4a0000;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.propose-surprise-btn {
+  background: linear-gradient(45deg, #c62828, #ff1744);
+  color: #fff;
+  border: 2px solid #fff;
+  padding: 15px 35px;
+  font-size: 1.2rem;
+  font-family: 'Bangers', cursive;
+  border-radius: 40px;
+  cursor: pointer;
+  box-shadow: 0 5px 20px rgba(198, 40, 40, 0.4);
+  transition: transform 0.2s;
+  letter-spacing: 1px;
+}
+
+.propose-surprise-btn:active { transform: scale(0.95); }
+
+.propose-surprise-footer {
+  margin-top: 30px;
+  font-size: 1rem;
+  color: #4a0000;
+}
+
+.propose-footer-small {
+  font-size: 0.8rem;
+  font-style: italic;
+  opacity: 0.7;
+}
