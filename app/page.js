@@ -20,6 +20,7 @@ export default function RoseDayPage() {
   const [proposeNoPos, setProposeNoPos] = useState({ x: 0, y: 0 })
   const ringIntervalRef = useRef(null)
   const lastTapRef = useRef(0)
+  const proposeSongRef = useRef(null)
 
   // Valentine Week Days
   const valentineWeekDays = [
@@ -1163,6 +1164,39 @@ ${deviceInfo.userAgent}`
   useEffect(() => {
     return () => {
       if (ringIntervalRef.current) clearInterval(ringIntervalRef.current)
+    }
+  }, [activeDay])
+
+  // Play/pause Propose Day song when day changes
+  useEffect(() => {
+    if (activeDay === 'propose') {
+      if (!proposeSongRef.current) {
+        proposeSongRef.current = new Audio('/itni-si-baat.mp3')
+        proposeSongRef.current.loop = true
+        proposeSongRef.current.volume = 0.5
+      }
+      proposeSongRef.current.play().catch(() => {
+        // Autoplay blocked — will retry on next user interaction
+        const playOnInteraction = () => {
+          if (proposeSongRef.current) {
+            proposeSongRef.current.play().catch(() => {})
+          }
+          document.removeEventListener('click', playOnInteraction)
+          document.removeEventListener('touchstart', playOnInteraction)
+        }
+        document.addEventListener('click', playOnInteraction, { once: true })
+        document.addEventListener('touchstart', playOnInteraction, { once: true })
+      })
+    } else {
+      if (proposeSongRef.current) {
+        proposeSongRef.current.pause()
+      }
+    }
+
+    return () => {
+      if (proposeSongRef.current && activeDay === 'propose') {
+        proposeSongRef.current.pause()
+      }
     }
   }, [activeDay])
 
