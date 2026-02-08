@@ -63,6 +63,25 @@ export default function RoseDayPage() {
   const [sirenPlayed, setSirenPlayed] = useState(false)
   const [showSoundOverlay, setShowSoundOverlay] = useState(true)
   const audioContextRef = useRef(null)
+
+  // Chocolate Day Quiz states
+  const [chocoQuizIndex, setChocoQuizIndex] = useState(0)
+  const [chocoQuizAnswered, setChocoQuizAnswered] = useState(false)
+  const [chocoQuizCorrect, setChocoQuizCorrect] = useState(false)
+  const [chocoQuizScore, setChocoQuizScore] = useState(0)
+  const [chocoQuizDone, setChocoQuizDone] = useState(false)
+  const [chocoWrongMsg, setChocoWrongMsg] = useState('')
+  const [chocoSwipeDir, setChocoSwipeDir] = useState('')
+  const chocoTouchStartRef = useRef(null)
+
+  // Valentine Spinner game states
+  const [spinnerAngle, setSpinnerAngle] = useState(0)
+  const [spinnerSpinning, setSpinnerSpinning] = useState(true)
+  const [spinnerStopped, setSpinnerStopped] = useState(false)
+  const [spinnerResult, setSpinnerResult] = useState('')
+  const spinnerAnimRef = useRef(null)
+  const spinnerAngleRef = useRef(0)
+  const spinnerSpeedRef = useRef(3)
   const whatsappNumber = "918512022116"
 
   // Initialize Audio Context
@@ -171,6 +190,51 @@ export default function RoseDayPage() {
           oscillator.start(ctx.currentTime)
           oscillator.stop(ctx.currentTime + 0.15)
           break
+
+        case 'wrongBuzzer':
+          // Absurd wrong answer sound - descending wah-wah
+          oscillator.type = 'sawtooth'
+          oscillator.frequency.setValueAtTime(500, ctx.currentTime)
+          oscillator.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.6)
+          gainNode.gain.setValueAtTime(0.35, ctx.currentTime)
+          gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6)
+          oscillator.start(ctx.currentTime)
+          oscillator.stop(ctx.currentTime + 0.6)
+          // Second sad trombone note
+          setTimeout(() => {
+            if (!soundEnabled) return
+            try {
+              const osc2 = ctx.createOscillator()
+              const gain2 = ctx.createGain()
+              osc2.connect(gain2)
+              gain2.connect(ctx.destination)
+              osc2.type = 'sawtooth'
+              osc2.frequency.setValueAtTime(400, ctx.currentTime)
+              osc2.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.8)
+              gain2.gain.setValueAtTime(0.3, ctx.currentTime)
+              gain2.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.8)
+              osc2.start(ctx.currentTime)
+              osc2.stop(ctx.currentTime + 0.8)
+            } catch(e) {}
+          }, 500)
+          break
+
+        case 'quizWin':
+          // Triumphant fanfare for winning the quiz
+          const winNotes = [523, 659, 784, 880, 1047, 1319, 1568] // C5 to G6
+          winNotes.forEach((freq, i) => {
+            const osc = ctx.createOscillator()
+            const gain = ctx.createGain()
+            osc.connect(gain)
+            gain.connect(ctx.destination)
+            osc.type = 'triangle'
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12)
+            gain.gain.setValueAtTime(0.35, ctx.currentTime + i * 0.12)
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.12 + 0.4)
+            osc.start(ctx.currentTime + i * 0.12)
+            osc.stop(ctx.currentTime + i * 0.12 + 0.4)
+          })
+          return // Don't use the main oscillator
 
         case 'heartbeat':
           // Heartbeat thump
@@ -746,6 +810,240 @@ ${deviceInfo.userAgent}`
 
     // Clear confetti after animation
     setTimeout(() => setConfetti([]), 5000)
+  }
+
+  // ===== CHOCOLATE DAY QUIZ DATA & HANDLERS =====
+  const chocoQuizQuestions = [
+    {
+      q: "Where did we first meet?",
+      options: [
+        "Your home",
+        "My home",
+        "Sadak pe",
+        "Begani shaadi mein Abdullah deewana"
+      ],
+      answer: 3,
+      wrongMsgs: [
+        "Ghar pe? Itni jaldi ghar bula liya? Sharafat ka zamana nahi raha! 😂",
+        "Mere ghar? Bhai mummy ne toh chai bhi nahi pilayi thi tujhe tab! 🫖",
+        "Sadak pe? Ye kya roadside romeo ban raha hai! 😤🛣️"
+      ]
+    },
+    {
+      q: "What gift did you first receive from me?",
+      options: [
+        "10 rs ki Pepsi",
+        "Rasgulla without chashni",
+        "Variety of chocolates",
+        "Teddy baddie"
+      ],
+      answer: 2,
+      wrongMsgs: [
+        "10 rs ki Pepsi?! Bhai inflation se pehle ka time yaad aa gaya! Budget lover! 💀",
+        "Rasgulla WITHOUT chashni?! Wo toh torture gift hota... sukha rasgulla kaun deta hai! 😭",
+        "Teddy baddie?! Ye kya Build-A-Bear workshop chal rahi hai kya?! 🧸💀"
+      ]
+    },
+    {
+      q: "Who is our fav singer out of these?",
+      options: [
+        "Karan Aujla",
+        "KK",
+        "Diljit",
+        "Cheema Y"
+      ],
+      answer: 0,
+      wrongMsgs: [
+        "",
+        "KK?! Bhai nostalgia trip pe mat le ja! Hum modern hai! 🎵😤",
+        "Diljit?! Wo toh Dil-jeet liya Kylie ka... humara singer alag hai! 🤪",
+        "Cheema Y?! Ye kaun hai? Google pe search karna padega! 🔍😂"
+      ]
+    },
+    {
+      q: "What's my fav song?",
+      options: [
+        "For A Reason",
+        "No Love",
+        "Jhol",
+        "Pal Pal (yaad teri tadpave :))"
+      ],
+      answer: 0,
+      wrongMsgs: [
+        "",
+        "No Love?! Are bhai No Love nahi... Full Love chal rahi hai idhar! 💔➡️❤️",
+        "Jhol?! Relationship mein jhol hai kya? Seedha baat kar! 🫣",
+        "Pal Pal yaad teri tadpave?! Itna dramatic mat ban filmy babu! 🎬😂"
+      ]
+    },
+    {
+      q: "Where was this video taken? 🎥",
+      options: [
+        "Chandigarh",
+        "Munnar",
+        "Kodaikanal",
+        "Madurai"
+      ],
+      answer: 1,
+      video: "/8E3E472E-384E-45D0-88CD-7B7D66698E30.mov",
+      wrongMsgs: [
+        "Chandigarh?! Bhai Chandigarh mein itni greenery? Sector 17 mein jungle nahi hota! 🏙️😂",
+        "",
+        "Kodaikanal?! Close but no cigar! Ye Kerala ki chai ki khushbu hai, Tamil Nadu ki nahi! ☕😤",
+        "Madurai?! Temple city mein honeymoon? Bhai thoda romantic soch! 🛕💀"
+      ]
+    }
+  ]
+
+  const handleChocoAnswer = (optionIndex) => {
+    if (chocoQuizAnswered) return
+    setChocoQuizAnswered(true)
+
+    const currentQ = chocoQuizQuestions[chocoQuizIndex]
+    if (optionIndex === currentQ.answer) {
+      setChocoQuizCorrect(true)
+      setChocoQuizScore(prev => prev + 1)
+      playSound('celebration')
+      triggerConfetti()
+    } else {
+      setChocoQuizCorrect(false)
+      setChocoWrongMsg(currentQ.wrongMsgs[optionIndex] || "Galat! Soch ke bata! 😜")
+      playSound('wrongBuzzer')
+    }
+  }
+
+  const handleChocoNext = () => {
+    const nextIndex = chocoQuizIndex + 1
+    if (nextIndex >= chocoQuizQuestions.length) {
+      setChocoQuizDone(true)
+      playSound('quizWin')
+      triggerConfetti()
+      setTimeout(() => triggerConfetti(), 1500)
+    } else {
+      setChocoSwipeDir('swipe-left')
+      setTimeout(() => {
+        setChocoQuizIndex(nextIndex)
+        setChocoQuizAnswered(false)
+        setChocoQuizCorrect(false)
+        setChocoWrongMsg('')
+        setChocoSwipeDir('swipe-right-enter')
+        setTimeout(() => setChocoSwipeDir(''), 400)
+      }, 300)
+    }
+  }
+
+  const handleChocoTouchStart = (e) => {
+    chocoTouchStartRef.current = e.touches[0].clientX
+  }
+
+  const handleChocoTouchEnd = (e) => {
+    if (!chocoTouchStartRef.current) return
+    const diff = chocoTouchStartRef.current - e.changedTouches[0].clientX
+    if (diff > 60 && chocoQuizAnswered) {
+      handleChocoNext()
+    }
+    chocoTouchStartRef.current = null
+  }
+
+  const resetChocoQuiz = () => {
+    setChocoQuizIndex(0)
+    setChocoQuizAnswered(false)
+    setChocoQuizCorrect(false)
+    setChocoQuizScore(0)
+    setChocoQuizDone(false)
+    setChocoWrongMsg('')
+    setChocoSwipeDir('')
+  }
+
+  // ===== VALENTINE SPINNER GAME =====
+  // YES positions: 0° (top), 90° (right), 180° (bottom), 270° (left) — every even slot
+  // NO positions: 45°, 135°, 225°, 315° — every odd slot
+  // 8 slots of 45° each, alternating YES/NO
+  const spinnerLabels = [
+    { text: 'YES', angle: 0 },
+    { text: 'NO', angle: 45 },
+    { text: 'YES', angle: 90 },
+    { text: 'NO', angle: 135 },
+    { text: 'YES', angle: 180 },
+    { text: 'NO', angle: 225 },
+    { text: 'YES', angle: 270 },
+    { text: 'NO', angle: 315 }
+  ]
+
+  // Continuous spinning animation
+  useEffect(() => {
+    if (activeDay !== 'chocolate') return
+    if (spinnerStopped) return
+
+    let running = true
+    const animate = () => {
+      if (!running) return
+      spinnerAngleRef.current = (spinnerAngleRef.current + spinnerSpeedRef.current) % 360
+      setSpinnerAngle(spinnerAngleRef.current)
+      spinnerAnimRef.current = requestAnimationFrame(animate)
+    }
+    spinnerAnimRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      running = false
+      if (spinnerAnimRef.current) cancelAnimationFrame(spinnerAnimRef.current)
+    }
+  }, [activeDay, spinnerStopped])
+
+  const handleSpinnerTap = () => {
+    if (spinnerStopped) return
+
+    // Stop the continuous animation
+    if (spinnerAnimRef.current) cancelAnimationFrame(spinnerAnimRef.current)
+
+    // Calculate a target angle that lands on YES (0°, 90°, 180°, 270°)
+    // The hand points at spinnerAngle, so we need it to land where a YES is
+    const currentAngle = spinnerAngleRef.current
+    // Pick a random YES position
+    const yesPositions = [0, 90, 180, 270]
+    const targetYes = yesPositions[Math.floor(Math.random() * yesPositions.length)]
+    // Add extra full rotations for dramatic spinning effect (3-5 more spins)
+    const extraSpins = (3 + Math.floor(Math.random() * 3)) * 360
+    const targetAngle = currentAngle + extraSpins + ((targetYes - (currentAngle % 360) + 360) % 360)
+
+    setSpinnerSpinning(false)
+
+    // Animate deceleration
+    const startAngle = currentAngle
+    const totalDelta = targetAngle - startAngle
+    const duration = 3000 // 3 seconds of spinning down
+    const startTime = performance.now()
+
+    const decelerate = (now) => {
+      const elapsed = now - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      // Ease-out cubic for natural deceleration
+      const eased = 1 - Math.pow(1 - progress, 3)
+      const newAngle = startAngle + totalDelta * eased
+      spinnerAngleRef.current = newAngle % 360
+      setSpinnerAngle(newAngle % 360)
+
+      if (progress < 1) {
+        spinnerAnimRef.current = requestAnimationFrame(decelerate)
+      } else {
+        // Landed!
+        setSpinnerStopped(true)
+        setSpinnerResult('YES')
+        playSound('celebration')
+        triggerConfetti()
+        setTimeout(() => triggerConfetti(), 800)
+      }
+    }
+    spinnerAnimRef.current = requestAnimationFrame(decelerate)
+  }
+
+  const resetSpinner = () => {
+    setSpinnerAngle(0)
+    spinnerAngleRef.current = 0
+    spinnerSpeedRef.current = 3
+    setSpinnerSpinning(true)
+    setSpinnerStopped(false)
+    setSpinnerResult('')
   }
 
   const scrollToSection = (num) => {
@@ -2589,20 +2887,214 @@ ${deviceInfo.userAgent}`
         </>
       )}
 
-      {/* ========== CHOCOLATE DAY - COMING SOON ========== */}
+      {/* ========== CHOCOLATE DAY - QUIZ ========== */}
       {activeDay === 'chocolate' && (
-        <section className="coming-soon-section chocolate-theme">
-          <div className="coming-soon-container">
-            <div className="coming-soon-emoji">🍫</div>
-            <h1 className="coming-soon-title">Chocolate Day</h1>
-            <h2 className="coming-soon-date">9th February</h2>
-            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
-            <p className="coming-soon-text">
-              Chocolate Day ka meetha content coming soon! 🍬<br/>
-              Dairy Milk se lekar Ferrero Rocher tak sab milega! 🎁
-            </p>
-            <div className="coming-soon-hearts">🍫 🍬 🍫 🍬 🍫</div>
-            <p className="coming-soon-hint">Calories count mat karna! 😂</p>
+        <section className="choco-quiz-section">
+          <div className="choco-quiz-header">
+            <div className="choco-header-emoji">🍫</div>
+            <h1 className="choco-header-title">Chocolate Day Quiz</h1>
+            <p className="choco-header-subtitle">9th February</p>
+            <p className="choco-header-tagline">Kitna jaanti hai tu mujhe? Chal prove kar! 😏</p>
+          </div>
+
+          {!chocoQuizDone ? (
+            <div className="choco-quiz-carousel"
+              onTouchStart={handleChocoTouchStart}
+              onTouchEnd={handleChocoTouchEnd}
+            >
+              {/* Progress bar */}
+              <div className="choco-progress-bar">
+                {chocoQuizQuestions.map((_, i) => (
+                  <div key={i} className={`choco-progress-dot ${i < chocoQuizIndex ? 'done' : ''} ${i === chocoQuizIndex ? 'active' : ''}`}>
+                    {i < chocoQuizIndex ? '✓' : i + 1}
+                  </div>
+                ))}
+              </div>
+
+              {/* Question Card */}
+              <div className={`choco-question-card ${chocoSwipeDir}`}>
+                <div className="choco-q-number">Q{chocoQuizIndex + 1} / {chocoQuizQuestions.length}</div>
+
+                {/* Video player for video questions */}
+                {chocoQuizQuestions[chocoQuizIndex].video && (
+                  <div className="choco-video-wrapper">
+                    <video
+                      className="choco-video-player"
+                      src={chocoQuizQuestions[chocoQuizIndex].video}
+                      controls
+                      playsInline
+                      loop
+                      muted
+                      autoPlay
+                    />
+                    <div className="choco-video-label">👆 Dekh ke bata!</div>
+                  </div>
+                )}
+
+                <h2 className="choco-q-text">{chocoQuizQuestions[chocoQuizIndex].q}</h2>
+
+                <div className="choco-options">
+                  {chocoQuizQuestions[chocoQuizIndex].options.map((opt, i) => {
+                    let optClass = 'choco-option'
+                    if (chocoQuizAnswered) {
+                      if (i === chocoQuizQuestions[chocoQuizIndex].answer) {
+                        optClass += ' correct'
+                      } else if (!chocoQuizCorrect && i !== chocoQuizQuestions[chocoQuizIndex].answer) {
+                        optClass += ' wrong'
+                      }
+                    }
+                    return (
+                      <button
+                        key={i}
+                        className={optClass}
+                        onClick={() => handleChocoAnswer(i)}
+                        disabled={chocoQuizAnswered}
+                      >
+                        <span className="choco-option-letter">{String.fromCharCode(65 + i)}</span>
+                        <span className="choco-option-text">{opt}</span>
+                        {chocoQuizAnswered && i === chocoQuizQuestions[chocoQuizIndex].answer && (
+                          <span className="choco-option-icon">✅</span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Feedback */}
+                {chocoQuizAnswered && (
+                  <div className={`choco-feedback ${chocoQuizCorrect ? 'correct' : 'wrong'}`}>
+                    {chocoQuizCorrect ? (
+                      <div className="choco-feedback-correct">
+                        <span className="choco-feedback-emoji">🎉🍫</span>
+                        <p>Sahi jawab! Tu toh meri expert nikli! 💕</p>
+                      </div>
+                    ) : (
+                      <div className="choco-feedback-wrong">
+                        <span className="choco-feedback-emoji">😂💀</span>
+                        <p>{chocoWrongMsg}</p>
+                      </div>
+                    )}
+                    <button className="choco-next-btn" onClick={handleChocoNext}>
+                      {chocoQuizIndex < chocoQuizQuestions.length - 1 ? 'Next Question ➡️' : 'See Results 🏆'}
+                    </button>
+                    <p className="choco-swipe-hint">👆 Swipe left ya button daba</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Score tracker */}
+              <div className="choco-score-tracker">
+                Score: {chocoQuizScore} / {chocoQuizQuestions.length} 🍫
+              </div>
+            </div>
+          ) : (
+            /* ===== QUIZ COMPLETE SCREEN ===== */
+            <div className="choco-quiz-result">
+              <div className="choco-result-emoji">
+                {chocoQuizScore === chocoQuizQuestions.length ? '👑🍫' : chocoQuizScore >= 3 ? '🎉🍫' : chocoQuizScore >= 2 ? '😅🍫' : '💀🍫'}
+              </div>
+              <h2 className="choco-result-title">
+                {chocoQuizScore === chocoQuizQuestions.length
+                  ? 'PERFECT SCORE!'
+                  : chocoQuizScore >= 3
+                  ? 'Almost Perfect!'
+                  : chocoQuizScore >= 2
+                  ? 'Theek-thaak hai...'
+                  : 'Ye kya tha?!'}
+              </h2>
+              <div className="choco-result-score">
+                {chocoQuizScore} / {chocoQuizQuestions.length}
+              </div>
+              <p className="choco-result-msg">
+                {chocoQuizScore === chocoQuizQuestions.length
+                  ? 'Waah! Sab sahi! Tu toh sachchi mein meri soulmate hai! Extra Dairy Milk tere liye! 🍫❤️'
+                  : chocoQuizScore >= 3
+                  ? 'Badhiya! Almost perfect! Ek aur chocolate milegi consolation mein! 🍬'
+                  : chocoQuizScore >= 2
+                  ? 'Hmm... 50-50 hai... jaise KBC mein lifeline lagti hai waise mujhse puchh lena next time! 😂'
+                  : 'Arre yaar! Itna bhi nahi pata? Kya relationship mein Google Maps lagake chal rahi hai? 🗺️💀'}
+              </p>
+              <div className="choco-result-chocolates">
+                {'🍫'.repeat(chocoQuizScore)} {'💔'.repeat(chocoQuizQuestions.length - chocoQuizScore)}
+              </div>
+              <button className="choco-retry-btn" onClick={resetChocoQuiz}>
+                🔄 Dobara Try Kar!
+              </button>
+              <p className="choco-result-footer">
+                Happy Chocolate Day! 🍫💕<br/>
+                <span style={{fontSize: '0.9rem', opacity: 0.8}}>Calories nahi, memories count hoti hai! 😘</span>
+              </p>
+            </div>
+          )}
+
+          {/* ===== VALENTINE SPINNER GAME ===== */}
+          <div className="spinner-game-section">
+            <div className="spinner-game-header">
+              <h2 className="spinner-game-title">
+                Pause the video to see...<br/>
+                will you be my <span className="spinner-valentine-text">Valentine</span>?
+              </h2>
+              <p className="spinner-game-subtitle">(Tap to stop the hand! 👆)</p>
+            </div>
+
+            <div className="spinner-wheel-container" onClick={handleSpinnerTap}>
+              {/* YES/NO labels arranged in circle */}
+              {spinnerLabels.map((label, i) => {
+                const radians = (label.angle - 90) * (Math.PI / 180)
+                const radius = 42
+                const x = 50 + radius * Math.cos(radians)
+                const y = 50 + radius * Math.sin(radians)
+                return (
+                  <span
+                    key={i}
+                    className={`spinner-label ${label.text === 'YES' ? 'spinner-yes' : 'spinner-no'} ${spinnerStopped && spinnerResult === 'YES' && label.text === 'YES' ? 'spinner-label-win' : ''}`}
+                    style={{
+                      left: `${x}%`,
+                      top: `${y}%`,
+                      transform: 'translate(-50%, -50%)'
+                    }}
+                  >
+                    {label.text}
+                  </span>
+                )
+              })}
+
+              {/* Center character - penguin-like creature */}
+              <div className="spinner-center-character">
+                <div className="spinner-penguin">
+                  <div className="spinner-penguin-halo">😇</div>
+                  <div className="spinner-penguin-body">🐧</div>
+                  <div className="spinner-penguin-glasses">😎</div>
+                </div>
+                {/* Rotating hand/pointer */}
+                <div
+                  className="spinner-hand"
+                  style={{ transform: `rotate(${spinnerAngle}deg)` }}
+                >
+                  <div className="spinner-hand-pointer">👆</div>
+                </div>
+              </div>
+
+              {/* Tap hint ripple */}
+              {!spinnerStopped && (
+                <div className="spinner-tap-hint">TAP!</div>
+              )}
+            </div>
+
+            {/* Result message */}
+            {spinnerStopped && (
+              <div className="spinner-result-area">
+                <div className="spinner-result-msg">
+                  <span className="spinner-result-emoji">💕🎉💕</span>
+                  <h3>It&apos;s a YES!</h3>
+                  <p>Dekha? Universe bhi chaahta hai ki tu meri Valentine ho! 😏❤️</p>
+                  <p className="spinner-result-sub">Haath bhi tere taraf hi ruka... kismat hai ya setting? 😂🍫</p>
+                </div>
+                <button className="spinner-retry-btn" onClick={resetSpinner}>
+                  🔄 Ek Aur Baar Try Kar (Result Same Aayega 😜)
+                </button>
+              </div>
+            )}
           </div>
         </section>
       )}
