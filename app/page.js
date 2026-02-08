@@ -63,6 +63,16 @@ export default function RoseDayPage() {
   const [sirenPlayed, setSirenPlayed] = useState(false)
   const [showSoundOverlay, setShowSoundOverlay] = useState(true)
   const audioContextRef = useRef(null)
+
+  // Chocolate Day Quiz states
+  const [chocoQuizIndex, setChocoQuizIndex] = useState(0)
+  const [chocoQuizAnswered, setChocoQuizAnswered] = useState(false)
+  const [chocoQuizCorrect, setChocoQuizCorrect] = useState(false)
+  const [chocoQuizScore, setChocoQuizScore] = useState(0)
+  const [chocoQuizDone, setChocoQuizDone] = useState(false)
+  const [chocoWrongMsg, setChocoWrongMsg] = useState('')
+  const [chocoSwipeDir, setChocoSwipeDir] = useState('')
+  const chocoTouchStartRef = useRef(null)
   const whatsappNumber = "918512022116"
 
   // Initialize Audio Context
@@ -171,6 +181,51 @@ export default function RoseDayPage() {
           oscillator.start(ctx.currentTime)
           oscillator.stop(ctx.currentTime + 0.15)
           break
+
+        case 'wrongBuzzer':
+          // Absurd wrong answer sound - descending wah-wah
+          oscillator.type = 'sawtooth'
+          oscillator.frequency.setValueAtTime(500, ctx.currentTime)
+          oscillator.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.6)
+          gainNode.gain.setValueAtTime(0.35, ctx.currentTime)
+          gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6)
+          oscillator.start(ctx.currentTime)
+          oscillator.stop(ctx.currentTime + 0.6)
+          // Second sad trombone note
+          setTimeout(() => {
+            if (!soundEnabled) return
+            try {
+              const osc2 = ctx.createOscillator()
+              const gain2 = ctx.createGain()
+              osc2.connect(gain2)
+              gain2.connect(ctx.destination)
+              osc2.type = 'sawtooth'
+              osc2.frequency.setValueAtTime(400, ctx.currentTime)
+              osc2.frequency.linearRampToValueAtTime(80, ctx.currentTime + 0.8)
+              gain2.gain.setValueAtTime(0.3, ctx.currentTime)
+              gain2.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.8)
+              osc2.start(ctx.currentTime)
+              osc2.stop(ctx.currentTime + 0.8)
+            } catch(e) {}
+          }, 500)
+          break
+
+        case 'quizWin':
+          // Triumphant fanfare for winning the quiz
+          const winNotes = [523, 659, 784, 880, 1047, 1319, 1568] // C5 to G6
+          winNotes.forEach((freq, i) => {
+            const osc = ctx.createOscillator()
+            const gain = ctx.createGain()
+            osc.connect(gain)
+            gain.connect(ctx.destination)
+            osc.type = 'triangle'
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12)
+            gain.gain.setValueAtTime(0.35, ctx.currentTime + i * 0.12)
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.12 + 0.4)
+            osc.start(ctx.currentTime + i * 0.12)
+            osc.stop(ctx.currentTime + i * 0.12 + 0.4)
+          })
+          return // Don't use the main oscillator
 
         case 'heartbeat':
           // Heartbeat thump
@@ -746,6 +801,132 @@ ${deviceInfo.userAgent}`
 
     // Clear confetti after animation
     setTimeout(() => setConfetti([]), 5000)
+  }
+
+  // ===== CHOCOLATE DAY QUIZ DATA & HANDLERS =====
+  const chocoQuizQuestions = [
+    {
+      q: "Where did we first meet?",
+      options: [
+        "Your home",
+        "My home",
+        "Sadak pe",
+        "Begani shaadi mein Abdullah deewana"
+      ],
+      answer: 3,
+      wrongMsgs: [
+        "Ghar pe? Itni jaldi ghar bula liya? Sharafat ka zamana nahi raha! 😂",
+        "Mere ghar? Bhai mummy ne toh chai bhi nahi pilayi thi tujhe tab! 🫖",
+        "Sadak pe? Ye kya roadside romeo ban raha hai! 😤🛣️"
+      ]
+    },
+    {
+      q: "What gift did you first receive from me?",
+      options: [
+        "10 rs ki Pepsi",
+        "Rasgulla without chashni",
+        "Variety of chocolates",
+        "Teddy baddie"
+      ],
+      answer: 2,
+      wrongMsgs: [
+        "10 rs ki Pepsi?! Bhai inflation se pehle ka time yaad aa gaya! Budget lover! 💀",
+        "Rasgulla WITHOUT chashni?! Wo toh torture gift hota... sukha rasgulla kaun deta hai! 😭",
+        "Teddy baddie?! Ye kya Build-A-Bear workshop chal rahi hai kya?! 🧸💀"
+      ]
+    },
+    {
+      q: "Who is our fav singer out of these?",
+      options: [
+        "Karan Aujla",
+        "KK",
+        "Diljit",
+        "Cheema Y"
+      ],
+      answer: 0,
+      wrongMsgs: [
+        "",
+        "KK?! Bhai nostalgia trip pe mat le ja! Hum modern hai! 🎵😤",
+        "Diljit?! Wo toh Dil-jeet liya Kylie ka... humara singer alag hai! 🤪",
+        "Cheema Y?! Ye kaun hai? Google pe search karna padega! 🔍😂"
+      ]
+    },
+    {
+      q: "What's my fav song?",
+      options: [
+        "For A Reason",
+        "No Love",
+        "Jhol",
+        "Pal Pal (yaad teri tadpave :))"
+      ],
+      answer: 0,
+      wrongMsgs: [
+        "",
+        "No Love?! Are bhai No Love nahi... Full Love chal rahi hai idhar! 💔➡️❤️",
+        "Jhol?! Relationship mein jhol hai kya? Seedha baat kar! 🫣",
+        "Pal Pal yaad teri tadpave?! Itna dramatic mat ban filmy babu! 🎬😂"
+      ]
+    }
+  ]
+
+  const handleChocoAnswer = (optionIndex) => {
+    if (chocoQuizAnswered) return
+    setChocoQuizAnswered(true)
+
+    const currentQ = chocoQuizQuestions[chocoQuizIndex]
+    if (optionIndex === currentQ.answer) {
+      setChocoQuizCorrect(true)
+      setChocoQuizScore(prev => prev + 1)
+      playSound('celebration')
+      triggerConfetti()
+    } else {
+      setChocoQuizCorrect(false)
+      setChocoWrongMsg(currentQ.wrongMsgs[optionIndex] || "Galat! Soch ke bata! 😜")
+      playSound('wrongBuzzer')
+    }
+  }
+
+  const handleChocoNext = () => {
+    const nextIndex = chocoQuizIndex + 1
+    if (nextIndex >= chocoQuizQuestions.length) {
+      setChocoQuizDone(true)
+      playSound('quizWin')
+      triggerConfetti()
+      setTimeout(() => triggerConfetti(), 1500)
+    } else {
+      setChocoSwipeDir('swipe-left')
+      setTimeout(() => {
+        setChocoQuizIndex(nextIndex)
+        setChocoQuizAnswered(false)
+        setChocoQuizCorrect(false)
+        setChocoWrongMsg('')
+        setChocoSwipeDir('swipe-right-enter')
+        setTimeout(() => setChocoSwipeDir(''), 400)
+      }, 300)
+    }
+  }
+
+  const handleChocoTouchStart = (e) => {
+    chocoTouchStartRef.current = e.touches[0].clientX
+  }
+
+  const handleChocoTouchEnd = (e) => {
+    if (!chocoTouchStartRef.current) return
+    const diff = chocoTouchStartRef.current - e.changedTouches[0].clientX
+    if (diff > 60 && chocoQuizAnswered) {
+      handleChocoNext()
+    }
+    chocoTouchStartRef.current = null
+  }
+
+  const resetChocoQuiz = () => {
+    setChocoQuizIndex(0)
+    setChocoQuizAnswered(false)
+    setChocoQuizCorrect(false)
+    setChocoQuizScore(0)
+    setChocoQuizDone(false)
+    setChocoWrongMsg('')
+    setChocoSwipeDir('')
   }
 
   const scrollToSection = (num) => {
@@ -2589,21 +2770,128 @@ ${deviceInfo.userAgent}`
         </>
       )}
 
-      {/* ========== CHOCOLATE DAY - COMING SOON ========== */}
+      {/* ========== CHOCOLATE DAY - QUIZ ========== */}
       {activeDay === 'chocolate' && (
-        <section className="coming-soon-section chocolate-theme">
-          <div className="coming-soon-container">
-            <div className="coming-soon-emoji">🍫</div>
-            <h1 className="coming-soon-title">Chocolate Day</h1>
-            <h2 className="coming-soon-date">9th February</h2>
-            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
-            <p className="coming-soon-text">
-              Chocolate Day ka meetha content coming soon! 🍬<br/>
-              Dairy Milk se lekar Ferrero Rocher tak sab milega! 🎁
-            </p>
-            <div className="coming-soon-hearts">🍫 🍬 🍫 🍬 🍫</div>
-            <p className="coming-soon-hint">Calories count mat karna! 😂</p>
+        <section className="choco-quiz-section">
+          <div className="choco-quiz-header">
+            <div className="choco-header-emoji">🍫</div>
+            <h1 className="choco-header-title">Chocolate Day Quiz</h1>
+            <p className="choco-header-subtitle">9th February</p>
+            <p className="choco-header-tagline">Kitna jaanti hai tu mujhe? Chal prove kar! 😏</p>
           </div>
+
+          {!chocoQuizDone ? (
+            <div className="choco-quiz-carousel"
+              onTouchStart={handleChocoTouchStart}
+              onTouchEnd={handleChocoTouchEnd}
+            >
+              {/* Progress bar */}
+              <div className="choco-progress-bar">
+                {chocoQuizQuestions.map((_, i) => (
+                  <div key={i} className={`choco-progress-dot ${i < chocoQuizIndex ? 'done' : ''} ${i === chocoQuizIndex ? 'active' : ''}`}>
+                    {i < chocoQuizIndex ? '✓' : i + 1}
+                  </div>
+                ))}
+              </div>
+
+              {/* Question Card */}
+              <div className={`choco-question-card ${chocoSwipeDir}`}>
+                <div className="choco-q-number">Q{chocoQuizIndex + 1} / {chocoQuizQuestions.length}</div>
+                <h2 className="choco-q-text">{chocoQuizQuestions[chocoQuizIndex].q}</h2>
+
+                <div className="choco-options">
+                  {chocoQuizQuestions[chocoQuizIndex].options.map((opt, i) => {
+                    let optClass = 'choco-option'
+                    if (chocoQuizAnswered) {
+                      if (i === chocoQuizQuestions[chocoQuizIndex].answer) {
+                        optClass += ' correct'
+                      } else if (!chocoQuizCorrect && i !== chocoQuizQuestions[chocoQuizIndex].answer) {
+                        optClass += ' wrong'
+                      }
+                    }
+                    return (
+                      <button
+                        key={i}
+                        className={optClass}
+                        onClick={() => handleChocoAnswer(i)}
+                        disabled={chocoQuizAnswered}
+                      >
+                        <span className="choco-option-letter">{String.fromCharCode(65 + i)}</span>
+                        <span className="choco-option-text">{opt}</span>
+                        {chocoQuizAnswered && i === chocoQuizQuestions[chocoQuizIndex].answer && (
+                          <span className="choco-option-icon">✅</span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Feedback */}
+                {chocoQuizAnswered && (
+                  <div className={`choco-feedback ${chocoQuizCorrect ? 'correct' : 'wrong'}`}>
+                    {chocoQuizCorrect ? (
+                      <div className="choco-feedback-correct">
+                        <span className="choco-feedback-emoji">🎉🍫</span>
+                        <p>Sahi jawab! Tu toh meri expert nikli! 💕</p>
+                      </div>
+                    ) : (
+                      <div className="choco-feedback-wrong">
+                        <span className="choco-feedback-emoji">😂💀</span>
+                        <p>{chocoWrongMsg}</p>
+                      </div>
+                    )}
+                    <button className="choco-next-btn" onClick={handleChocoNext}>
+                      {chocoQuizIndex < chocoQuizQuestions.length - 1 ? 'Next Question ➡️' : 'See Results 🏆'}
+                    </button>
+                    <p className="choco-swipe-hint">👆 Swipe left ya button daba</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Score tracker */}
+              <div className="choco-score-tracker">
+                Score: {chocoQuizScore} / {chocoQuizQuestions.length} 🍫
+              </div>
+            </div>
+          ) : (
+            /* ===== QUIZ COMPLETE SCREEN ===== */
+            <div className="choco-quiz-result">
+              <div className="choco-result-emoji">
+                {chocoQuizScore === chocoQuizQuestions.length ? '👑🍫' : chocoQuizScore >= 3 ? '🎉🍫' : chocoQuizScore >= 2 ? '😅🍫' : '💀🍫'}
+              </div>
+              <h2 className="choco-result-title">
+                {chocoQuizScore === chocoQuizQuestions.length
+                  ? 'PERFECT SCORE!'
+                  : chocoQuizScore >= 3
+                  ? 'Almost Perfect!'
+                  : chocoQuizScore >= 2
+                  ? 'Theek-thaak hai...'
+                  : 'Ye kya tha?!'}
+              </h2>
+              <div className="choco-result-score">
+                {chocoQuizScore} / {chocoQuizQuestions.length}
+              </div>
+              <p className="choco-result-msg">
+                {chocoQuizScore === chocoQuizQuestions.length
+                  ? 'Waah! Sab sahi! Tu toh sachchi mein meri soulmate hai! Extra Dairy Milk tere liye! 🍫❤️'
+                  : chocoQuizScore >= 3
+                  ? 'Badhiya! Almost perfect! Ek aur chocolate milegi consolation mein! 🍬'
+                  : chocoQuizScore >= 2
+                  ? 'Hmm... 50-50 hai... jaise KBC mein lifeline lagti hai waise mujhse puchh lena next time! 😂'
+                  : 'Arre yaar! Itna bhi nahi pata? Kya relationship mein Google Maps lagake chal rahi hai? 🗺️💀'}
+              </p>
+              <div className="choco-result-chocolates">
+                {'🍫'.repeat(chocoQuizScore)} {'💔'.repeat(chocoQuizQuestions.length - chocoQuizScore)}
+              </div>
+              <button className="choco-retry-btn" onClick={resetChocoQuiz}>
+                🔄 Dobara Try Kar!
+              </button>
+              <p className="choco-result-footer">
+                Happy Chocolate Day! 🍫💕<br/>
+                <span style={{fontSize: '0.9rem', opacity: 0.8}}>Calories nahi, memories count hoti hai! 😘</span>
+              </p>
+            </div>
+          )}
         </section>
       )}
 
