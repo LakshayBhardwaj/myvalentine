@@ -3690,7 +3690,251 @@ body {
   font-weight: 600;
 }
 
-/* Mobile responsive for quiz */
+/* ============ VALENTINE SPINNER GAME ============ */
+.spinner-game-section {
+  margin-top: 50px;
+  padding: 40px 20px;
+  background: linear-gradient(180deg, rgba(62,31,13,0) 0%, rgba(255,182,193,0.15) 20%, rgba(255,182,193,0.25) 50%, rgba(255,182,193,0.15) 80%, rgba(62,31,13,0) 100%);
+  border-radius: 30px;
+  max-width: 460px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.spinner-game-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.spinner-game-title {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1.6rem;
+  color: #fff;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.spinner-valentine-text {
+  color: #ff4d6d;
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  animation: valentinePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes valentinePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); color: #ff1744; }
+}
+
+.spinner-game-subtitle {
+  color: rgba(255,255,255,0.6);
+  font-size: 0.95rem;
+  margin-top: 8px;
+}
+
+/* Wheel Container */
+.spinner-wheel-container {
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,182,193,0.2) 0%, rgba(255,182,193,0.08) 60%, transparent 70%);
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* YES / NO Labels */
+.spinner-label {
+  position: absolute;
+  font-family: 'Bangers', cursive;
+  font-size: 1.4rem;
+  letter-spacing: 2px;
+  z-index: 2;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+  transition: transform 0.3s, text-shadow 0.3s;
+}
+
+.spinner-yes {
+  color: #00e676;
+}
+
+.spinner-no {
+  color: #ff1744;
+}
+
+.spinner-label-win {
+  animation: winLabelPop 0.6s ease infinite alternate;
+  text-shadow: 0 0 20px rgba(0, 230, 118, 0.8), 0 0 40px rgba(0, 230, 118, 0.4);
+}
+
+@keyframes winLabelPop {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to { transform: translate(-50%, -50%) scale(1.25); }
+}
+
+/* Center Character */
+.spinner-center-character {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  z-index: 3;
+}
+
+.spinner-penguin {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-penguin-body {
+  font-size: 4rem;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+.spinner-penguin-halo {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.8rem;
+  animation: haloFloat 2s ease-in-out infinite;
+}
+
+@keyframes haloFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-5px); }
+}
+
+.spinner-penguin-glasses {
+  position: absolute;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  opacity: 0;
+}
+
+/* Rotating Hand */
+.spinner-hand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 2px;
+  transform-origin: 0% 50%;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.spinner-hand-pointer {
+  position: absolute;
+  right: -15px;
+  top: -18px;
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+
+/* Tap Hint */
+.spinner-tap-hint {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,215,0,0.9);
+  color: #3e1f0d;
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-family: 'Bangers', cursive;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  animation: tapHintPulse 1.5s ease-in-out infinite;
+  z-index: 10;
+}
+
+@keyframes tapHintPulse {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+  50% { transform: translateX(-50%) scale(1.1); opacity: 0.7; }
+}
+
+/* Result Area */
+.spinner-result-area {
+  margin-top: 25px;
+  text-align: center;
+  animation: feedbackSlideUp 0.5s ease;
+}
+
+.spinner-result-msg {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(0, 230, 118, 0.3);
+  border-radius: 24px;
+  padding: 25px 20px;
+  margin-bottom: 15px;
+}
+
+.spinner-result-emoji {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.spinner-result-msg h3 {
+  font-family: 'Bangers', cursive;
+  font-size: 2.2rem;
+  color: #00e676;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  margin-bottom: 10px;
+}
+
+.spinner-result-msg p {
+  color: #ffe0b2;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  font-family: 'Comic Neue', cursive;
+}
+
+.spinner-result-sub {
+  margin-top: 8px;
+  font-size: 0.95rem !important;
+  opacity: 0.8;
+}
+
+.spinner-retry-btn {
+  background: linear-gradient(45deg, #ff4d6d, #ff1744);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.3);
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-family: 'Comic Neue', cursive;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 5px 20px rgba(255, 23, 68, 0.3);
+}
+
+.spinner-retry-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(255, 23, 68, 0.4);
+}
+
+.spinner-retry-btn:active {
+  transform: scale(0.95);
+}
+
+/* Mobile responsive for quiz + spinner */
 @media (max-width: 480px) {
   .choco-header-title { font-size: 2rem; }
   .choco-q-text { font-size: 1.2rem; }
@@ -3699,4 +3943,9 @@ body {
   .choco-result-score { font-size: 2.8rem; }
   .choco-result-title { font-size: 1.8rem; }
   .choco-video-player { max-height: 200px; }
+  .spinner-wheel-container { width: 280px; height: 280px; }
+  .spinner-game-title { font-size: 1.35rem; }
+  .spinner-valentine-text { font-size: 1.7rem; }
+  .spinner-label { font-size: 1.2rem; }
+  .spinner-hand { width: 100px; }
 }

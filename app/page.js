@@ -73,6 +73,15 @@ export default function RoseDayPage() {
   const [chocoWrongMsg, setChocoWrongMsg] = useState('')
   const [chocoSwipeDir, setChocoSwipeDir] = useState('')
   const chocoTouchStartRef = useRef(null)
+
+  // Valentine Spinner game states
+  const [spinnerAngle, setSpinnerAngle] = useState(0)
+  const [spinnerSpinning, setSpinnerSpinning] = useState(true)
+  const [spinnerStopped, setSpinnerStopped] = useState(false)
+  const [spinnerResult, setSpinnerResult] = useState('')
+  const spinnerAnimRef = useRef(null)
+  const spinnerAngleRef = useRef(0)
+  const spinnerSpeedRef = useRef(3)
   const whatsappNumber = "918512022116"
 
   // Initialize Audio Context
@@ -944,6 +953,97 @@ ${deviceInfo.userAgent}`
     setChocoQuizDone(false)
     setChocoWrongMsg('')
     setChocoSwipeDir('')
+  }
+
+  // ===== VALENTINE SPINNER GAME =====
+  // YES positions: 0° (top), 90° (right), 180° (bottom), 270° (left) — every even slot
+  // NO positions: 45°, 135°, 225°, 315° — every odd slot
+  // 8 slots of 45° each, alternating YES/NO
+  const spinnerLabels = [
+    { text: 'YES', angle: 0 },
+    { text: 'NO', angle: 45 },
+    { text: 'YES', angle: 90 },
+    { text: 'NO', angle: 135 },
+    { text: 'YES', angle: 180 },
+    { text: 'NO', angle: 225 },
+    { text: 'YES', angle: 270 },
+    { text: 'NO', angle: 315 }
+  ]
+
+  // Continuous spinning animation
+  useEffect(() => {
+    if (activeDay !== 'chocolate') return
+    if (spinnerStopped) return
+
+    let running = true
+    const animate = () => {
+      if (!running) return
+      spinnerAngleRef.current = (spinnerAngleRef.current + spinnerSpeedRef.current) % 360
+      setSpinnerAngle(spinnerAngleRef.current)
+      spinnerAnimRef.current = requestAnimationFrame(animate)
+    }
+    spinnerAnimRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      running = false
+      if (spinnerAnimRef.current) cancelAnimationFrame(spinnerAnimRef.current)
+    }
+  }, [activeDay, spinnerStopped])
+
+  const handleSpinnerTap = () => {
+    if (spinnerStopped) return
+
+    // Stop the continuous animation
+    if (spinnerAnimRef.current) cancelAnimationFrame(spinnerAnimRef.current)
+
+    // Calculate a target angle that lands on YES (0°, 90°, 180°, 270°)
+    // The hand points at spinnerAngle, so we need it to land where a YES is
+    const currentAngle = spinnerAngleRef.current
+    // Pick a random YES position
+    const yesPositions = [0, 90, 180, 270]
+    const targetYes = yesPositions[Math.floor(Math.random() * yesPositions.length)]
+    // Add extra full rotations for dramatic spinning effect (3-5 more spins)
+    const extraSpins = (3 + Math.floor(Math.random() * 3)) * 360
+    const targetAngle = currentAngle + extraSpins + ((targetYes - (currentAngle % 360) + 360) % 360)
+
+    setSpinnerSpinning(false)
+
+    // Animate deceleration
+    const startAngle = currentAngle
+    const totalDelta = targetAngle - startAngle
+    const duration = 3000 // 3 seconds of spinning down
+    const startTime = performance.now()
+
+    const decelerate = (now) => {
+      const elapsed = now - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      // Ease-out cubic for natural deceleration
+      const eased = 1 - Math.pow(1 - progress, 3)
+      const newAngle = startAngle + totalDelta * eased
+      spinnerAngleRef.current = newAngle % 360
+      setSpinnerAngle(newAngle % 360)
+
+      if (progress < 1) {
+        spinnerAnimRef.current = requestAnimationFrame(decelerate)
+      } else {
+        // Landed!
+        setSpinnerStopped(true)
+        setSpinnerResult('YES')
+        playSound('celebration')
+        triggerConfetti()
+        setTimeout(() => triggerConfetti(), 800)
+      }
+    }
+    spinnerAnimRef.current = requestAnimationFrame(decelerate)
+  }
+
+  const resetSpinner = () => {
+    setSpinnerAngle(0)
+    spinnerAngleRef.current = 0
+    spinnerSpeedRef.current = 3
+    setSpinnerSpinning(true)
+    setSpinnerStopped(false)
+    setSpinnerResult('')
   }
 
   const scrollToSection = (num) => {
@@ -2926,6 +3026,76 @@ ${deviceInfo.userAgent}`
               </p>
             </div>
           )}
+
+          {/* ===== VALENTINE SPINNER GAME ===== */}
+          <div className="spinner-game-section">
+            <div className="spinner-game-header">
+              <h2 className="spinner-game-title">
+                Pause the video to see...<br/>
+                will you be my <span className="spinner-valentine-text">Valentine</span>?
+              </h2>
+              <p className="spinner-game-subtitle">(Tap to stop the hand! 👆)</p>
+            </div>
+
+            <div className="spinner-wheel-container" onClick={handleSpinnerTap}>
+              {/* YES/NO labels arranged in circle */}
+              {spinnerLabels.map((label, i) => {
+                const radians = (label.angle - 90) * (Math.PI / 180)
+                const radius = 42
+                const x = 50 + radius * Math.cos(radians)
+                const y = 50 + radius * Math.sin(radians)
+                return (
+                  <span
+                    key={i}
+                    className={`spinner-label ${label.text === 'YES' ? 'spinner-yes' : 'spinner-no'} ${spinnerStopped && spinnerResult === 'YES' && label.text === 'YES' ? 'spinner-label-win' : ''}`}
+                    style={{
+                      left: `${x}%`,
+                      top: `${y}%`,
+                      transform: 'translate(-50%, -50%)'
+                    }}
+                  >
+                    {label.text}
+                  </span>
+                )
+              })}
+
+              {/* Center character - penguin-like creature */}
+              <div className="spinner-center-character">
+                <div className="spinner-penguin">
+                  <div className="spinner-penguin-halo">😇</div>
+                  <div className="spinner-penguin-body">🐧</div>
+                  <div className="spinner-penguin-glasses">😎</div>
+                </div>
+                {/* Rotating hand/pointer */}
+                <div
+                  className="spinner-hand"
+                  style={{ transform: `rotate(${spinnerAngle}deg)` }}
+                >
+                  <div className="spinner-hand-pointer">👆</div>
+                </div>
+              </div>
+
+              {/* Tap hint ripple */}
+              {!spinnerStopped && (
+                <div className="spinner-tap-hint">TAP!</div>
+              )}
+            </div>
+
+            {/* Result message */}
+            {spinnerStopped && (
+              <div className="spinner-result-area">
+                <div className="spinner-result-msg">
+                  <span className="spinner-result-emoji">💕🎉💕</span>
+                  <h3>It&apos;s a YES!</h3>
+                  <p>Dekha? Universe bhi chaahta hai ki tu meri Valentine ho! 😏❤️</p>
+                  <p className="spinner-result-sub">Haath bhi tere taraf hi ruka... kismat hai ya setting? 😂🍫</p>
+                </div>
+                <button className="spinner-retry-btn" onClick={resetSpinner}>
+                  🔄 Ek Aur Baar Try Kar (Result Same Aayega 😜)
+                </button>
+              </div>
+            )}
+          </div>
         </section>
       )}
 
