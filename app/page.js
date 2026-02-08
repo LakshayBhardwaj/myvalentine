@@ -866,6 +866,23 @@ ${deviceInfo.userAgent}`
         "Jhol?! Relationship mein jhol hai kya? Seedha baat kar! 🫣",
         "Pal Pal yaad teri tadpave?! Itna dramatic mat ban filmy babu! 🎬😂"
       ]
+    },
+    {
+      q: "Where was this video taken? 🎥",
+      options: [
+        "Chandigarh",
+        "Munnar",
+        "Kodaikanal",
+        "Madurai"
+      ],
+      answer: 1,
+      video: "/8E3E472E-384E-45D0-88CD-7B7D66698E30.mov",
+      wrongMsgs: [
+        "Chandigarh?! Bhai Chandigarh mein itni greenery? Sector 17 mein jungle nahi hota! 🏙️😂",
+        "",
+        "Kodaikanal?! Close but no cigar! Ye Kerala ki chai ki khushbu hai, Tamil Nadu ki nahi! ☕😤",
+        "Madurai?! Temple city mein honeymoon? Bhai thoda romantic soch! 🛕💀"
+      ]
     }
   ]
 
@@ -2797,6 +2814,23 @@ ${deviceInfo.userAgent}`
               {/* Question Card */}
               <div className={`choco-question-card ${chocoSwipeDir}`}>
                 <div className="choco-q-number">Q{chocoQuizIndex + 1} / {chocoQuizQuestions.length}</div>
+
+                {/* Video player for video questions */}
+                {chocoQuizQuestions[chocoQuizIndex].video && (
+                  <div className="choco-video-wrapper">
+                    <video
+                      className="choco-video-player"
+                      src={chocoQuizQuestions[chocoQuizIndex].video}
+                      controls
+                      playsInline
+                      loop
+                      muted
+                      autoPlay
+                    />
+                    <div className="choco-video-label">👆 Dekh ke bata!</div>
+                  </div>
+                )}
+
                 <h2 className="choco-q-text">{chocoQuizQuestions[chocoQuizIndex].q}</h2>
 
                 <div className="choco-options">
