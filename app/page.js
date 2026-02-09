@@ -84,6 +84,34 @@ export default function RoseDayPage() {
   const spinnerSpeedRef = useRef(3)
   const whatsappNumber = "918512022116"
 
+  // ===== TEDDY DAY - WHACK-A-BEAR GAME STATES =====
+  const [wabState, setWabState] = useState('intro') // intro, levelIntro, playing, levelComplete, gameOver, victory
+  const [wabLevel, setWabLevel] = useState(1)
+  const [wabScore, setWabScore] = useState(0)
+  const [wabLives, setWabLives] = useState(3)
+  const [wabCombo, setWabCombo] = useState(0)
+  const [wabMaxCombo, setWabMaxCombo] = useState(0)
+  const [wabTimer, setWabTimer] = useState(30)
+  const [wabHoles, setWabHoles] = useState(Array(9).fill(null))
+  const [wabWhacked, setWabWhacked] = useState(Array(9).fill(false))
+  const [wabMessage, setWabMessage] = useState('')
+  const [wabPowerUp, setWabPowerUp] = useState(null) // 'freeze' | 'double' | null
+  const [wabStats, setWabStats] = useState({ whacks: 0, misses: 0 })
+  const [wabHighScore, setWabHighScore] = useState(0)
+  const [wabBossHP, setWabBossHP] = useState(0)
+  const [wabBossMaxHP, setWabBossMaxHP] = useState(10)
+  const [wabShake, setWabShake] = useState(false)
+  const [wabComboMsg, setWabComboMsg] = useState('')
+  const [wabFrozen, setWabFrozen] = useState(false)
+  const [wabDouble, setWabDouble] = useState(false)
+  const wabTimerRef = useRef(null)
+  const wabSpawnRef = useRef(null)
+  const wabLivesRef = useRef(3)
+  const wabComboRef = useRef(0)
+  const wabFrozenRef = useRef(false)
+  const wabActiveRef = useRef(false)
+  const wabHolesRef = useRef(Array(9).fill(null))
+
   // Initialize Audio Context
   const getAudioContext = () => {
     if (!audioContextRef.current && typeof window !== 'undefined') {
@@ -810,6 +838,644 @@ ${deviceInfo.userAgent}`
 
     // Clear confetti after animation
     setTimeout(() => setConfetti([]), 5000)
+  }
+
+  // ===== TEDDY DAY - WHACK-A-BEAR GAME CONFIG & LOGIC =====
+
+  const wabBearTypes = {
+    normal: { emoji: '🧸', points: 10, duration: 1800, name: 'Teddy', color: '#a1887f' },
+    brown: { emoji: '🐻', points: 20, duration: 1300, name: 'Bhalu', color: '#795548' },
+    panda: { emoji: '🐼', points: 30, duration: 1000, name: 'Panda Ji', color: '#424242' },
+    golden: { emoji: '✨', points: 50, duration: 650, name: 'Golden Teddy', color: '#ffd700' },
+    bomb: { emoji: '💣', points: -30, duration: 1600, name: 'BOMB', color: '#f44336', isBomb: true },
+    love: { emoji: '💝', points: 0, duration: 1100, name: 'Love Bear', color: '#e91e63', isLife: true },
+    boss: { emoji: '👑', points: 0, duration: 4000, name: 'Boss Bear', color: '#ff6f00', isHard: true },
+  }
+
+  const wabLevels = [
+    {
+      level: 1, name: 'Teddy Training',
+      time: 30, spawnRate: 1600, maxBears: 2,
+      bearPool: ['normal', 'normal', 'normal', 'normal'],
+      targetScore: 60,
+      intro: 'Welcome to Teddy Training!',
+      introSub: 'In pyaare bears ko tap karo... pyaar se! 😅',
+      bg: 'linear-gradient(135deg, #5d4037 0%, #795548 50%, #8d6e63 100%)'
+    },
+    {
+      level: 2, name: 'Bear Bazaar',
+      time: 30, spawnRate: 1300, maxBears: 2,
+      bearPool: ['normal', 'normal', 'brown', 'brown', 'panda', 'bomb'],
+      targetScore: 150,
+      intro: 'Ab aaye variety mein bears!',
+      introSub: 'Bombs se bachna... warna BOOM! 💥',
+      bg: 'linear-gradient(135deg, #4e342e 0%, #6d4c41 50%, #8d6e63 100%)'
+    },
+    {
+      level: 3, name: 'Fluffy Fury',
+      time: 28, spawnRate: 1100, maxBears: 3,
+      bearPool: ['normal', 'brown', 'brown', 'panda', 'panda', 'golden', 'bomb', 'bomb', 'love'],
+      targetScore: 300,
+      intro: 'Fluffy Fury mode ON!',
+      introSub: 'Golden bears = jackpot! 💝 = extra life!',
+      bg: 'linear-gradient(135deg, #3e2723 0%, #5d4037 50%, #795548 100%)'
+    },
+    {
+      level: 4, name: 'Bear-mageddon',
+      time: 25, spawnRate: 900, maxBears: 4,
+      bearPool: ['brown', 'panda', 'panda', 'golden', 'golden', 'bomb', 'bomb', 'bomb', 'love'],
+      targetScore: 500,
+      intro: 'BEAR-MAGEDDON! 🌪️',
+      introSub: 'Ye bears tumse zyada fast hain... ya nahi? 😏',
+      bg: 'linear-gradient(135deg, #1b0000 0%, #4e342e 50%, #6d4c41 100%)'
+    },
+    {
+      level: 5, name: 'Boss Bear Showdown',
+      time: 35, spawnRate: 1000, maxBears: 3,
+      bearPool: ['panda', 'golden', 'bomb', 'love'],
+      targetScore: 700,
+      hasBoss: true,
+      intro: 'FINAL BOSS FIGHT! 👑🐻',
+      introSub: 'Boss Bear ko 10 baar maaro! Baaki bears se points lo!',
+      bg: 'linear-gradient(135deg, #0d0000 0%, #3e2723 50%, #4e342e 100%)'
+    }
+  ]
+
+  const wabWhackMsgs = [
+    "Ouch! 😭", "Kyu maara?!", "Meri teddy! 😢",
+    "Why you bully me?! 😤", "I was just saying hi!",
+    "Arey arey! 🥴", "*bonk* 🤕",
+    "Teddy abuse hotline: 1800-FLUFFY 📞",
+    "Main toh pyaar dene aaya tha! 💔",
+    "Tera haath bahut bhaari hai! 😵",
+    "Bear lives matter! ✊🐻",
+    "Mummy! Ye maarta hai! 😭",
+  ]
+
+  const wabMissMsgs = [
+    "Haha missed! 😜", "Too slow! 🐌",
+    "Catch me if you can! 🏃", "Nah nah nah! 😝",
+    "I'm faster than your wifi! 📶",
+    "Is that your best? 😏", "Better luck next time!",
+    "Tera aim toh... 😂", "Aankh band karke maar! 🙈",
+  ]
+
+  const wabAppearMsgs = [
+    "Peek-a-boo! 👀", "Miss me? 😏", "Can't touch this!",
+    "I'm too fluffy!", "Main aa gaya! 🎉",
+    "Teddy power! 💪", "Pakad ke dikha! 🐻",
+    "Boo! 👻", "Surprise! 🎁",
+  ]
+
+  const wabComboNames = {
+    3: { msg: 'Triple Whack! 🔥', color: '#ff9800' },
+    5: { msg: 'PENTA-BEAR! ⚡', color: '#ffeb3b' },
+    7: { msg: 'BEAR SLAYER! 🗡️', color: '#4caf50' },
+    10: { msg: 'TEDDY TERMINATOR! 🤖', color: '#2196f3' },
+    15: { msg: 'GOD MODE! 👑', color: '#9c27b0' },
+    20: { msg: 'UNBELIEVABLE! 🤯', color: '#f44336' },
+  }
+
+  const wabGameOverRoasts = [
+    { max: 50, msg: "Bhai... teddy ne tujhe maara ya tune teddy ko? 😂", title: "Teddy's Revenge 🧸" },
+    { max: 150, msg: "Thoda aur practice kar... teddy bhi sharma rahi hai 😅", title: "Beginner Bear 🐻" },
+    { max: 300, msg: "Not bad! Par golden teddy ne tujhe miss kiya 🌟", title: "Bear Apprentice 🎓" },
+    { max: 500, msg: "Solid performance! Bears tujhse darne lage hain! 💪", title: "Bear Hunter 🏹" },
+    { max: 800, msg: "Kya baat hai! Teddy factory mein job lagwa doon? 🏭", title: "Bear Commander 🎖️" },
+    { max: Infinity, msg: "LEGEND! Teddy universe ka naya champion! 👑", title: "Teddy GOD 🌟👑" },
+  ]
+
+  // Whack-a-Bear Sound Effects
+  const playWabSound = (type) => {
+    if (!soundEnabled) return
+    const ctx = getAudioContext()
+    if (!ctx) return
+    try {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+
+      switch(type) {
+        case 'whack':
+          osc.type = 'square'
+          osc.frequency.setValueAtTime(300, ctx.currentTime)
+          osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.12)
+          gain.gain.setValueAtTime(0.4, ctx.currentTime)
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12)
+          osc.start(ctx.currentTime)
+          osc.stop(ctx.currentTime + 0.12)
+          break
+        case 'miss':
+          osc.type = 'sine'
+          osc.frequency.setValueAtTime(600, ctx.currentTime)
+          osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15)
+          gain.gain.setValueAtTime(0.15, ctx.currentTime)
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15)
+          osc.start(ctx.currentTime)
+          osc.stop(ctx.currentTime + 0.15)
+          break
+        case 'bomb':
+          osc.type = 'sawtooth'
+          osc.frequency.setValueAtTime(100, ctx.currentTime)
+          osc.frequency.linearRampToValueAtTime(40, ctx.currentTime + 0.4)
+          gain.gain.setValueAtTime(0.5, ctx.currentTime)
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.4)
+          osc.start(ctx.currentTime)
+          osc.stop(ctx.currentTime + 0.4)
+          // Second explosion rumble
+          const osc2b = ctx.createOscillator()
+          const gain2b = ctx.createGain()
+          osc2b.connect(gain2b)
+          gain2b.connect(ctx.destination)
+          osc2b.type = 'square'
+          osc2b.frequency.setValueAtTime(60, ctx.currentTime + 0.1)
+          osc2b.frequency.linearRampToValueAtTime(20, ctx.currentTime + 0.5)
+          gain2b.gain.setValueAtTime(0.3, ctx.currentTime + 0.1)
+          gain2b.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5)
+          osc2b.start(ctx.currentTime + 0.1)
+          osc2b.stop(ctx.currentTime + 0.5)
+          break
+        case 'golden':
+          // Sparkly bling sound
+          const gNotes = [1047, 1319, 1568, 2093]
+          gNotes.forEach((freq, i) => {
+            const o = ctx.createOscillator()
+            const g = ctx.createGain()
+            o.connect(g)
+            g.connect(ctx.destination)
+            o.type = 'sine'
+            o.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.08)
+            g.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.08)
+            g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.08 + 0.2)
+            o.start(ctx.currentTime + i * 0.08)
+            o.stop(ctx.currentTime + i * 0.08 + 0.2)
+          })
+          return
+        case 'powerup':
+          osc.type = 'sine'
+          osc.frequency.setValueAtTime(400, ctx.currentTime)
+          osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.25)
+          gain.gain.setValueAtTime(0.3, ctx.currentTime)
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25)
+          osc.start(ctx.currentTime)
+          osc.stop(ctx.currentTime + 0.25)
+          break
+        case 'levelup':
+          const luNotes = [523, 659, 784, 1047, 1319]
+          luNotes.forEach((freq, i) => {
+            const o = ctx.createOscillator()
+            const g = ctx.createGain()
+            o.connect(g)
+            g.connect(ctx.destination)
+            o.type = 'triangle'
+            o.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.1)
+            g.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.1)
+            g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.1 + 0.25)
+            o.start(ctx.currentTime + i * 0.1)
+            o.stop(ctx.currentTime + i * 0.1 + 0.25)
+          })
+          return
+        case 'bosshit':
+          osc.type = 'sawtooth'
+          osc.frequency.setValueAtTime(200, ctx.currentTime)
+          osc.frequency.linearRampToValueAtTime(400, ctx.currentTime + 0.1)
+          osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.2)
+          gain.gain.setValueAtTime(0.4, ctx.currentTime)
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2)
+          osc.start(ctx.currentTime)
+          osc.stop(ctx.currentTime + 0.2)
+          break
+        case 'life':
+          osc.type = 'sine'
+          osc.frequency.setValueAtTime(660, ctx.currentTime)
+          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1)
+          osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.2)
+          gain.gain.setValueAtTime(0.3, ctx.currentTime)
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3)
+          osc.start(ctx.currentTime)
+          osc.stop(ctx.currentTime + 0.3)
+          break
+        case 'gameover':
+          osc.type = 'sawtooth'
+          osc.frequency.setValueAtTime(400, ctx.currentTime)
+          osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.5)
+          osc.frequency.linearRampToValueAtTime(60, ctx.currentTime + 1)
+          gain.gain.setValueAtTime(0.35, ctx.currentTime)
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1)
+          osc.start(ctx.currentTime)
+          osc.stop(ctx.currentTime + 1)
+          break
+        case 'combo':
+          const cNotes = [784, 988, 1175]
+          cNotes.forEach((freq, i) => {
+            const o = ctx.createOscillator()
+            const g = ctx.createGain()
+            o.connect(g)
+            g.connect(ctx.destination)
+            o.type = 'square'
+            o.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.06)
+            g.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.06)
+            g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.06 + 0.12)
+            o.start(ctx.currentTime + i * 0.06)
+            o.stop(ctx.currentTime + i * 0.06 + 0.12)
+          })
+          return
+        case 'freeze':
+          osc.type = 'sine'
+          osc.frequency.setValueAtTime(2000, ctx.currentTime)
+          osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.3)
+          gain.gain.setValueAtTime(0.2, ctx.currentTime)
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3)
+          osc.start(ctx.currentTime)
+          osc.stop(ctx.currentTime + 0.3)
+          break
+        default:
+          return
+      }
+    } catch(e) {}
+  }
+
+  // Load high score from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('wabHighScore')
+      if (saved) setWabHighScore(parseInt(saved) || 0)
+    }
+  }, [])
+
+  // Clean up game intervals on unmount or day change
+  useEffect(() => {
+    return () => {
+      wabActiveRef.current = false
+      if (wabTimerRef.current) clearInterval(wabTimerRef.current)
+      if (wabSpawnRef.current) clearInterval(wabSpawnRef.current)
+    }
+  }, [activeDay])
+
+  const stopWabIntervals = () => {
+    if (wabTimerRef.current) { clearInterval(wabTimerRef.current); wabTimerRef.current = null }
+    if (wabSpawnRef.current) { clearInterval(wabSpawnRef.current); wabSpawnRef.current = null }
+  }
+
+  const startWabGame = () => {
+    setWabScore(0)
+    setWabLives(3)
+    setWabCombo(0)
+    setWabMaxCombo(0)
+    setWabStats({ whacks: 0, misses: 0 })
+    setWabBossHP(0)
+    setWabPowerUp(null)
+    setWabFrozen(false)
+    setWabDouble(false)
+    setWabMessage('')
+    setWabComboMsg('')
+    wabLivesRef.current = 3
+    wabComboRef.current = 0
+    wabFrozenRef.current = false
+    setWabLevel(1)
+    setWabState('levelIntro')
+  }
+
+  const beginWabLevel = (lvl) => {
+    const config = wabLevels[lvl - 1]
+    setWabHoles(Array(9).fill(null))
+    setWabWhacked(Array(9).fill(false))
+    wabHolesRef.current = Array(9).fill(null)
+    setWabTimer(config.time)
+    setWabMessage('')
+    setWabComboMsg('')
+    setWabPowerUp(null)
+    setWabFrozen(false)
+    setWabDouble(false)
+    wabFrozenRef.current = false
+    wabActiveRef.current = true
+
+    if (config.hasBoss) {
+      setWabBossHP(10)
+      setWabBossMaxHP(10)
+    }
+
+    setWabState('playing')
+
+    // Timer countdown
+    let timeLeft = config.time
+    wabTimerRef.current = setInterval(() => {
+      if (!wabActiveRef.current) return
+      timeLeft--
+      setWabTimer(timeLeft)
+      if (timeLeft <= 0) {
+        stopWabIntervals()
+        wabActiveRef.current = false
+        // Check if boss level and boss not defeated
+        if (config.hasBoss) {
+          // Boss level: you need to defeat boss
+          handleWabLevelEnd(lvl, true)
+        } else {
+          handleWabLevelEnd(lvl, false)
+        }
+      }
+    }, 1000)
+
+    // Bear spawning
+    wabSpawnRef.current = setInterval(() => {
+      if (!wabActiveRef.current) return
+      if (wabFrozenRef.current) return
+
+      const currentHoles = wabHolesRef.current
+      const emptyIndices = []
+      for (let i = 0; i < 9; i++) {
+        if (!currentHoles[i]) emptyIndices.push(i)
+      }
+      if (emptyIndices.length === 0) return
+
+      const activeCount = currentHoles.filter(h => h !== null).length
+      if (activeCount >= config.maxBears) return
+
+      const holeIdx = emptyIndices[Math.floor(Math.random() * emptyIndices.length)]
+
+      // Decide bear type
+      let bearTypeKey = config.bearPool[Math.floor(Math.random() * config.bearPool.length)]
+
+      // Boss level: spawn boss bear in center hole sometimes
+      if (config.hasBoss && Math.random() < 0.15 && !currentHoles[4]) {
+        bearTypeKey = 'boss'
+      }
+
+      const bearInfo = wabBearTypes[bearTypeKey]
+      const bearId = Date.now() + Math.random()
+      const appearMsg = wabAppearMsgs[Math.floor(Math.random() * wabAppearMsgs.length)]
+      const targetHole = (bearTypeKey === 'boss' && !currentHoles[4]) ? 4 : holeIdx
+
+      const newBear = {
+        ...bearInfo,
+        type: bearTypeKey,
+        id: bearId,
+        msg: appearMsg,
+        hitsLeft: bearTypeKey === 'boss' ? 3 : 1,
+      }
+
+      const updatedHoles = [...currentHoles]
+      updatedHoles[targetHole] = newBear
+      wabHolesRef.current = updatedHoles
+      setWabHoles([...updatedHoles])
+
+      // Auto-hide bear after duration
+      const hideDuration = bearInfo.duration * (lvl <= 2 ? 1 : 0.85)
+      setTimeout(() => {
+        const h = wabHolesRef.current
+        if (h[targetHole] && h[targetHole].id === bearId) {
+          const hideHoles = [...h]
+          hideHoles[targetHole] = null
+          wabHolesRef.current = hideHoles
+          setWabHoles([...hideHoles])
+
+          // Bear escaped = miss (only for non-bomb bears)
+          if (!bearInfo.isBomb) {
+            wabComboRef.current = 0
+            setWabCombo(0)
+            setWabStats(prev => ({ ...prev, misses: prev.misses + 1 }))
+            const missMsg = wabMissMsgs[Math.floor(Math.random() * wabMissMsgs.length)]
+            setWabMessage(missMsg)
+            setTimeout(() => setWabMessage(''), 1200)
+          }
+        }
+      }, hideDuration)
+
+    }, config.spawnRate)
+  }
+
+  const handleWabLevelEnd = (lvl, isBossLevel) => {
+    setWabHoles(Array(9).fill(null))
+    wabHolesRef.current = Array(9).fill(null)
+    setWabWhacked(Array(9).fill(false))
+
+    if (isBossLevel) {
+      // Boss not defeated in time
+      setWabState('gameOver')
+      playWabSound('gameover')
+      setWabMessage('Boss Bear jeet gaya! 👑🐻')
+      saveWabHighScore()
+      return
+    }
+
+    if (wabLivesRef.current <= 0) {
+      setWabState('gameOver')
+      playWabSound('gameover')
+      saveWabHighScore()
+      return
+    }
+
+    if (lvl >= 5) {
+      setWabState('victory')
+      playWabSound('levelup')
+      triggerConfetti()
+      saveWabHighScore()
+      return
+    }
+
+    // Next level
+    playWabSound('levelup')
+    setWabLevel(lvl + 1)
+    setWabState('levelComplete')
+  }
+
+  const saveWabHighScore = () => {
+    setWabScore(prev => {
+      if (prev > wabHighScore) {
+        setWabHighScore(prev)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('wabHighScore', prev.toString())
+        }
+      }
+      return prev
+    })
+  }
+
+  const whackBear = (holeIdx) => {
+    const bear = wabHolesRef.current[holeIdx]
+    if (!bear) {
+      // Missed - tapped empty hole
+      playWabSound('miss')
+      return
+    }
+
+    // Bomb bear
+    if (bear.isBomb) {
+      playWabSound('bomb')
+      setWabShake(true)
+      setTimeout(() => setWabShake(false), 500)
+
+      // Clear this hole
+      const h = [...wabHolesRef.current]
+      h[holeIdx] = null
+      wabHolesRef.current = h
+      setWabHoles([...h])
+      setWabWhacked(prev => { const w = [...prev]; w[holeIdx] = true; setTimeout(() => setWabWhacked(p => { const x = [...p]; x[holeIdx] = false; return x }), 300); return w })
+
+      // Lose life and points
+      wabLivesRef.current = Math.max(0, wabLivesRef.current - 1)
+      setWabLives(wabLivesRef.current)
+      setWabScore(prev => Math.max(0, prev + bear.points))
+      wabComboRef.current = 0
+      setWabCombo(0)
+      setWabMessage('BOOM! 💥 -1 Life!')
+
+      if (wabLivesRef.current <= 0) {
+        stopWabIntervals()
+        wabActiveRef.current = false
+        setTimeout(() => {
+          setWabState('gameOver')
+          playWabSound('gameover')
+          saveWabHighScore()
+        }, 500)
+      }
+      setTimeout(() => setWabMessage(''), 1500)
+      return
+    }
+
+    // Love bear - extra life
+    if (bear.isLife) {
+      playWabSound('life')
+      wabLivesRef.current = Math.min(5, wabLivesRef.current + 1)
+      setWabLives(wabLivesRef.current)
+      setWabMessage('+1 Life! 💝')
+      const h = [...wabHolesRef.current]
+      h[holeIdx] = null
+      wabHolesRef.current = h
+      setWabHoles([...h])
+      setWabWhacked(prev => { const w = [...prev]; w[holeIdx] = true; setTimeout(() => setWabWhacked(p => { const x = [...p]; x[holeIdx] = false; return x }), 300); return w })
+      setWabStats(prev => ({ ...prev, whacks: prev.whacks + 1 }))
+      setTimeout(() => setWabMessage(''), 1200)
+      return
+    }
+
+    // Boss bear - needs multiple hits
+    if (bear.isHard) {
+      const newHitsLeft = bear.hitsLeft - 1
+      playWabSound('bosshit')
+      setWabWhacked(prev => { const w = [...prev]; w[holeIdx] = true; setTimeout(() => setWabWhacked(p => { const x = [...p]; x[holeIdx] = false; return x }), 200); return w })
+
+      if (newHitsLeft <= 0) {
+        // Boss hit defeated for this pop-up
+        const h = [...wabHolesRef.current]
+        h[holeIdx] = null
+        wabHolesRef.current = h
+        setWabHoles([...h])
+        setWabScore(prev => prev + 100)
+        setWabBossHP(prev => {
+          const newHP = prev - 1
+          if (newHP <= 0) {
+            // Boss defeated!
+            stopWabIntervals()
+            wabActiveRef.current = false
+            setTimeout(() => {
+              setWabState('victory')
+              playWabSound('levelup')
+              triggerConfetti()
+              saveWabHighScore()
+            }, 500)
+          }
+          return Math.max(0, newHP)
+        })
+        setWabMessage('Boss hit! -1 HP! 💥')
+      } else {
+        // Boss still alive this popup
+        const h = [...wabHolesRef.current]
+        h[holeIdx] = { ...bear, hitsLeft: newHitsLeft }
+        wabHolesRef.current = h
+        setWabHoles([...h])
+        setWabMessage(`Boss: ${newHitsLeft} hits left! 👑`)
+      }
+      setWabStats(prev => ({ ...prev, whacks: prev.whacks + 1 }))
+      setTimeout(() => setWabMessage(''), 1200)
+      return
+    }
+
+    // Normal bears (normal, brown, panda, golden)
+    if (bear.type === 'golden') {
+      playWabSound('golden')
+    } else {
+      playWabSound('whack')
+    }
+
+    // Clear hole + show whack animation
+    const h = [...wabHolesRef.current]
+    h[holeIdx] = null
+    wabHolesRef.current = h
+    setWabHoles([...h])
+    setWabWhacked(prev => { const w = [...prev]; w[holeIdx] = true; setTimeout(() => setWabWhacked(p => { const x = [...p]; x[holeIdx] = false; return x }), 300); return w })
+
+    // Points
+    const multiplier = wabDouble ? 2 : 1
+    const pts = bear.points * multiplier
+    setWabScore(prev => prev + pts)
+
+    // Combo
+    wabComboRef.current += 1
+    const newCombo = wabComboRef.current
+    setWabCombo(newCombo)
+    if (newCombo > wabMaxCombo) setWabMaxCombo(newCombo)
+
+    // Check for combo milestone
+    if (wabComboNames[newCombo]) {
+      playWabSound('combo')
+      setWabComboMsg(wabComboNames[newCombo].msg)
+      setTimeout(() => setWabComboMsg(''), 1500)
+    }
+
+    // Bonus points for combos
+    let comboBonus = 0
+    if (newCombo >= 5) comboBonus = 5
+    if (newCombo >= 10) comboBonus = 10
+    if (newCombo >= 15) comboBonus = 20
+    if (comboBonus > 0) setWabScore(prev => prev + comboBonus)
+
+    // Random power-up drop (8% chance on whack, not in level 1)
+    if (wabLevel > 1 && Math.random() < 0.08 && !wabPowerUp) {
+      const powerups = ['freeze', 'double']
+      const pu = powerups[Math.floor(Math.random() * powerups.length)]
+      setWabPowerUp(pu)
+      playWabSound('powerup')
+    }
+
+    // Funny whack message
+    const whackMsg = wabWhackMsgs[Math.floor(Math.random() * wabWhackMsgs.length)]
+    setWabMessage(`+${pts}! ${whackMsg}`)
+    setWabStats(prev => ({ ...prev, whacks: prev.whacks + 1 }))
+    setTimeout(() => setWabMessage(''), 1000)
+  }
+
+  const activateWabPowerUp = () => {
+    if (!wabPowerUp) return
+
+    if (wabPowerUp === 'freeze') {
+      playWabSound('freeze')
+      wabFrozenRef.current = true
+      setWabFrozen(true)
+      setWabMessage('FREEZE! Bears can\'t move! ❄️')
+      setTimeout(() => {
+        wabFrozenRef.current = false
+        setWabFrozen(false)
+        setWabMessage('')
+      }, 3500)
+    } else if (wabPowerUp === 'double') {
+      playWabSound('powerup')
+      setWabDouble(true)
+      setWabMessage('DOUBLE POINTS! x2! 🔥')
+      setTimeout(() => {
+        setWabDouble(false)
+        setWabMessage('')
+      }, 6000)
+    }
+    setWabPowerUp(null)
+  }
+
+  const getWabRoast = (score) => {
+    for (const r of wabGameOverRoasts) {
+      if (score <= r.max) return r
+    }
+    return wabGameOverRoasts[wabGameOverRoasts.length - 1]
   }
 
   // ===== CHOCOLATE DAY QUIZ DATA & HANDLERS =====
@@ -3099,21 +3765,307 @@ ${deviceInfo.userAgent}`
         </section>
       )}
 
-      {/* ========== TEDDY DAY - COMING SOON ========== */}
+      {/* ========== TEDDY DAY - WHACK-A-BEAR GAME ========== */}
       {activeDay === 'teddy' && (
-        <section className="coming-soon-section teddy-theme">
-          <div className="coming-soon-container">
-            <div className="coming-soon-emoji">🧸</div>
-            <h1 className="coming-soon-title">Teddy Day</h1>
-            <h2 className="coming-soon-date">10th February</h2>
-            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
-            <p className="coming-soon-text">
-              Teddy Day pe soft toys ki barish hogi! 🧸<br/>
-              Giant teddy bear dreams coming true! 💕
-            </p>
-            <div className="coming-soon-hearts">🧸 💕 🧸 💕 🧸</div>
-            <p className="coming-soon-hint">Teddy se zyada cute tu hai! 😘</p>
-          </div>
+        <section className="wab-section" style={{ background: wabState === 'playing' ? (wabLevels[wabLevel - 1]?.bg || '#5d4037') : 'linear-gradient(135deg, #4e342e 0%, #6d4c41 40%, #8d6e63 100%)' }}>
+
+          {/* ---- INTRO SCREEN ---- */}
+          {wabState === 'intro' && (
+            <div className="wab-intro">
+              <div className="wab-intro-bear">🧸</div>
+              <h1 className="wab-title">WHACK-A-BEAR!</h1>
+              <p className="wab-subtitle">Teddy Day Special Edition</p>
+              <div className="wab-intro-story">
+                <p>Tere teddy bears pagal ho gaye hain! 🤪</p>
+                <p>Ye randomly holes se bahar aa rahe hain...</p>
+                <p>Tera mission: Inhe wapas holes mein bhejo! 🔨</p>
+              </div>
+              <div className="wab-intro-bears-row">
+                <span className="wab-intro-bear-item">🧸<small>10 pts</small></span>
+                <span className="wab-intro-bear-item">🐻<small>20 pts</small></span>
+                <span className="wab-intro-bear-item">🐼<small>30 pts</small></span>
+                <span className="wab-intro-bear-item">✨<small>50 pts</small></span>
+                <span className="wab-intro-bear-item wab-bomb-item">💣<small>BOOM!</small></span>
+                <span className="wab-intro-bear-item">💝<small>+1 Life</small></span>
+              </div>
+              <div className="wab-intro-rules">
+                <p>🧸 Bears ko tap karo = Points!</p>
+                <p>💣 Bombs se bachna = Survive!</p>
+                <p>💝 Love bears = Extra life!</p>
+                <p>⚡ Combos = Bonus points!</p>
+                <p>👑 Level 5 mein Boss Bear se ladna hai!</p>
+              </div>
+              {wabHighScore > 0 && (
+                <div className="wab-high-score-badge">
+                  🏆 High Score: {wabHighScore}
+                </div>
+              )}
+              <button className="wab-start-btn" onClick={() => { playSound('click'); startWabGame() }}>
+                🔨 SHURU KARO! 🐻
+              </button>
+              <p className="wab-intro-hint">Teddy se zyada cute tu hai... par teddy zyada fast hai! 😏</p>
+            </div>
+          )}
+
+          {/* ---- LEVEL INTRO SCREEN ---- */}
+          {wabState === 'levelIntro' && (
+            <div className="wab-level-intro">
+              <div className="wab-level-badge">LEVEL {wabLevel}</div>
+              <h2 className="wab-level-name">{wabLevels[wabLevel - 1]?.name}</h2>
+              <div className="wab-level-intro-emoji">
+                {wabLevel === 1 && '🧸'}
+                {wabLevel === 2 && '🐻'}
+                {wabLevel === 3 && '🔥'}
+                {wabLevel === 4 && '🌪️'}
+                {wabLevel === 5 && '👑'}
+              </div>
+              <p className="wab-level-intro-text">{wabLevels[wabLevel - 1]?.intro}</p>
+              <p className="wab-level-intro-sub">{wabLevels[wabLevel - 1]?.introSub}</p>
+              {wabLevel === 5 && (
+                <div className="wab-boss-warning">
+                  <p>⚠️ BOSS BEAR: 10 HP ⚠️</p>
+                  <p>Har popup mein 3 baar maaro!</p>
+                </div>
+              )}
+              <button className="wab-ready-btn" onClick={() => { playSound('click'); beginWabLevel(wabLevel) }}>
+                {wabLevel === 5 ? '⚔️ FIGHT! ⚔️' : '👊 READY!'}
+              </button>
+            </div>
+          )}
+
+          {/* ---- PLAYING SCREEN ---- */}
+          {wabState === 'playing' && (
+            <div className={`wab-game ${wabShake ? 'wab-shake' : ''} ${wabFrozen ? 'wab-frozen-mode' : ''}`}>
+              {/* HUD */}
+              <div className="wab-hud">
+                <div className="wab-hud-item wab-hud-score">
+                  <span className="wab-hud-label">Score</span>
+                  <span className="wab-hud-value">{wabScore}</span>
+                </div>
+                <div className="wab-hud-item wab-hud-level">
+                  <span className="wab-hud-label">Level {wabLevel}</span>
+                  <span className="wab-hud-value wab-hud-level-name">{wabLevels[wabLevel - 1]?.name}</span>
+                </div>
+                <div className="wab-hud-item wab-hud-timer">
+                  <span className="wab-hud-label">Time</span>
+                  <span className={`wab-hud-value ${wabTimer <= 5 ? 'wab-timer-danger' : ''}`}>{wabTimer}s</span>
+                </div>
+              </div>
+
+              {/* Lives */}
+              <div className="wab-lives">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span key={i} className={`wab-life ${i < wabLives ? 'wab-life-active' : 'wab-life-lost'}`}>
+                    {i < wabLives ? '❤️' : '🖤'}
+                  </span>
+                ))}
+              </div>
+
+              {/* Combo display */}
+              {wabCombo >= 2 && (
+                <div className="wab-combo-display">
+                  🔥 {wabCombo}x COMBO!
+                </div>
+              )}
+
+              {/* Combo milestone message */}
+              {wabComboMsg && (
+                <div className="wab-combo-msg">{wabComboMsg}</div>
+              )}
+
+              {/* Boss HP bar */}
+              {wabLevels[wabLevel - 1]?.hasBoss && (
+                <div className="wab-boss-bar">
+                  <div className="wab-boss-bar-label">👑 BOSS BEAR HP</div>
+                  <div className="wab-boss-bar-track">
+                    <div className="wab-boss-bar-fill" style={{ width: `${(wabBossHP / wabBossMaxHP) * 100}%` }}></div>
+                  </div>
+                  <div className="wab-boss-bar-text">{wabBossHP}/{wabBossMaxHP}</div>
+                </div>
+              )}
+
+              {/* Game message */}
+              {wabMessage && (
+                <div className="wab-game-message">{wabMessage}</div>
+              )}
+
+              {/* Power-up button */}
+              {wabPowerUp && (
+                <button className="wab-powerup-btn" onClick={activateWabPowerUp}>
+                  {wabPowerUp === 'freeze' ? '❄️ FREEZE!' : '🔥 2x POINTS!'}
+                </button>
+              )}
+
+              {/* Double points indicator */}
+              {wabDouble && (
+                <div className="wab-double-indicator">🔥 DOUBLE POINTS ACTIVE! 🔥</div>
+              )}
+
+              {/* Frozen overlay */}
+              {wabFrozen && (
+                <div className="wab-frozen-overlay">❄️ FROZEN! ❄️</div>
+              )}
+
+              {/* THE GAME GRID */}
+              <div className="wab-grid">
+                {wabHoles.map((bear, idx) => (
+                  <div
+                    key={idx}
+                    className={`wab-hole ${bear ? 'wab-hole-active' : ''} ${wabWhacked[idx] ? 'wab-hole-whacked' : ''}`}
+                    onClick={() => whackBear(idx)}
+                  >
+                    <div className="wab-hole-dirt"></div>
+                    {bear && (
+                      <div className={`wab-bear wab-bear-${bear.type} ${wabFrozen ? 'wab-bear-frozen' : ''}`}>
+                        <span className="wab-bear-emoji">{bear.emoji}</span>
+                        {bear.type === 'boss' && <span className="wab-bear-crown">👑</span>}
+                        {bear.msg && <span className="wab-bear-speech">{bear.msg}</span>}
+                        {bear.type === 'boss' && bear.hitsLeft > 0 && (
+                          <span className="wab-bear-hits">{bear.hitsLeft} hits!</span>
+                        )}
+                      </div>
+                    )}
+                    {wabWhacked[idx] && !bear && (
+                      <div className="wab-whack-effect">💥</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Fun footer */}
+              <div className="wab-game-footer">
+                <span>Whacks: {wabStats.whacks}</span>
+                <span>|</span>
+                <span>Misses: {wabStats.misses}</span>
+                <span>|</span>
+                <span>Best Combo: {wabMaxCombo}x</span>
+              </div>
+            </div>
+          )}
+
+          {/* ---- LEVEL COMPLETE SCREEN ---- */}
+          {wabState === 'levelComplete' && (
+            <div className="wab-level-complete">
+              <div className="wab-complete-emoji">🎉</div>
+              <h2 className="wab-complete-title">LEVEL {wabLevel - 1} COMPLETE!</h2>
+              <p className="wab-complete-level-name">{wabLevels[wabLevel - 2]?.name}</p>
+              <div className="wab-complete-stats">
+                <div className="wab-stat-row">
+                  <span>Score</span>
+                  <span className="wab-stat-val">{wabScore}</span>
+                </div>
+                <div className="wab-stat-row">
+                  <span>Combo</span>
+                  <span className="wab-stat-val">{wabMaxCombo}x</span>
+                </div>
+                <div className="wab-stat-row">
+                  <span>Lives</span>
+                  <span className="wab-stat-val">{'❤️'.repeat(wabLives)}</span>
+                </div>
+              </div>
+              <p className="wab-complete-next">Get ready for Level {wabLevel}...</p>
+              <p className="wab-complete-next-name">{wabLevels[wabLevel - 1]?.name}!</p>
+              <button className="wab-next-btn" onClick={() => { playSound('click'); setWabState('levelIntro') }}>
+                NEXT LEVEL ➡️
+              </button>
+            </div>
+          )}
+
+          {/* ---- GAME OVER SCREEN ---- */}
+          {wabState === 'gameOver' && (
+            <div className="wab-gameover">
+              <div className="wab-gameover-emoji">😵</div>
+              <h2 className="wab-gameover-title">GAME OVER!</h2>
+              <div className="wab-gameover-roast-badge">{getWabRoast(wabScore).title}</div>
+              <p className="wab-gameover-roast">{getWabRoast(wabScore).msg}</p>
+              <div className="wab-gameover-stats">
+                <div className="wab-go-stat">
+                  <span className="wab-go-stat-num">{wabScore}</span>
+                  <span className="wab-go-stat-label">Final Score</span>
+                </div>
+                <div className="wab-go-stat">
+                  <span className="wab-go-stat-num">Level {wabLevel}</span>
+                  <span className="wab-go-stat-label">Reached</span>
+                </div>
+                <div className="wab-go-stat">
+                  <span className="wab-go-stat-num">{wabMaxCombo}x</span>
+                  <span className="wab-go-stat-label">Best Combo</span>
+                </div>
+                <div className="wab-go-stat">
+                  <span className="wab-go-stat-num">{wabStats.whacks}</span>
+                  <span className="wab-go-stat-label">Bears Whacked</span>
+                </div>
+              </div>
+              {wabScore >= wabHighScore && wabScore > 0 && (
+                <div className="wab-new-high">🏆 NEW HIGH SCORE! 🏆</div>
+              )}
+              <div className="wab-gameover-btns">
+                <button className="wab-retry-btn" onClick={() => { playSound('click'); startWabGame() }}>
+                  🔄 DOBARA TRY KARO!
+                </button>
+                <button className="wab-home-btn" onClick={() => { playSound('click'); setWabState('intro') }}>
+                  🏠 Main Menu
+                </button>
+              </div>
+              <p className="wab-gameover-taunt">
+                {wabScore < 100 ? "Teddy bol raha hai: 'Main toh dabba hun, tu kya hai?' 😂" :
+                 wabScore < 300 ? "Ek aur try de... bears bhi bore ho rahe hain! 😴" :
+                 "Accha khele! Par boss bear abhi bhi has raha hai 😏"}
+              </p>
+            </div>
+          )}
+
+          {/* ---- VICTORY SCREEN ---- */}
+          {wabState === 'victory' && (
+            <div className="wab-victory">
+              <div className="wab-victory-emoji">🏆</div>
+              <h2 className="wab-victory-title">VICTORY! 👑</h2>
+              <p className="wab-victory-subtitle">Tune Boss Bear ko hara diya!</p>
+              <div className="wab-victory-crown">
+                <span>🧸</span>
+                <span>👑</span>
+                <span>🧸</span>
+              </div>
+              <div className="wab-victory-msg">
+                <p>Ab tu official Teddy Master hai! 🎓</p>
+                <p>Saare bears tere control mein hain! 💪</p>
+                <p>Teddy Day pe sabse bada champion! 🏆</p>
+              </div>
+              <div className="wab-gameover-stats">
+                <div className="wab-go-stat">
+                  <span className="wab-go-stat-num">{wabScore}</span>
+                  <span className="wab-go-stat-label">Final Score</span>
+                </div>
+                <div className="wab-go-stat">
+                  <span className="wab-go-stat-num">{wabMaxCombo}x</span>
+                  <span className="wab-go-stat-label">Best Combo</span>
+                </div>
+                <div className="wab-go-stat">
+                  <span className="wab-go-stat-num">{wabStats.whacks}</span>
+                  <span className="wab-go-stat-label">Bears Whacked</span>
+                </div>
+                <div className="wab-go-stat">
+                  <span className="wab-go-stat-num">{wabStats.misses}</span>
+                  <span className="wab-go-stat-label">Misses</span>
+                </div>
+              </div>
+              {wabScore >= wabHighScore && wabScore > 0 && (
+                <div className="wab-new-high">🏆 NEW HIGH SCORE! 🏆</div>
+              )}
+              <div className="wab-victory-love">
+                <p>Jaise tune saare bears ko handle kiya...</p>
+                <p>Waise hi meri zindagi bhi handle kar le! 🧸💕</p>
+              </div>
+              <div className="wab-gameover-btns">
+                <button className="wab-retry-btn" onClick={() => { playSound('click'); startWabGame() }}>
+                  🔄 PLAY AGAIN!
+                </button>
+                <button className="wab-home-btn" onClick={() => { playSound('click'); setWabState('intro') }}>
+                  🏠 Main Menu
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       )}
 
