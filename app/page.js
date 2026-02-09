@@ -111,6 +111,11 @@ export default function RoseDayPage() {
   const wabFrozenRef = useRef(false)
   const wabActiveRef = useRef(false)
   const wabHolesRef = useRef(Array(9).fill(null))
+  const [wabMusicOn, setWabMusicOn] = useState(true)
+  const wabMusicIntervalRef = useRef(null)
+  const wabMusicBassRef = useRef(null)
+  const wabMusicDrumRef = useRef(null)
+  const wabMusicActiveRef = useRef(false)
 
   // Initialize Audio Context
   const getAudioContext = () => {
@@ -1104,10 +1109,240 @@ ${deviceInfo.userAgent}`
     }
   }, [])
 
+  // ===== WHACK-A-BEAR MUSIC SYSTEM =====
+  // Note frequencies (C4=262, D4=294, E4=330, F4=349, G4=392, A4=440, B4=494, C5=523 etc.)
+  const wabMusicPatterns = {
+    intro: {
+      melody: [392, 440, 494, 523, 494, 440, 392, 330, 392, 440, 494, 523, 587, 523, 494, 523],
+      bass:   [196, 196, 220, 220, 247, 247, 196, 196, 196, 196, 220, 220, 262, 262, 247, 247],
+      drums:  [1,   0,   0.5, 0,   1,   0,   0.5, 0,   1,   0,   0.5, 0,   1,   0.5, 1,   0  ],
+      tempo: 210,
+      melodyType: 'triangle',
+      bassType: 'sine',
+      melodyVol: 0.09,
+      bassVol: 0.07,
+      drumVol: 0.06,
+      noteLen: 0.75,
+    },
+    playing: {
+      melody: [523, 494, 440, 494, 523, 587, 659, 587, 523, 494, 440, 392, 440, 494, 523, 587],
+      bass:   [262, 262, 220, 220, 262, 262, 330, 330, 262, 262, 220, 220, 196, 196, 262, 262],
+      drums:  [1,   0,   0.6, 0,   1,   0,   0.6, 0.3, 1,   0,   0.6, 0,   1,   0.6, 1,   0.3],
+      tempo: 170,
+      melodyType: 'square',
+      bassType: 'triangle',
+      melodyVol: 0.07,
+      bassVol: 0.06,
+      drumVol: 0.05,
+      noteLen: 0.7,
+    },
+    playingFast: {
+      melody: [587, 659, 698, 784, 698, 659, 587, 523, 587, 659, 784, 880, 784, 698, 659, 587],
+      bass:   [294, 294, 330, 330, 349, 349, 294, 294, 262, 262, 330, 330, 392, 392, 330, 330],
+      drums:  [1,   0.4, 0.7, 0.3, 1,   0.4, 0.7, 0.3, 1,   0.4, 0.7, 0.3, 1,   0.7, 1,   0.5],
+      tempo: 145,
+      melodyType: 'square',
+      bassType: 'triangle',
+      melodyVol: 0.07,
+      bassVol: 0.06,
+      drumVol: 0.06,
+      noteLen: 0.65,
+    },
+    boss: {
+      melody: [220, 262, 220, 196, 220, 262, 330, 262, 220, 196, 175, 196, 220, 262, 330, 349],
+      bass:   [110, 110, 98,  98,  110, 110, 131, 131, 110, 110, 88,  88,  110, 110, 131, 131],
+      drums:  [1,   0.5, 0.8, 0.5, 1,   0.5, 0.8, 0.5, 1,   0.5, 0.8, 0.5, 1,   0.8, 1,   0.8],
+      tempo: 155,
+      melodyType: 'sawtooth',
+      bassType: 'square',
+      melodyVol: 0.06,
+      bassVol: 0.07,
+      drumVol: 0.07,
+      noteLen: 0.8,
+    },
+    victory: {
+      melody: [523, 587, 659, 784, 880, 784, 880, 1047, 880, 784, 659, 784, 880, 1047, 1175, 1047],
+      bass:   [262, 262, 330, 330, 392, 392, 440, 440,  392, 392, 330, 330, 392, 392,  523,  523 ],
+      drums:  [1,   0,   0.5, 0,   1,   0,   0.5, 0,    1,   0.5, 1,   0,   1,   0.5,  1,    0.5],
+      tempo: 190,
+      melodyType: 'triangle',
+      bassType: 'sine',
+      melodyVol: 0.1,
+      bassVol: 0.07,
+      drumVol: 0.05,
+      noteLen: 0.7,
+    },
+    gameover: {
+      melody: [392, 370, 349, 330, 311, 294, 277, 262, 247, 233, 220, 208, 196, 185, 175, 165],
+      bass:   [196, 185, 175, 165, 156, 147, 139, 131, 123, 117, 110, 104, 98,  93,  88,  82 ],
+      drums:  [1,   0,   0,   0,   0.5, 0,   0,   0,   1,   0,   0,   0,   0.5, 0,   0,   0  ],
+      tempo: 320,
+      melodyType: 'sawtooth',
+      bassType: 'triangle',
+      melodyVol: 0.08,
+      bassVol: 0.06,
+      drumVol: 0.04,
+      noteLen: 0.85,
+    },
+  }
+
+  const stopWabMusic = () => {
+    wabMusicActiveRef.current = false
+    if (wabMusicIntervalRef.current) { clearInterval(wabMusicIntervalRef.current); wabMusicIntervalRef.current = null }
+    if (wabMusicBassRef.current) { clearInterval(wabMusicBassRef.current); wabMusicBassRef.current = null }
+    if (wabMusicDrumRef.current) { clearInterval(wabMusicDrumRef.current); wabMusicDrumRef.current = null }
+  }
+
+  const startWabMusic = (mood) => {
+    stopWabMusic()
+    if (!soundEnabled || !wabMusicOn) return
+    const ctx = getAudioContext()
+    if (!ctx) return
+    const p = wabMusicPatterns[mood]
+    if (!p) return
+
+    wabMusicActiveRef.current = true
+    let melodyIdx = 0
+    let bassIdx = 0
+    let drumIdx = 0
+
+    // Melody loop
+    wabMusicIntervalRef.current = setInterval(() => {
+      if (!wabMusicActiveRef.current || !soundEnabled) { stopWabMusic(); return }
+      try {
+        const now = ctx.currentTime
+        const dur = (p.tempo / 1000) * p.noteLen
+        const freq = p.melody[melodyIdx % p.melody.length]
+
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.type = p.melodyType
+        osc.frequency.setValueAtTime(freq, now)
+        // Slight vibrato for character
+        osc.frequency.setValueAtTime(freq, now)
+        osc.frequency.linearRampToValueAtTime(freq * 1.003, now + dur * 0.5)
+        osc.frequency.linearRampToValueAtTime(freq, now + dur)
+        gain.gain.setValueAtTime(p.melodyVol, now)
+        gain.gain.setValueAtTime(p.melodyVol * 0.9, now + dur * 0.6)
+        gain.gain.exponentialRampToValueAtTime(0.001, now + dur)
+        osc.start(now)
+        osc.stop(now + dur + 0.01)
+
+        melodyIdx++
+      } catch(e) {}
+    }, p.tempo)
+
+    // Bass loop (offset by half a beat for groove)
+    setTimeout(() => {
+      if (!wabMusicActiveRef.current) return
+      wabMusicBassRef.current = setInterval(() => {
+        if (!wabMusicActiveRef.current || !soundEnabled) return
+        try {
+          const now = ctx.currentTime
+          const dur = (p.tempo / 1000) * p.noteLen * 1.1
+          const freq = p.bass[bassIdx % p.bass.length]
+
+          const osc = ctx.createOscillator()
+          const gain = ctx.createGain()
+          osc.connect(gain)
+          gain.connect(ctx.destination)
+          osc.type = p.bassType
+          osc.frequency.setValueAtTime(freq, now)
+          gain.gain.setValueAtTime(p.bassVol, now)
+          gain.gain.exponentialRampToValueAtTime(0.001, now + dur)
+          osc.start(now)
+          osc.stop(now + dur + 0.01)
+
+          bassIdx++
+        } catch(e) {}
+      }, p.tempo)
+    }, p.tempo * 0.5)
+
+    // Drum/percussion loop (noise-based kick and hihat)
+    let drumBeatIdx = 0
+    wabMusicDrumRef.current = setInterval(() => {
+      if (!wabMusicActiveRef.current || !soundEnabled) return
+      try {
+        const now = ctx.currentTime
+        const hitStrength = p.drums[drumBeatIdx % p.drums.length]
+        if (hitStrength <= 0) { drumBeatIdx++; return }
+
+        const dur = 0.08
+
+        // Kick: low frequency burst
+        if (hitStrength >= 0.8) {
+          const kickOsc = ctx.createOscillator()
+          const kickGain = ctx.createGain()
+          kickOsc.connect(kickGain)
+          kickGain.connect(ctx.destination)
+          kickOsc.type = 'sine'
+          kickOsc.frequency.setValueAtTime(150, now)
+          kickOsc.frequency.exponentialRampToValueAtTime(40, now + 0.08)
+          kickGain.gain.setValueAtTime(p.drumVol * hitStrength, now)
+          kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1)
+          kickOsc.start(now)
+          kickOsc.stop(now + 0.1)
+        }
+
+        // Hihat: high frequency noise-like
+        if (hitStrength > 0 && hitStrength < 1) {
+          const hhOsc = ctx.createOscillator()
+          const hhGain = ctx.createGain()
+          hhOsc.connect(hhGain)
+          hhGain.connect(ctx.destination)
+          hhOsc.type = 'square'
+          hhOsc.frequency.setValueAtTime(800 + Math.random() * 400, now)
+          hhGain.gain.setValueAtTime(p.drumVol * hitStrength * 0.3, now)
+          hhGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04)
+          hhOsc.start(now)
+          hhOsc.stop(now + 0.05)
+        }
+
+        drumBeatIdx++
+      } catch(e) {}
+    }, p.tempo * 0.5)
+  }
+
+  // Sync music with game state
+  useEffect(() => {
+    if (activeDay !== 'teddy') { stopWabMusic(); return }
+    if (!wabMusicOn || !soundEnabled) { stopWabMusic(); return }
+
+    switch (wabState) {
+      case 'intro':
+        startWabMusic('intro')
+        break
+      case 'levelIntro':
+        stopWabMusic()
+        break
+      case 'playing':
+        if (wabLevel === 5) startWabMusic('boss')
+        else if (wabLevel >= 3) startWabMusic('playingFast')
+        else startWabMusic('playing')
+        break
+      case 'levelComplete':
+        stopWabMusic()
+        break
+      case 'gameOver':
+        startWabMusic('gameover')
+        break
+      case 'victory':
+        startWabMusic('victory')
+        break
+      default:
+        stopWabMusic()
+    }
+
+    return () => stopWabMusic()
+  }, [wabState, wabLevel, activeDay, wabMusicOn, soundEnabled])
+
   // Clean up game intervals on unmount or day change
   useEffect(() => {
     return () => {
       wabActiveRef.current = false
+      stopWabMusic()
       if (wabTimerRef.current) clearInterval(wabTimerRef.current)
       if (wabSpawnRef.current) clearInterval(wabSpawnRef.current)
     }
@@ -3803,6 +4038,9 @@ ${deviceInfo.userAgent}`
               <button className="wab-start-btn" onClick={() => { playSound('click'); startWabGame() }}>
                 🔨 SHURU KARO! 🐻
               </button>
+              <button className="wab-music-toggle" onClick={() => setWabMusicOn(prev => !prev)}>
+                {wabMusicOn ? '🎵 Music: ON' : '🔇 Music: OFF'}
+              </button>
               <p className="wab-intro-hint">Teddy se zyada cute tu hai... par teddy zyada fast hai! 😏</p>
             </div>
           )}
@@ -3852,13 +4090,18 @@ ${deviceInfo.userAgent}`
                 </div>
               </div>
 
-              {/* Lives */}
-              <div className="wab-lives">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <span key={i} className={`wab-life ${i < wabLives ? 'wab-life-active' : 'wab-life-lost'}`}>
-                    {i < wabLives ? '❤️' : '🖤'}
+              {/* Lives + Music toggle */}
+              <div className="wab-lives-row">
+                <div className="wab-lives">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} className={`wab-life ${i < wabLives ? 'wab-life-active' : 'wab-life-lost'}`}>
+                      {i < wabLives ? '❤️' : '🖤'}
                   </span>
                 ))}
+                </div>
+                <button className="wab-music-toggle-mini" onClick={() => setWabMusicOn(prev => !prev)}>
+                  {wabMusicOn ? '🎵' : '🔇'}
+                </button>
               </div>
 
               {/* Combo display */}

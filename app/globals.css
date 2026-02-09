@@ -4125,6 +4125,61 @@ body {
   font-style: italic;
 }
 
+/* Music toggle (intro screen) */
+.wab-music-toggle {
+  background: rgba(255,255,255,0.1);
+  color: #ffcc80;
+  border: 1px solid rgba(255,204,128,0.3);
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 12px;
+  display: inline-block;
+}
+
+.wab-music-toggle:hover {
+  background: rgba(255,255,255,0.18);
+  transform: scale(1.05);
+}
+
+.wab-music-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Mini music toggle (in-game HUD) */
+.wab-music-toggle-mini {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,204,128,0.25);
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.wab-music-toggle-mini:hover {
+  background: rgba(0,0,0,0.5);
+  transform: scale(1.1);
+}
+
+.wab-music-toggle-mini:active {
+  transform: scale(0.9);
+}
+
+/* Lives row (lives + music toggle) */
+.wab-lives-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
 /* Level Intro Screen */
 .wab-level-intro {
   text-align: center;
@@ -4291,7 +4346,6 @@ body {
   display: flex;
   justify-content: center;
   gap: 6px;
-  margin-bottom: 6px;
 }
 
 .wab-life {
