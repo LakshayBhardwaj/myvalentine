@@ -5103,3 +5103,970 @@ body {
   .wab-title { font-size: 2rem; }
   .wab-intro-bears-row { gap: 6px; }
 }
+
+/* ============================================ */
+/* ===== PROMISE DAY - PUZZLE HUNGAMA CSS ===== */
+/* ============================================ */
+
+.pd-section {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2d1b69 0%, #7b2d8e 40%, #c2185b 80%, #e91e63 100%);
+  background-size: 300% 300%;
+  animation: pdGradient 12s ease infinite;
+  padding: 80px 15px 40px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes pdGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Floating background emojis */
+.pd-bg-emojis {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pd-bg-emoji {
+  position: absolute;
+  font-size: 1.8rem;
+  opacity: 0.15;
+  animation: pdFloat linear infinite;
+  top: -40px;
+}
+
+@keyframes pdFloat {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+  50% { opacity: 0.25; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+/* Hasdi Reh Meter */
+.pd-hasdi-meter {
+  position: fixed;
+  top: 65px;
+  right: 10px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.pd-hasdi-label {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.65rem;
+  color: #ffd700;
+  white-space: nowrap;
+}
+
+.pd-hasdi-bar {
+  width: 60px;
+  height: 8px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pd-hasdi-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #ff6b6b);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.pd-hasdi-val {
+  font-size: 0.6rem;
+  color: #ffd700;
+  font-family: 'Comic Neue', cursive;
+  font-weight: 700;
+}
+
+/* ===== HUB VIEW ===== */
+.pd-hub {
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  z-index: 1;
+  animation: pdFadeIn 0.6s ease;
+}
+
+@keyframes pdFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pd-hub-emoji {
+  font-size: 5rem;
+  animation: pdBounce 1.2s ease infinite;
+  filter: drop-shadow(0 0 20px rgba(255, 105, 180, 0.5));
+}
+
+@keyframes pdBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.05); }
+}
+
+.pd-hub-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2.5rem;
+  color: #ffd700;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.3), 0 0 30px rgba(255, 215, 0, 0.3);
+  margin: 10px 0 5px;
+  letter-spacing: 2px;
+}
+
+.pd-hub-subtitle {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1.1rem;
+  color: #ffab91;
+  margin-bottom: 10px;
+}
+
+.pd-hub-header {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.95rem;
+  color: #ffe0b2;
+  background: rgba(0,0,0,0.3);
+  padding: 12px 18px;
+  border-radius: 16px;
+  margin: 10px 0 20px;
+  border: 2px solid rgba(255,215,0,0.2);
+  line-height: 1.5;
+}
+
+.pd-hub-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 10px 0 20px;
+}
+
+.pd-hub-card {
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 18px;
+  padding: 18px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  color: white;
+  font-family: 'Comic Neue', cursive;
+}
+
+.pd-hub-card:hover, .pd-hub-card:active {
+  transform: scale(1.05);
+  border-color: #ffd700;
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+}
+
+.pd-hub-card-emoji {
+  font-size: 2.5rem;
+}
+
+.pd-hub-card-name {
+  font-family: 'Bangers', cursive;
+  font-size: 1.05rem;
+  color: #ffd700;
+  letter-spacing: 1px;
+}
+
+.pd-hub-card-desc {
+  font-size: 0.75rem;
+  color: #e0e0e0;
+}
+
+.pd-hub-done {
+  border-color: #4caf50;
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.pd-hub-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 1.2rem;
+}
+
+.pd-hub-footer {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.9rem;
+  color: #ffcc80;
+  margin-top: 10px;
+  animation: pdPulseText 2s ease infinite;
+}
+
+@keyframes pdPulseText {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* ===== ALL DONE CELEBRATION ===== */
+.pd-all-done {
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(15px);
+  border: 3px solid #ffd700;
+  border-radius: 24px;
+  padding: 25px 20px;
+  margin: 20px 0;
+  animation: pdGlow 2s ease infinite;
+}
+
+@keyframes pdGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.6); }
+}
+
+.pd-all-done-emoji {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.pd-all-done-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  margin-bottom: 10px;
+}
+
+.pd-all-done-msg {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1rem;
+  color: #ffe0b2;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.pd-final-promise {
+  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(233,30,99,0.15));
+  border: 2px solid rgba(255,215,0,0.3);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+}
+
+.pd-final-promise p {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1rem;
+  color: #fff;
+  line-height: 1.8;
+  margin: 3px 0;
+}
+
+.pd-final-sign {
+  font-family: 'Bangers', cursive;
+  font-size: 1.15rem !important;
+  color: #ffd700 !important;
+  margin-top: 10px !important;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}
+
+/* ===== GAME CONTAINER (shared) ===== */
+.pd-game-container {
+  max-width: 500px;
+  width: 100%;
+  z-index: 1;
+  animation: pdFadeIn 0.5s ease;
+}
+
+.pd-back-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #ffd700;
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-bottom: 15px;
+  transition: all 0.2s;
+}
+
+.pd-back-btn:hover {
+  background: rgba(255,255,255,0.25);
+  transform: scale(1.05);
+}
+
+.pd-game-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.pd-game-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.pd-game-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2.2rem;
+  color: #ffd700;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  letter-spacing: 2px;
+}
+
+.pd-game-sub {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.95rem;
+  color: #ffcc80;
+}
+
+/* Shake animation */
+.pd-shake {
+  animation: pdShakeAnim 0.5s ease;
+}
+
+@keyframes pdShakeAnim {
+  0%, 100% { transform: translateX(0); }
+  10%, 50%, 90% { transform: translateX(-8px); }
+  30%, 70% { transform: translateX(8px); }
+}
+
+/* Messages */
+.pd-msg {
+  text-align: center;
+  padding: 12px 16px;
+  border-radius: 14px;
+  margin: 12px 0;
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.95rem;
+  font-weight: 700;
+  animation: pdFadeIn 0.3s ease;
+}
+
+.pd-msg-success {
+  background: rgba(76, 175, 80, 0.25);
+  border: 2px solid rgba(76, 175, 80, 0.5);
+  color: #a5d6a7;
+}
+
+.pd-msg-error {
+  background: rgba(244, 67, 54, 0.25);
+  border: 2px solid rgba(244, 67, 54, 0.5);
+  color: #ef9a9a;
+}
+
+.pd-msg-info {
+  background: rgba(33, 150, 243, 0.25);
+  border: 2px solid rgba(33, 150, 243, 0.5);
+  color: #90caf9;
+}
+
+/* ===== PUZZLE 1: VADA UNSCRAMBLE ===== */
+.pd-unscramble {
+  text-align: center;
+}
+
+.pd-word-progress {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.85rem;
+  color: #ffcc80;
+  margin-bottom: 12px;
+}
+
+.pd-word-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.pd-word-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #ff6b6b);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.pd-word-hint {
+  background: rgba(0,0,0,0.3);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.95rem;
+  color: #ffe0b2;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255,215,0,0.2);
+}
+
+.pd-word-answer {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.pd-word-slot {
+  width: 45px;
+  height: 50px;
+  background: rgba(255,255,255,0.1);
+  border: 2px dashed rgba(255,255,255,0.4);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Bangers', cursive;
+  font-size: 1.6rem;
+  color: #ffd700;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.pd-word-slot-filled {
+  background: rgba(255, 215, 0, 0.2);
+  border: 2px solid #ffd700;
+  animation: pdSlotPop 0.3s ease;
+}
+
+@keyframes pdSlotPop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.pd-word-pool {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.pd-pool-letter {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08));
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 12px;
+  font-family: 'Bangers', cursive;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pd-pool-letter:hover:not(:disabled) {
+  transform: scale(1.1);
+  border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.pd-pool-letter:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.pd-pool-used {
+  opacity: 0.2;
+  cursor: default;
+  transform: scale(0.9);
+}
+
+.pd-check-btn {
+  background: linear-gradient(135deg, #ffd700, #ff8f00);
+  color: #1a1a2e;
+  border: none;
+  padding: 12px 32px;
+  font-family: 'Bangers', cursive;
+  font-size: 1.3rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+  letter-spacing: 1px;
+}
+
+.pd-check-btn:hover:not(:disabled) {
+  transform: scale(1.08);
+  box-shadow: 0 6px 30px rgba(255, 215, 0, 0.5);
+}
+
+.pd-check-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== GAME COMPLETE (shared) ===== */
+.pd-game-complete {
+  text-align: center;
+  animation: pdFadeIn 0.6s ease;
+}
+
+.pd-complete-emoji {
+  font-size: 3.5rem;
+  margin-bottom: 10px;
+  animation: pdBounce 1s ease infinite;
+}
+
+.pd-complete-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  margin-bottom: 10px;
+}
+
+.pd-complete-stats {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.9rem;
+  color: #ffcc80;
+  margin-bottom: 15px;
+}
+
+.pd-unlock-promise {
+  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(233,30,99,0.15));
+  border: 2px solid rgba(255,215,0,0.4);
+  border-radius: 18px;
+  padding: 20px;
+  margin: 15px 0;
+  animation: pdGlow 3s ease infinite;
+}
+
+.pd-unlock-label {
+  font-family: 'Bangers', cursive;
+  font-size: 1.2rem;
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.pd-unlock-text {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1rem;
+  color: #fff;
+  line-height: 1.7;
+}
+
+.pd-hub-return-btn {
+  background: linear-gradient(135deg, #9c27b0, #e91e63);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  font-family: 'Bangers', cursive;
+  font-size: 1.15rem;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+  letter-spacing: 1px;
+}
+
+.pd-hub-return-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 25px rgba(156, 39, 176, 0.5);
+}
+
+/* ===== PUZZLE 2: MEMORY MATCH ===== */
+.pd-match-game {
+  text-align: center;
+}
+
+.pd-match-stats {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.85rem;
+  color: #ffcc80;
+  margin-bottom: 12px;
+  padding: 0 5px;
+}
+
+.pd-match-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.pd-match-card {
+  aspect-ratio: 3/4;
+  perspective: 600px;
+  cursor: pointer;
+}
+
+.pd-match-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.5s ease;
+  transform-style: preserve-3d;
+}
+
+.pd-match-flipped .pd-match-card-inner {
+  transform: rotateY(180deg);
+}
+
+.pd-match-card-front,
+.pd-match-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  padding: 4px;
+}
+
+.pd-match-card-front {
+  background: linear-gradient(135deg, #7b2d8e, #c2185b);
+  border: 2px solid rgba(255,255,255,0.3);
+  font-size: 1.8rem;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+
+.pd-match-card-back {
+  background: rgba(0,0,0,0.6);
+  border: 2px solid rgba(255,255,255,0.3);
+  transform: rotateY(180deg);
+  overflow: hidden;
+  gap: 2px;
+}
+
+.pd-card-scenario {
+  border-color: #ff6b6b;
+  background: linear-gradient(135deg, rgba(244,67,54,0.3), rgba(0,0,0,0.5));
+}
+
+.pd-card-promise {
+  border-color: #4caf50;
+  background: linear-gradient(135deg, rgba(76,175,80,0.3), rgba(0,0,0,0.5));
+}
+
+.pd-card-type-badge {
+  font-size: 1rem;
+}
+
+.pd-card-text {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.55rem;
+  color: #fff;
+  line-height: 1.3;
+  text-align: center;
+  padding: 2px;
+}
+
+.pd-match-matched .pd-match-card-inner {
+  transform: rotateY(180deg);
+}
+
+.pd-match-matched .pd-match-card-back {
+  border-color: #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+/* ===== PUZZLE 3: JIGSAW ===== */
+.pd-jigsaw-game {
+  text-align: center;
+}
+
+.pd-jigsaw-stats {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.85rem;
+  color: #ffcc80;
+  margin-bottom: 12px;
+  padding: 0 5px;
+}
+
+.pd-jigsaw-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 340px;
+  margin: 0 auto 15px;
+}
+
+.pd-jigsaw-tile {
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.pd-jigsaw-tile:hover {
+  transform: scale(1.05);
+}
+
+.pd-jigsaw-tile:active {
+  transform: scale(0.95);
+}
+
+.pd-jigsaw-selected {
+  border-color: #ffd700 !important;
+  background: rgba(255, 215, 0, 0.2) !important;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  animation: pdTileGlow 0.8s ease infinite;
+}
+
+@keyframes pdTileGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+}
+
+.pd-jigsaw-correct {
+  border-color: rgba(76, 175, 80, 0.5);
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.pd-jigsaw-tile-emoji {
+  font-size: 2rem;
+}
+
+.pd-jigsaw-tile-text {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.8rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.pd-jigsaw-tile-num {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.4);
+  font-family: 'Comic Neue', cursive;
+}
+
+.pd-jigsaw-hint {
+  background: rgba(0,0,0,0.3);
+  padding: 10px 16px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,215,0,0.2);
+}
+
+.pd-jigsaw-hint p {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.85rem;
+  color: #ffe0b2;
+  line-height: 1.4;
+}
+
+.pd-jigsaw-hint-sub {
+  font-size: 0.75rem !important;
+  color: #ffcc80 !important;
+  margin-top: 4px;
+}
+
+/* Jigsaw solved display */
+.pd-jigsaw-solved {
+  margin: 15px 0;
+}
+
+.pd-jigsaw-solved-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  max-width: 300px;
+  margin: 0 auto 12px;
+}
+
+.pd-jigsaw-solved-tile {
+  background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(233,30,99,0.2));
+  border: 2px solid rgba(255,215,0,0.5);
+  border-radius: 10px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 1.3rem;
+}
+
+.pd-jigsaw-solved-tile span:last-child {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.75rem;
+  color: #ffd700;
+  font-weight: 700;
+}
+
+.pd-jigsaw-solved-msg {
+  font-family: 'Bangers', cursive;
+  font-size: 1.2rem;
+  color: #ffd700;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}
+
+/* ===== PUZZLE 4: ESCAPE ROOM ===== */
+.pd-escape-game {
+  text-align: center;
+}
+
+.pd-escape-progress {
+  margin-bottom: 18px;
+}
+
+.pd-escape-locks {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.pd-escape-lock {
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.pd-lock-open {
+  animation: pdLockOpen 0.5s ease;
+  filter: drop-shadow(0 0 8px rgba(76, 175, 80, 0.5));
+}
+
+@keyframes pdLockOpen {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3) rotate(-10deg); }
+  100% { transform: scale(1); }
+}
+
+.pd-escape-step {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.8rem;
+  color: #ffcc80;
+}
+
+.pd-escape-riddle {
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,215,0,0.3);
+  border-radius: 18px;
+  padding: 20px;
+  margin-bottom: 18px;
+}
+
+.pd-escape-q-emoji {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.pd-escape-question {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1.05rem;
+  color: #fff;
+  line-height: 1.6;
+}
+
+.pd-escape-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.pd-escape-option {
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05));
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 14px;
+  padding: 14px 18px;
+  font-family: 'Comic Neue', cursive;
+  font-size: 1rem;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.pd-escape-option:hover:not(:disabled) {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.15);
+  transform: translateX(5px);
+}
+
+.pd-escape-option:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.pd-escape-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Escape room unlocked items */
+.pd-escape-unlocked-all {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 15px 0;
+}
+
+.pd-escape-unlocked-item {
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.8rem;
+  color: #a5d6a7;
+  text-align: left;
+}
+
+/* ===== PROMISE DAY RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .pd-hub-title { font-size: 2rem; }
+  .pd-hub-grid { gap: 10px; }
+  .pd-hub-card { padding: 14px 10px; }
+  .pd-hub-card-emoji { font-size: 2rem; }
+  .pd-hub-card-name { font-size: 0.9rem; }
+  .pd-game-title { font-size: 1.8rem; }
+  .pd-match-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .pd-card-text { font-size: 0.5rem; }
+  .pd-word-slot { width: 40px; height: 44px; font-size: 1.3rem; }
+  .pd-pool-letter { width: 42px; height: 42px; font-size: 1.3rem; }
+  .pd-jigsaw-grid { max-width: 290px; gap: 6px; }
+  .pd-jigsaw-tile-emoji { font-size: 1.6rem; }
+  .pd-jigsaw-tile-text { font-size: 0.7rem; }
+  .pd-hasdi-meter { top: 58px; right: 5px; padding: 4px 8px; }
+  .pd-section { padding: 75px 10px 30px; }
+}
+
+@media (max-width: 360px) {
+  .pd-hub-title { font-size: 1.7rem; }
+  .pd-hub-card-emoji { font-size: 1.8rem; }
+  .pd-game-title { font-size: 1.5rem; }
+  .pd-match-grid { gap: 4px; }
+  .pd-card-text { font-size: 0.45rem; }
+  .pd-word-slot { width: 35px; height: 40px; font-size: 1.2rem; }
+  .pd-pool-letter { width: 38px; height: 38px; font-size: 1.2rem; }
+  .pd-jigsaw-grid { max-width: 260px; }
+}

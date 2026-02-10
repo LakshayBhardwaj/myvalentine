@@ -117,6 +117,38 @@ export default function RoseDayPage() {
   const wabMusicDrumRef = useRef(null)
   const wabMusicActiveRef = useRef(false)
 
+  // ===== PROMISE DAY - PUZZLE HUNGAMA STATES =====
+  const [pdView, setPdView] = useState('hub') // hub, unscramble, match, jigsaw, escape
+  const [pdDone, setPdDone] = useState({ u: false, m: false, j: false, e: false })
+  const [pdHasdi, setPdHasdi] = useState(0)
+  // Puzzle 1: Vada Unscramble
+  const [pdUIdx, setPdUIdx] = useState(0)
+  const [pdUPool, setPdUPool] = useState([]) // {letter, origIdx, used}
+  const [pdUAns, setPdUAns] = useState([]) // placed letters
+  const [pdUMsg, setPdUMsg] = useState('')
+  const [pdUDone, setPdUDone] = useState(false)
+  const [pdUShake, setPdUShake] = useState(false)
+  // Puzzle 2: Memory Match
+  const [pdMCards, setPdMCards] = useState([])
+  const [pdMFlip, setPdMFlip] = useState([])
+  const [pdMFound, setPdMFound] = useState([])
+  const [pdMMsg, setPdMMsg] = useState('')
+  const [pdMMoves, setPdMMoves] = useState(0)
+  const [pdMDone, setPdMDone] = useState(false)
+  const [pdMLock, setPdMLock] = useState(false)
+  // Puzzle 3: Jigsaw (Tile Swap)
+  const [pdJTiles, setPdJTiles] = useState([])
+  const [pdJDone, setPdJDone] = useState(false)
+  const [pdJMsg, setPdJMsg] = useState('')
+  const [pdJMoves, setPdJMoves] = useState(0)
+  const [pdJSel, setPdJSel] = useState(null)
+  // Puzzle 4: Escape Room
+  const [pdEStep, setPdEStep] = useState(0)
+  const [pdEMsg, setPdEMsg] = useState('')
+  const [pdEDone, setPdEDone] = useState(false)
+  const [pdEShake, setPdEShake] = useState(false)
+  const [pdEUnlocked, setPdEUnlocked] = useState([])
+
   // Initialize Audio Context
   const getAudioContext = () => {
     if (!audioContextRef.current && typeof window !== 'undefined') {
@@ -2399,6 +2431,396 @@ ${deviceInfo.userAgent}`
     }
   }, [activeDay])
 
+  // ===== PROMISE DAY - PUZZLE HUNGAMA DATA & LOGIC =====
+  const pdWords = [
+    { word: 'VADA', hint: 'Jo nibhaaunga lifetime! 🤝' },
+    { word: 'PYAR', hint: 'Tere naal bohot saara... ❤️' },
+    { word: 'FOREVER', hint: 'Kitna time saath rahunga? 😏' },
+    { word: 'JAAN', hint: 'Tu meri ___! 💕' },
+    { word: 'PROMISE', hint: 'Aaj ka din! 🤞' },
+    { word: 'TRACTOR', hint: 'Jatt da ride! 🚜' },
+    { word: 'DILJIT', hint: 'Punjab da King! 🎵' },
+    { word: 'CHOLE', hint: 'Bhature ke saathi! 😋' },
+  ]
+
+  const pdWrongWordMsgs = [
+    "Arre galat! Eh vada nahi, tractor da brake fail ho gaya! 😂",
+    "Oye nahi! Jatt da spelling bhi weak? Try again! 🚜",
+    "Galat bae! Pehle chole khaa, phir soch! 😋",
+    "Wrong! Tere bina mera brain bhi kaam nahi karda! 🧠❌",
+    "Nope! Itna easy tha... tu soch mein kho gayi? 😏",
+    "Eh ki? Gurudwara jaake ardaas kar phir try kar! 😂",
+  ]
+
+  const pdMatchPairs = [
+    { id: 0, scenario: 'Jadon tu gussa karegi 😤', promise: 'Teri favorite ice cream laake manaaunga! 🍦' },
+    { id: 1, scenario: 'Chole khake food poisoning 🤢', promise: 'Davaai + cuddles dunga lifetime! 🤢❤️' },
+    { id: 2, scenario: 'Mera naach dekh ke sharma jaegi 💃', promise: 'Sirf tere layi Bhangra karunga! 🕺' },
+    { id: 3, scenario: 'Late ho jaunga date te ⏰', promise: 'Next time tractor te jaldi aaunga! 🚜' },
+    { id: 4, scenario: 'Teri shopping mein bore hounga 🛍️', promise: 'Main bags khushi se uthaunga! 💪' },
+    { id: 5, scenario: 'Meri cooking se ghar jalega 🔥', promise: 'Swiggy da VIP member banunga! 📱' },
+    { id: 6, scenario: 'Selfie mein bura laguga tere saath 🤳', promise: 'Tere saath toh main hero lagda! 😎' },
+    { id: 7, scenario: 'Raat ko tera phone nahi uthaunga 📱', promise: 'Kabhi nahi! 24/7 on call humesha! 📞' },
+  ]
+
+  const pdMismatchMsgs = [
+    "Oye mismatch! Jaise mera pehla propose fail! 😭",
+    "Galat pair! Jaise chole bina bhature! 😂",
+    "Nahi match hua! Tere bina meri memory bhi weak! 🧠",
+    "Wrong! Jatt confused ho gaya! 🤯",
+    "Mismatch! Par mera pyar perfect match ae! ❤️",
+    "Oye hoye! Sahi se dekh ke flip kar! 👀",
+  ]
+
+  const pdJigsawData = [
+    { id: 0, emoji: '🤝', text: 'Main' },
+    { id: 1, emoji: '💕', text: 'Vada' },
+    { id: 2, emoji: '🚜', text: 'Karda' },
+    { id: 3, emoji: '🌹', text: 'Haan' },
+    { id: 4, emoji: '❤️', text: 'Tere' },
+    { id: 5, emoji: '💍', text: 'Naal' },
+    { id: 6, emoji: '🤞', text: 'Har' },
+    { id: 7, emoji: '🎵', text: 'Pal' },
+    { id: 8, emoji: '✨', text: 'Forever' },
+  ]
+
+  const pdEscRiddles = [
+    {
+      q: 'Main red hoon, pyar da symbol, par kande vi ne – ki haan?',
+      opts: ['Gulab 🌹', 'Dil ❤️', 'Tomato 🍅', 'Traffic Light 🚦'],
+      ans: 0,
+      unlock: 'Sahi! Par mera pyar kande bina! 😂🌹',
+      wrong: 'Galat! Tu taan mera dil tod rahi ae... try again pagli! 😭'
+    },
+    {
+      q: 'Tu isnu khandi ae subah, main vi tere naal share karda – ki?',
+      opts: ['Chai ☕', 'Gaaliyan 😂', 'Wifi Password 📶', 'Noodles 🍜'],
+      ans: 0,
+      unlock: 'Promise: Har subah tere naal chai peeunga! ☕❤️',
+      wrong: 'Arre galat! Subah subah ki chahiye tujhe? ☕'
+    },
+    {
+      q: 'Jatt da vehicle, par pyar vich speed deta – ki?',
+      opts: ['Tractor 🚜', 'Bicycle 🚲', 'Auto Rickshaw 🛺', 'Rocket 🚀'],
+      ans: 0,
+      unlock: 'Vada: Tere layi full speed rahunga! 🚜💨',
+      wrong: 'Oye Jatt da vehicle toh pata hona chahida! 🚜'
+    },
+    {
+      q: 'Pyar mein sabse zaroori cheez ki ae?',
+      opts: ['Trust 🤝', 'Money 💰', 'Insta Followers 📸', 'Chole Bhature 😂'],
+      ans: 0,
+      unlock: 'Promise: Tera trust kabhi nahi todunga! 🤝💕',
+      wrong: 'Nahi nahi! Dil se soch... sahi answer kya hoga? 💕'
+    },
+    {
+      q: 'Tere bina main ki ban jaunga?',
+      opts: ['Sad 😢', 'Happy 😊', 'Billi da dost 🐱', 'TikTok Star 🤳'],
+      ans: 0,
+      unlock: 'Isiliye hamesha tere saath rahunga! Forever! 💕',
+      wrong: 'Galat! Sachchi bata... tere bina kya hoga mera? 😭'
+    },
+  ]
+
+  // Scramble a word
+  const scrambleWord = (word) => {
+    const letters = word.split('')
+    for (let i = letters.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[letters[i], letters[j]] = [letters[j], letters[i]]
+    }
+    // Make sure it's not the same as original
+    if (letters.join('') === word) {
+      ;[letters[0], letters[1]] = [letters[1], letters[0]]
+    }
+    return letters.map((l, i) => ({ letter: l, origIdx: i, used: false }))
+  }
+
+  // Initialize Unscramble
+  const initPdUnscramble = () => {
+    setPdView('unscramble')
+    setPdUIdx(0)
+    setPdUDone(false)
+    setPdUMsg('')
+    const pool = scrambleWord(pdWords[0].word)
+    setPdUPool(pool)
+    setPdUAns([])
+    playSound('click')
+  }
+
+  // Tap letter from pool
+  const pdTapPoolLetter = (poolIdx) => {
+    if (pdUPool[poolIdx].used) return
+    playSound('click')
+    const newPool = [...pdUPool]
+    newPool[poolIdx] = { ...newPool[poolIdx], used: true }
+    setPdUPool(newPool)
+    setPdUAns(prev => [...prev, { letter: pdUPool[poolIdx].letter, poolIdx }])
+    setPdUMsg('')
+  }
+
+  // Remove letter from answer
+  const pdRemoveAnsLetter = (ansIdx) => {
+    playSound('click')
+    const removed = pdUAns[ansIdx]
+    const newPool = [...pdUPool]
+    newPool[removed.poolIdx] = { ...newPool[removed.poolIdx], used: false }
+    setPdUPool(newPool)
+    setPdUAns(prev => prev.filter((_, i) => i !== ansIdx))
+  }
+
+  // Check unscramble answer
+  const pdCheckWord = () => {
+    const currentWord = pdWords[pdUIdx].word
+    const userWord = pdUAns.map(a => a.letter).join('')
+    if (userWord === currentWord) {
+      playSound('celebration')
+      setPdHasdi(prev => Math.min(100, prev + 12))
+      if (pdUIdx >= pdWords.length - 1) {
+        setPdUDone(true)
+        setPdUMsg('')
+        setPdDone(prev => ({ ...prev, u: true }))
+        triggerConfetti()
+      } else {
+        setPdUMsg('Sahi jawab! 🎉 Next word loading...')
+        setTimeout(() => {
+          const nextIdx = pdUIdx + 1
+          setPdUIdx(nextIdx)
+          setPdUPool(scrambleWord(pdWords[nextIdx].word))
+          setPdUAns([])
+          setPdUMsg('')
+        }, 1200)
+      }
+    } else {
+      playSound('error')
+      setPdUShake(true)
+      setPdUMsg(pdWrongWordMsgs[Math.floor(Math.random() * pdWrongWordMsgs.length)])
+      if (navigator.vibrate) navigator.vibrate(200)
+      setTimeout(() => setPdUShake(false), 500)
+    }
+  }
+
+  // Initialize Memory Match
+  const initPdMatch = () => {
+    setPdView('match')
+    setPdMDone(false)
+    setPdMMsg('')
+    setPdMMoves(0)
+    setPdMFlip([])
+    setPdMFound([])
+    setPdMLock(false)
+    // Create card pairs: scenario cards + promise cards
+    const cards = []
+    pdMatchPairs.forEach((pair) => {
+      cards.push({ pairId: pair.id, type: 'scenario', text: pair.scenario, flipped: false })
+      cards.push({ pairId: pair.id, type: 'promise', text: pair.promise, flipped: false })
+    })
+    // Shuffle
+    for (let i = cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[cards[i], cards[j]] = [cards[j], cards[i]]
+    }
+    setPdMCards(cards)
+    playSound('click')
+  }
+
+  // Flip a memory card
+  const pdFlipCard = (idx) => {
+    if (pdMLock || pdMFound.includes(pdMCards[idx].pairId) || pdMFlip.includes(idx)) return
+    playSound('click')
+    const newFlip = [...pdMFlip, idx]
+    setPdMFlip(newFlip)
+
+    if (newFlip.length === 2) {
+      setPdMMoves(prev => prev + 1)
+      setPdMLock(true)
+      const card1 = pdMCards[newFlip[0]]
+      const card2 = pdMCards[newFlip[1]]
+
+      if (card1.pairId === card2.pairId && card1.type !== card2.type) {
+        // Match!
+        playSound('celebration')
+        setPdHasdi(prev => Math.min(100, prev + 6))
+        const newFound = [...pdMFound, card1.pairId]
+        setPdMFound(newFound)
+        setPdMMsg('Match ho gaya! 🎉')
+        setTimeout(() => {
+          setPdMFlip([])
+          setPdMLock(false)
+          setPdMMsg('')
+          if (newFound.length === pdMatchPairs.length) {
+            setPdMDone(true)
+            setPdDone(prev => ({ ...prev, m: true }))
+            triggerConfetti()
+          }
+        }, 800)
+      } else {
+        // No match
+        playSound('error')
+        setPdMMsg(pdMismatchMsgs[Math.floor(Math.random() * pdMismatchMsgs.length)])
+        if (navigator.vibrate) navigator.vibrate(150)
+        setTimeout(() => {
+          setPdMFlip([])
+          setPdMLock(false)
+          setPdMMsg('')
+        }, 1200)
+      }
+    }
+  }
+
+  // Initialize Jigsaw
+  const initPdJigsaw = () => {
+    setPdView('jigsaw')
+    setPdJDone(false)
+    setPdJMsg('')
+    setPdJMoves(0)
+    setPdJSel(null)
+    // Shuffle tiles
+    const tiles = pdJigsawData.map(t => ({ ...t }))
+    for (let i = tiles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[tiles[i], tiles[j]] = [tiles[j], tiles[i]]
+    }
+    // Make sure it's not already solved
+    if (tiles.every((t, i) => t.id === i)) {
+      ;[tiles[0], tiles[1]] = [tiles[1], tiles[0]]
+    }
+    setPdJTiles(tiles)
+    playSound('click')
+  }
+
+  // Tap jigsaw tile
+  const pdTapTile = (idx) => {
+    if (pdJDone) return
+    if (pdJSel === null) {
+      setPdJSel(idx)
+      setPdJMsg('Ab doosri tile tap kar ke swap kar! 🔄')
+      playSound('click')
+    } else if (pdJSel === idx) {
+      setPdJSel(null)
+      setPdJMsg('')
+    } else {
+      // Swap tiles
+      playSound('click')
+      const newTiles = [...pdJTiles]
+      ;[newTiles[pdJSel], newTiles[idx]] = [newTiles[idx], newTiles[pdJSel]]
+      setPdJTiles(newTiles)
+      setPdJSel(null)
+      setPdJMoves(prev => prev + 1)
+      setPdJMsg('')
+      // Check if solved
+      if (newTiles.every((t, i) => t.id === i)) {
+        setPdJDone(true)
+        setPdJMsg('')
+        setPdDone(prev => ({ ...prev, j: true }))
+        setPdHasdi(prev => Math.min(100, prev + 25))
+        playSound('celebration')
+        triggerConfetti()
+      }
+    }
+  }
+
+  // Initialize Escape Room
+  const initPdEscape = () => {
+    setPdView('escape')
+    setPdEStep(0)
+    setPdEMsg('')
+    setPdEDone(false)
+    setPdEShake(false)
+    setPdEUnlocked([])
+    playSound('click')
+  }
+
+  // Check escape room answer
+  const pdCheckEsc = (optIdx) => {
+    const riddle = pdEscRiddles[pdEStep]
+    if (optIdx === riddle.ans) {
+      playSound('celebration')
+      setPdHasdi(prev => Math.min(100, prev + 10))
+      const newUnlocked = [...pdEUnlocked, pdEStep]
+      setPdEUnlocked(newUnlocked)
+      setPdEMsg(riddle.unlock)
+      if (pdEStep >= pdEscRiddles.length - 1) {
+        // All done!
+        setTimeout(() => {
+          setPdEDone(true)
+          setPdDone(prev => ({ ...prev, e: true }))
+          triggerConfetti()
+        }, 1500)
+      } else {
+        setTimeout(() => {
+          setPdEStep(prev => prev + 1)
+          setPdEMsg('')
+        }, 2000)
+      }
+    } else {
+      playSound('error')
+      setPdEShake(true)
+      setPdEMsg(riddle.wrong)
+      if (navigator.vibrate) navigator.vibrate(200)
+      setTimeout(() => setPdEShake(false), 500)
+    }
+  }
+
+  // Back to hub
+  const pdBackToHub = () => {
+    setPdView('hub')
+    playSound('click')
+  }
+
+  // Promise Day sound effects
+  const playPdSound = (type) => {
+    if (!soundEnabled) return
+    const ctx = getAudioContext()
+    if (!ctx) return
+    try {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      if (type === 'dhol') {
+        osc.type = 'triangle'
+        osc.frequency.setValueAtTime(80, ctx.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15)
+        gain.gain.setValueAtTime(0.5, ctx.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15)
+        osc.start(ctx.currentTime)
+        osc.stop(ctx.currentTime + 0.15)
+        // Second hit
+        const osc2 = ctx.createOscillator()
+        const gain2 = ctx.createGain()
+        osc2.connect(gain2)
+        gain2.connect(ctx.destination)
+        osc2.type = 'triangle'
+        osc2.frequency.setValueAtTime(100, ctx.currentTime + 0.2)
+        osc2.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.35)
+        gain2.gain.setValueAtTime(0.4, ctx.currentTime + 0.2)
+        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35)
+        osc2.start(ctx.currentTime + 0.2)
+        osc2.stop(ctx.currentTime + 0.35)
+      } else if (type === 'oyehoye') {
+        // Fun ascending tone
+        const notes = [330, 440, 554, 660]
+        notes.forEach((freq, i) => {
+          const o = ctx.createOscillator()
+          const g = ctx.createGain()
+          o.connect(g)
+          g.connect(ctx.destination)
+          o.type = 'sine'
+          o.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.1)
+          g.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.1)
+          g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.1 + 0.15)
+          o.start(ctx.currentTime + i * 0.1)
+          o.stop(ctx.currentTime + i * 0.1 + 0.15)
+        })
+        return
+      }
+    } catch(e) {}
+  }
+
+  // Check if all promise day puzzles complete
+  const pdAllDone = pdDone.u && pdDone.m && pdDone.j && pdDone.e
+
   return (
     <div onClick={enableSound}>
       {/* Sound Enable Overlay - Shows on first visit */}
@@ -4312,21 +4734,359 @@ ${deviceInfo.userAgent}`
         </section>
       )}
 
-      {/* ========== PROMISE DAY - COMING SOON ========== */}
+      {/* ========== PROMISE DAY - PUZZLE HUNGAMA ========== */}
       {activeDay === 'promise' && (
-        <section className="coming-soon-section promise-theme">
-          <div className="coming-soon-container">
-            <div className="coming-soon-emoji">🤞</div>
-            <h1 className="coming-soon-title">Promise Day</h1>
-            <h2 className="coming-soon-date">11th February</h2>
-            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
-            <p className="coming-soon-text">
-              Promise Day pe dil se waade honge! 🤝<br/>
-              Pinky promise se pakka wala promise tak! 💪
-            </p>
-            <div className="coming-soon-hearts">🤞 💕 🤞 💕 🤞</div>
-            <p className="coming-soon-hint">Promise: Content amazing hoga! 😉</p>
+        <section className="pd-section">
+          {/* Floating handshakes background */}
+          <div className="pd-bg-emojis">
+            {['🤝','🌹','🤝','💕','🤝','🌹','💕','🤝'].map((e, i) => (
+              <span key={i} className="pd-bg-emoji" style={{ left: `${(i * 13) + 3}%`, animationDelay: `${i * 0.7}s`, animationDuration: `${4 + (i % 3)}s` }}>{e}</span>
+            ))}
           </div>
+
+          {/* Hasdi Reh Meter */}
+          <div className="pd-hasdi-meter">
+            <span className="pd-hasdi-label">Hasdi Reh Meter</span>
+            <div className="pd-hasdi-bar">
+              <div className="pd-hasdi-fill" style={{ width: `${pdHasdi}%` }}></div>
+            </div>
+            <span className="pd-hasdi-val">{pdHasdi}% 😂</span>
+          </div>
+
+          {/* ===== HUB VIEW ===== */}
+          {pdView === 'hub' && (
+            <div className="pd-hub">
+              <div className="pd-hub-emoji">🤝</div>
+              <h1 className="pd-hub-title">Promise Da Puzzle Hungama</h1>
+              <p className="pd-hub-subtitle">Vada Nibhaunga Lifetime! 🤝😂🚜</p>
+              <p className="pd-hub-header">
+                Oye sohniye, aaj puzzle solve kar ke mera vada accept kar&hellip; warna main billi nu promise kar dunga! 🐱💍
+              </p>
+
+              <div className="pd-hub-grid">
+                <button className={`pd-hub-card ${pdDone.u ? 'pd-hub-done' : ''}`} onClick={initPdUnscramble}>
+                  <span className="pd-hub-card-emoji">🔤</span>
+                  <span className="pd-hub-card-name">Vada Unscramble</span>
+                  <span className="pd-hub-card-desc">Punjabi words solve kar!</span>
+                  {pdDone.u && <span className="pd-hub-check">✅</span>}
+                </button>
+
+                <button className={`pd-hub-card ${pdDone.m ? 'pd-hub-done' : ''}`} onClick={initPdMatch}>
+                  <span className="pd-hub-card-emoji">🃏</span>
+                  <span className="pd-hub-card-name">Promise Pair Match</span>
+                  <span className="pd-hub-card-desc">Memory cards flip kar!</span>
+                  {pdDone.m && <span className="pd-hub-check">✅</span>}
+                </button>
+
+                <button className={`pd-hub-card ${pdDone.j ? 'pd-hub-done' : ''}`} onClick={initPdJigsaw}>
+                  <span className="pd-hub-card-emoji">🧩</span>
+                  <span className="pd-hub-card-name">Jigsaw Promise</span>
+                  <span className="pd-hub-card-desc">Tiles arrange kar!</span>
+                  {pdDone.j && <span className="pd-hub-check">✅</span>}
+                </button>
+
+                <button className={`pd-hub-card ${pdDone.e ? 'pd-hub-done' : ''}`} onClick={initPdEscape}>
+                  <span className="pd-hub-card-emoji">🔐</span>
+                  <span className="pd-hub-card-name">Promise Escape Room</span>
+                  <span className="pd-hub-card-desc">Riddles solve kar!</span>
+                  {pdDone.e && <span className="pd-hub-check">✅</span>}
+                </button>
+              </div>
+
+              {pdAllDone && (
+                <div className="pd-all-done">
+                  <div className="pd-all-done-emoji">🏆🤝🌹</div>
+                  <h2 className="pd-all-done-title">SAB PUZZLE COMPLETE! 🎉</h2>
+                  <div className="pd-all-done-msg">
+                    <p>Jaan, tu ne saare puzzles jeet liye!</p>
+                    <p>Ab mera sabse bada vada sun:</p>
+                  </div>
+                  <div className="pd-final-promise">
+                    <p>Main promise karda haan &ndash;</p>
+                    <p>Teri har khushi mein share hona,</p>
+                    <p>Har dukh mein tractor ban ke khada rehna,</p>
+                    <p>Har subah tere naal chai peena,</p>
+                    <p>Har raat tere naal gallan karna,</p>
+                    <p>Aur hamesha tujhe hasaunda rehna.</p>
+                    <p className="pd-final-sign">Tu meri zindagi da sabse pakka vada ae.</p>
+                    <p className="pd-final-sign">Forever yours &ndash; Lakshay ❤️🤝🌹</p>
+                  </div>
+                </div>
+              )}
+
+              <p className="pd-hub-footer">Choose Your Puzzle Hungama! 🚜</p>
+            </div>
+          )}
+
+          {/* ===== PUZZLE 1: VADA UNSCRAMBLE ===== */}
+          {pdView === 'unscramble' && (
+            <div className="pd-game-container">
+              <button className="pd-back-btn" onClick={pdBackToHub}>← Wapas Hub</button>
+              <div className="pd-game-header">
+                <span className="pd-game-icon">🔤</span>
+                <h2 className="pd-game-title">Vada Unscramble!</h2>
+                <p className="pd-game-sub">Jumbled letters ko sahi order mein laga!</p>
+              </div>
+
+              {!pdUDone ? (
+                <div className={`pd-unscramble ${pdUShake ? 'pd-shake' : ''}`}>
+                  <div className="pd-word-progress">
+                    Word {pdUIdx + 1} / {pdWords.length}
+                    <div className="pd-word-progress-bar">
+                      <div className="pd-word-progress-fill" style={{ width: `${((pdUIdx) / pdWords.length) * 100}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div className="pd-word-hint">
+                    💡 Hint: {pdWords[pdUIdx].hint}
+                  </div>
+
+                  {/* Answer slots */}
+                  <div className="pd-word-answer">
+                    {pdWords[pdUIdx].word.split('').map((_, i) => (
+                      <div
+                        key={i}
+                        className={`pd-word-slot ${pdUAns[i] ? 'pd-word-slot-filled' : ''}`}
+                        onClick={() => pdUAns[i] && pdRemoveAnsLetter(i)}
+                      >
+                        {pdUAns[i] ? pdUAns[i].letter : ''}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Letter pool */}
+                  <div className="pd-word-pool">
+                    {pdUPool.map((item, i) => (
+                      <button
+                        key={i}
+                        className={`pd-pool-letter ${item.used ? 'pd-pool-used' : ''}`}
+                        onClick={() => pdTapPoolLetter(i)}
+                        disabled={item.used}
+                      >
+                        {item.letter}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    className="pd-check-btn"
+                    onClick={pdCheckWord}
+                    disabled={pdUAns.length !== pdWords[pdUIdx].word.length}
+                  >
+                    Check Karo! ✅
+                  </button>
+
+                  {pdUMsg && <div className={`pd-msg ${pdUMsg.includes('🎉') ? 'pd-msg-success' : 'pd-msg-error'}`}>{pdUMsg}</div>}
+                </div>
+              ) : (
+                <div className="pd-game-complete">
+                  <div className="pd-complete-emoji">🎉🔤✅</div>
+                  <h3 className="pd-complete-title">Saare Words Solve Ho Gaye!</h3>
+                  <div className="pd-unlock-promise">
+                    <p className="pd-unlock-label">🔓 Unlocked Promise:</p>
+                    <p className="pd-unlock-text">
+                      Main vada karda haan, tere naal har Promise Day te extra chole bhature treat dunga&hellip; aur har dukh vich tractor ban ke khada rahunga! Love you jaan ❤️🚜
+                    </p>
+                  </div>
+                  <button className="pd-hub-return-btn" onClick={pdBackToHub}>🏠 Hub te Wapas Ja</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ===== PUZZLE 2: PROMISE PAIR MATCH ===== */}
+          {pdView === 'match' && (
+            <div className="pd-game-container">
+              <button className="pd-back-btn" onClick={pdBackToHub}>← Wapas Hub</button>
+              <div className="pd-game-header">
+                <span className="pd-game-icon">🃏</span>
+                <h2 className="pd-game-title">Promise Pair Match!</h2>
+                <p className="pd-game-sub">Scenario aur Promise cards match kar!</p>
+              </div>
+
+              {!pdMDone ? (
+                <div className="pd-match-game">
+                  <div className="pd-match-stats">
+                    <span>Moves: {pdMMoves}</span>
+                    <span>Found: {pdMFound.length}/{pdMatchPairs.length}</span>
+                  </div>
+
+                  <div className="pd-match-grid">
+                    {pdMCards.map((card, idx) => {
+                      const isFlipped = pdMFlip.includes(idx) || pdMFound.includes(card.pairId)
+                      const isMatched = pdMFound.includes(card.pairId)
+                      return (
+                        <div
+                          key={idx}
+                          className={`pd-match-card ${isFlipped ? 'pd-match-flipped' : ''} ${isMatched ? 'pd-match-matched' : ''}`}
+                          onClick={() => pdFlipCard(idx)}
+                        >
+                          <div className="pd-match-card-inner">
+                            <div className="pd-match-card-front">🤝</div>
+                            <div className={`pd-match-card-back ${card.type === 'scenario' ? 'pd-card-scenario' : 'pd-card-promise'}`}>
+                              <span className="pd-card-type-badge">{card.type === 'scenario' ? '😤' : '💕'}</span>
+                              <span className="pd-card-text">{card.text}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {pdMMsg && <div className={`pd-msg ${pdMMsg.includes('🎉') ? 'pd-msg-success' : 'pd-msg-error'}`}>{pdMMsg}</div>}
+                </div>
+              ) : (
+                <div className="pd-game-complete">
+                  <div className="pd-complete-emoji">🎉🃏✅</div>
+                  <h3 className="pd-complete-title">Sab Match Ho Gaya!</h3>
+                  <p className="pd-complete-stats">Moves: {pdMMoves} | Pairs: {pdMFound.length}</p>
+                  <div className="pd-unlock-promise">
+                    <p className="pd-unlock-label">🔓 Unlocked Promise:</p>
+                    <p className="pd-unlock-text">
+                      Jaan, main promise karda haan &ndash; har pal tere saath rahunga, teri har khushi apni banaunga, aur kabhi nahi chhodunga. Tu meri zindagi da sabse pakka vada ae. Forever yours ❤️
+                    </p>
+                  </div>
+                  <button className="pd-hub-return-btn" onClick={pdBackToHub}>🏠 Hub te Wapas Ja</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ===== PUZZLE 3: JIGSAW PROMISE PUZZLE ===== */}
+          {pdView === 'jigsaw' && (
+            <div className="pd-game-container">
+              <button className="pd-back-btn" onClick={pdBackToHub}>← Wapas Hub</button>
+              <div className="pd-game-header">
+                <span className="pd-game-icon">🧩</span>
+                <h2 className="pd-game-title">Jigsaw Promise Puzzle!</h2>
+                <p className="pd-game-sub">Tiles sahi order mein arrange kar ke message reveal kar!</p>
+              </div>
+
+              {!pdJDone ? (
+                <div className="pd-jigsaw-game">
+                  <div className="pd-jigsaw-stats">
+                    <span>Moves: {pdJMoves}</span>
+                    <span>Tap 2 tiles to swap! 🔄</span>
+                  </div>
+
+                  <div className="pd-jigsaw-grid">
+                    {pdJTiles.map((tile, idx) => (
+                      <div
+                        key={idx}
+                        className={`pd-jigsaw-tile ${pdJSel === idx ? 'pd-jigsaw-selected' : ''} ${tile.id === idx ? 'pd-jigsaw-correct' : ''}`}
+                        onClick={() => pdTapTile(idx)}
+                      >
+                        <span className="pd-jigsaw-tile-emoji">{tile.emoji}</span>
+                        <span className="pd-jigsaw-tile-text">{tile.text}</span>
+                        <span className="pd-jigsaw-tile-num">{tile.id + 1}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pd-jigsaw-hint">
+                    <p>🧩 Hint: &quot;Main Vada Karda Haan Tere Naal Har Pal Forever&quot;</p>
+                    <p className="pd-jigsaw-hint-sub">Tiles ko 1-9 order mein lagao! 🤝</p>
+                  </div>
+
+                  {pdJMsg && <div className="pd-msg pd-msg-info">{pdJMsg}</div>}
+                </div>
+              ) : (
+                <div className="pd-game-complete">
+                  <div className="pd-complete-emoji">🎉🧩✅</div>
+                  <h3 className="pd-complete-title">Puzzle Poora!</h3>
+                  <div className="pd-jigsaw-solved">
+                    <div className="pd-jigsaw-solved-grid">
+                      {pdJigsawData.map((tile) => (
+                        <div key={tile.id} className="pd-jigsaw-solved-tile">
+                          <span>{tile.emoji}</span>
+                          <span>{tile.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="pd-jigsaw-solved-msg">🤝 Main Vada Karda Haan Tere Naal Har Pal Forever ✨</p>
+                  </div>
+                  <p className="pd-complete-stats">Moves: {pdJMoves}</p>
+                  <div className="pd-unlock-promise">
+                    <p className="pd-unlock-label">🔓 Unlocked Promise:</p>
+                    <p className="pd-unlock-text">
+                      Puzzle poora! Ab asli vada: Main promise karda haan, tere sapne poore karunga, har ladai baad cuddle karunga, aur tujhe hamesha hasaunga. Tu meri jaan ae, meri everything. Happy Promise Day! 🤝🌹
+                    </p>
+                  </div>
+                  <button className="pd-hub-return-btn" onClick={pdBackToHub}>🏠 Hub te Wapas Ja</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ===== PUZZLE 4: PROMISE ESCAPE ROOM ===== */}
+          {pdView === 'escape' && (
+            <div className="pd-game-container">
+              <button className="pd-back-btn" onClick={pdBackToHub}>← Wapas Hub</button>
+              <div className="pd-game-header">
+                <span className="pd-game-icon">🔐</span>
+                <h2 className="pd-game-title">Promise Escape Room!</h2>
+                <p className="pd-game-sub">Riddles solve kar ke promises unlock kar!</p>
+              </div>
+
+              {!pdEDone ? (
+                <div className={`pd-escape-game ${pdEShake ? 'pd-shake' : ''}`}>
+                  <div className="pd-escape-progress">
+                    <div className="pd-escape-locks">
+                      {pdEscRiddles.map((_, i) => (
+                        <span key={i} className={`pd-escape-lock ${pdEUnlocked.includes(i) ? 'pd-lock-open' : ''}`}>
+                          {pdEUnlocked.includes(i) ? '🔓' : '🔒'}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="pd-escape-step">Riddle {pdEStep + 1}/{pdEscRiddles.length}</span>
+                  </div>
+
+                  <div className="pd-escape-riddle">
+                    <div className="pd-escape-q-emoji">🤔</div>
+                    <p className="pd-escape-question">{pdEscRiddles[pdEStep].q}</p>
+                  </div>
+
+                  <div className="pd-escape-options">
+                    {pdEscRiddles[pdEStep].opts.map((opt, i) => (
+                      <button
+                        key={i}
+                        className="pd-escape-option"
+                        onClick={() => pdCheckEsc(i)}
+                        disabled={pdEUnlocked.includes(pdEStep)}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+
+                  {pdEMsg && (
+                    <div className={`pd-msg ${pdEMsg.includes('!') && !pdEMsg.includes('Galat') && !pdEMsg.includes('galat') && !pdEMsg.includes('Nahi') && !pdEMsg.includes('Oye') ? 'pd-msg-success' : 'pd-msg-error'}`}>
+                      {pdEMsg}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="pd-game-complete">
+                  <div className="pd-complete-emoji">🎉🔐✅</div>
+                  <h3 className="pd-complete-title">Escape Successful!</h3>
+                  <div className="pd-escape-unlocked-all">
+                    {pdEscRiddles.map((r, i) => (
+                      <div key={i} className="pd-escape-unlocked-item">
+                        <span>🔓 Riddle {i + 1}: {r.unlock}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pd-unlock-promise">
+                    <p className="pd-unlock-label">🔓 Final Lifetime Vada:</p>
+                    <p className="pd-unlock-text">
+                      Main hamesha tera saath dunga, har promise nibhaunga, aur teri smile nu kabhi nahi jaane dunga. Tu meri duniya ae, meri jaan. I promise ❤️🤝
+                    </p>
+                  </div>
+                  <button className="pd-hub-return-btn" onClick={pdBackToHub}>🏠 Hub te Wapas Ja</button>
+                </div>
+              )}
+            </div>
+          )}
         </section>
       )}
 
