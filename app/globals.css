@@ -6070,3 +6070,710 @@ body {
   .pd-pool-letter { width: 38px; height: 38px; font-size: 1.2rem; }
   .pd-jigsaw-grid { max-width: 260px; }
 }
+
+/* ================================================ */
+/* ===== HUG DAY - LATE NIGHT HUG DA HUNGAMA ===== */
+/* ================================================ */
+
+.hd-section {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2d1b4e 0%, #6a1b6a 30%, #c2185b 70%, #e8a0bf 100%);
+  background-size: 300% 300%;
+  animation: hdGradient 15s ease infinite;
+  padding: 80px 15px 40px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+@keyframes hdGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Squeeze animation on whole section */
+.hd-squeeze {
+  animation: hdSqueezeAnim 0.35s ease;
+}
+
+@keyframes hdSqueezeAnim {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.92); }
+  70% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* Chaos mode - flip + color invert */
+.hd-chaos {
+  animation: hdChaosAnim 0.6s ease;
+}
+
+@keyframes hdChaosAnim {
+  0% { transform: scale(1) rotate(0deg); filter: none; }
+  25% { transform: scale(0.95) rotate(2deg); filter: hue-rotate(90deg); }
+  50% { transform: scale(1.02) rotate(-2deg); filter: hue-rotate(180deg); }
+  75% { transform: scale(0.98) rotate(1deg); filter: hue-rotate(270deg); }
+  100% { transform: scale(1) rotate(0deg); filter: none; }
+}
+
+/* Background floating layer */
+.hd-bg-layer {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hd-bg-float {
+  position: absolute;
+  font-size: 1.5rem;
+  opacity: 0.12;
+  animation: hdBgFloat linear infinite;
+  top: -30px;
+}
+
+@keyframes hdBgFloat {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0.12; }
+  50% { opacity: 0.2; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+/* Zzz particles */
+.hd-zzz {
+  position: absolute;
+  opacity: 0.35;
+  animation: hdZzzFloat ease-out forwards;
+  pointer-events: none;
+  top: 60%;
+}
+
+@keyframes hdZzzFloat {
+  0% { transform: translateY(0) scale(0.5); opacity: 0.4; }
+  50% { opacity: 0.6; }
+  100% { transform: translateY(-200px) translateX(30px) scale(1.2); opacity: 0; }
+}
+
+/* Blush overlay */
+.hd-blush-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at center, rgba(255, 105, 180, 0.25) 0%, transparent 70%);
+  z-index: 10;
+  pointer-events: none;
+  animation: hdBlushFade 2s ease forwards;
+}
+
+@keyframes hdBlushFade {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Overheat overlay */
+.hd-overheat-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 10;
+  pointer-events: none;
+  animation: hdOverheat 0.3s ease infinite;
+}
+
+@keyframes hdOverheat {
+  0%, 100% { background: rgba(255, 0, 0, 0.15); }
+  50% { background: rgba(255, 80, 0, 0.25); }
+}
+
+/* Kiss rain */
+.hd-kiss-rain {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 12;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hd-kiss-emoji {
+  position: absolute;
+  top: -30px;
+  font-size: 1.8rem;
+  animation: hdKissFall linear forwards;
+}
+
+@keyframes hdKissFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0.3; }
+}
+
+/* Fog overlay */
+.hd-fog-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 200, 220, 0.7);
+  backdrop-filter: blur(15px);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: hdFogIn 0.5s ease;
+}
+
+.hd-fog-overlay p {
+  font-family: 'Bangers', cursive;
+  font-size: 1.8rem;
+  color: #c2185b;
+  text-shadow: 2px 2px 0 rgba(255,255,255,0.5);
+  animation: pdBounce 1s ease infinite;
+}
+
+@keyframes hdFogIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Billi popup */
+.hd-billi-popup {
+  position: fixed;
+  bottom: 80px;
+  right: 15px;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(10px);
+  border: 2px solid #ff9800;
+  border-radius: 18px;
+  padding: 12px 16px;
+  z-index: 20;
+  animation: hdBilliPop 0.4s ease, hdBilliShake 0.5s ease 0.4s;
+  max-width: 200px;
+}
+
+@keyframes hdBilliPop {
+  from { transform: scale(0) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes hdBilliShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
+
+.hd-billi-emoji {
+  font-size: 2.5rem;
+  display: block;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.hd-billi-popup p {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.8rem;
+  color: #ffcc80;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Tractor zoom across screen */
+.hd-tractor-zoom {
+  position: fixed;
+  top: 45%;
+  z-index: 20;
+  font-size: 4rem;
+  animation: hdTractorZoom 1.5s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes hdTractorZoom {
+  0% { left: -100px; transform: rotate(0deg); }
+  40% { transform: rotate(-5deg); }
+  60% { transform: rotate(5deg); }
+  100% { left: 120%; transform: rotate(0deg); }
+}
+
+/* Main content */
+.hd-content {
+  max-width: 500px;
+  width: 100%;
+  z-index: 1;
+  animation: hdFadeIn 0.8s ease;
+}
+
+@keyframes hdFadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.hd-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.hd-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2.4rem;
+  color: #ffd700;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.3), 0 0 30px rgba(255,215,0,0.3);
+  letter-spacing: 2px;
+  animation: hdWobble 2s ease infinite;
+  line-height: 1.3;
+}
+
+@keyframes hdWobble {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-1.5deg); }
+  30% { transform: rotate(1.5deg); }
+  45% { transform: rotate(-1deg); }
+  60% { transform: rotate(1deg); }
+  75% { transform: rotate(0deg); }
+}
+
+.hd-title-sub {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1rem;
+  color: #ffab91;
+  margin-top: 5px;
+}
+
+/* Pillow area */
+.hd-pillow-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  transition: transform 0.3s ease;
+}
+
+.hd-pillow-squeezed .hd-pillow {
+  animation: hdPillowSquish 0.4s ease;
+}
+
+@keyframes hdPillowSquish {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.8, 1.15); }
+  100% { transform: scale(1); }
+}
+
+.hd-pillow {
+  position: relative;
+  background: linear-gradient(135deg, #f8bbd0, #f48fb1);
+  border: 3px solid rgba(255,255,255,0.4);
+  border-radius: 20px;
+  padding: 15px 25px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  animation: hdPillowBreathe 4s ease infinite;
+}
+
+@keyframes hdPillowBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.hd-pillow-emoji {
+  font-size: 2.5rem;
+  display: block;
+}
+
+.hd-pillow-label {
+  font-family: 'Bangers', cursive;
+  font-size: 0.85rem;
+  color: #880e4f;
+  display: block;
+  margin-top: 3px;
+}
+
+.hd-pillow-arms {
+  position: absolute;
+  right: -25px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  animation: hdArmsHug 2s ease infinite;
+}
+
+@keyframes hdArmsHug {
+  0%, 100% { transform: translateY(-50%) rotate(0deg); }
+  50% { transform: translateY(-50%) rotate(-15deg) scale(1.1); }
+}
+
+.hd-sleepy-jatt {
+  position: relative;
+}
+
+.hd-sleepy-face {
+  font-size: 3rem;
+  animation: hdSleepyBob 3s ease infinite;
+}
+
+@keyframes hdSleepyBob {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg) translateY(-3px); }
+  75% { transform: rotate(5deg) translateY(3px); }
+}
+
+.hd-sleepy-zzz {
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  font-size: 1.2rem;
+  animation: hdZzzBubble 2s ease infinite;
+}
+
+@keyframes hdZzzBubble {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+}
+
+/* Confession text */
+.hd-confession {
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 18px 16px;
+  margin: 15px 0;
+}
+
+.hd-confession p {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.95rem;
+  color: #ffe0b2;
+  line-height: 1.6;
+  margin: 10px 0;
+}
+
+.hd-confession-cta {
+  color: #ffd700 !important;
+  font-weight: 700;
+  font-size: 1rem !important;
+}
+
+/* Hug counter */
+.hd-counter {
+  text-align: center;
+  margin: 18px 0 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hd-counter-label {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.85rem;
+  color: #ffcc80;
+}
+
+.hd-counter-num {
+  font-family: 'Bangers', cursive;
+  font-size: 2.5rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3), 0 0 20px rgba(255,215,0,0.3);
+  transition: transform 0.2s ease;
+}
+
+.hd-squeeze .hd-counter-num {
+  animation: hdCountPop 0.3s ease;
+}
+
+@keyframes hdCountPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.hd-counter-sub {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.7rem;
+  color: #ffab91;
+  animation: pdPulseText 2s ease infinite;
+}
+
+/* THE BIG HUG BUTTON */
+.hd-btn-area {
+  text-align: center;
+  margin: 15px 0;
+}
+
+.hd-hug-btn {
+  background: linear-gradient(135deg, #f48fb1, #e91e63, #c2185b);
+  border: 4px solid rgba(255,255,255,0.4);
+  border-radius: 30px;
+  padding: 22px 35px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin: 0 auto;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 30px rgba(233, 30, 99, 0.4), 0 0 40px rgba(255, 105, 180, 0.2);
+  animation: hdBtnPulse 2s ease infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes hdBtnPulse {
+  0%, 100% { box-shadow: 0 8px 30px rgba(233, 30, 99, 0.4), 0 0 40px rgba(255, 105, 180, 0.2); }
+  50% { box-shadow: 0 8px 40px rgba(233, 30, 99, 0.6), 0 0 60px rgba(255, 105, 180, 0.4); }
+}
+
+.hd-hug-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  animation: hdBtnShine 3s ease infinite;
+}
+
+@keyframes hdBtnShine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.hd-hug-btn:hover {
+  transform: scale(1.05);
+}
+
+.hd-hug-btn:active {
+  transform: scale(0.93);
+  box-shadow: 0 2px 10px rgba(233, 30, 99, 0.6);
+}
+
+.hd-btn-arms {
+  font-size: 3.5rem;
+  display: block;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+}
+
+.hd-btn-text {
+  font-family: 'Bangers', cursive;
+  font-size: 1.4rem;
+  color: white;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  line-height: 1.3;
+}
+
+.hd-btn-sub {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.7);
+}
+
+/* Reverse hug mode */
+.hd-reverse-hug {
+  text-align: center;
+  animation: hdFadeIn 0.5s ease;
+}
+
+.hd-reverse-title {
+  font-family: 'Bangers', cursive;
+  font-size: 1.8rem;
+  color: #ffd700;
+  margin-bottom: 12px;
+  animation: hdWobble 1.5s ease infinite;
+}
+
+.hd-reverse-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: white;
+  font-family: 'Bangers', cursive;
+  font-size: 1.2rem;
+  padding: 14px 28px;
+  border-radius: 25px;
+  text-decoration: none;
+  box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+}
+
+.hd-reverse-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
+}
+
+.hd-reverse-skip {
+  display: block;
+  margin: 12px auto 0;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #ffcc80;
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.85rem;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.hd-reverse-skip:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Maxed out state */
+.hd-maxed-out {
+  text-align: center;
+  animation: hdFadeIn 0.6s ease;
+}
+
+.hd-maxed-emoji {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  animation: pdBounce 1s ease infinite;
+}
+
+.hd-maxed-title {
+  font-family: 'Bangers', cursive;
+  font-size: 2rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  margin-bottom: 8px;
+}
+
+.hd-maxed-text {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.95rem;
+  color: #ffe0b2;
+  margin-bottom: 15px;
+}
+
+.hd-maxed-wa-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: white;
+  font-family: 'Bangers', cursive;
+  font-size: 1.3rem;
+  padding: 14px 30px;
+  border-radius: 30px;
+  text-decoration: none;
+  box-shadow: 0 5px 20px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+  animation: hdBtnPulse 2s ease infinite;
+}
+
+.hd-maxed-wa-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Random hug message */
+.hd-random-msg {
+  text-align: center;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(255,215,0,0.3);
+  border-radius: 16px;
+  padding: 10px 16px;
+  margin: 10px 0;
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.9rem;
+  color: #ffe0b2;
+  font-weight: 700;
+  animation: hdMsgPop 0.3s ease;
+}
+
+@keyframes hdMsgPop {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Milestone popup */
+.hd-milestone {
+  text-align: center;
+  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(233,30,99,0.2));
+  border: 3px solid #ffd700;
+  border-radius: 20px;
+  padding: 18px 16px;
+  margin: 12px 0;
+  animation: hdMilestonePop 0.5s ease;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+@keyframes hdMilestonePop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.hd-milestone-badge {
+  font-family: 'Bangers', cursive;
+  font-size: 1.5rem;
+  color: #ffd700;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.hd-milestone-text {
+  font-family: 'Comic Neue', cursive;
+  font-size: 0.9rem;
+  color: #fff;
+  line-height: 1.6;
+}
+
+/* Outro */
+.hd-outro {
+  margin-top: 25px;
+  text-align: center;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255,215,0,0.2);
+  border-radius: 22px;
+  padding: 20px 16px;
+}
+
+.hd-outro-divider {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+  letter-spacing: 8px;
+}
+
+.hd-outro-text {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1rem;
+  color: #fff;
+  line-height: 1.7;
+}
+
+.hd-outro-sign {
+  font-family: 'Bangers', cursive;
+  font-size: 1.15rem;
+  color: #ffd700;
+  margin-top: 12px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}
+
+/* ===== HUG DAY RESPONSIVE ===== */
+@media (max-width: 480px) {
+  .hd-title { font-size: 2rem; }
+  .hd-title-sub { font-size: 0.9rem; }
+  .hd-pillow-emoji { font-size: 2rem; }
+  .hd-sleepy-face { font-size: 2.5rem; }
+  .hd-confession p { font-size: 0.85rem; }
+  .hd-btn-arms { font-size: 3rem; }
+  .hd-btn-text { font-size: 1.2rem; }
+  .hd-counter-num { font-size: 2rem; }
+  .hd-section { padding: 75px 10px 30px; }
+  .hd-milestone-badge { font-size: 1.3rem; }
+  .hd-milestone-text { font-size: 0.85rem; }
+}
+
+@media (max-width: 360px) {
+  .hd-title { font-size: 1.7rem; }
+  .hd-pillow { padding: 12px 18px; }
+  .hd-btn-arms { font-size: 2.5rem; }
+  .hd-btn-text { font-size: 1.1rem; }
+  .hd-hug-btn { padding: 18px 25px; }
+  .hd-billi-popup { right: 10px; bottom: 70px; max-width: 170px; }
+}
