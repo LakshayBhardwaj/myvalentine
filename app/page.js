@@ -149,6 +149,23 @@ export default function RoseDayPage() {
   const [pdEShake, setPdEShake] = useState(false)
   const [pdEUnlocked, setPdEUnlocked] = useState([])
 
+  // ===== HUG DAY - LATE NIGHT HUG DA HUNGAMA STATES =====
+  const [hugCount, setHugCount] = useState(0)
+  const [hugMsg, setHugMsg] = useState('')
+  const [hugMilestone, setHugMilestone] = useState(null) // current milestone
+  const [hugSqueeze, setHugSqueeze] = useState(false)
+  const [hugBlush, setHugBlush] = useState(false)
+  const [hugFlip, setHugFlip] = useState(false) // reverse hug mode
+  const [hugOverheat, setHugOverheat] = useState(false)
+  const [hugKissRain, setHugKissRain] = useState(false)
+  const [hugChaos, setHugChaos] = useState(false) // ultimate surrender
+  const [hugTractor, setHugTractor] = useState(false)
+  const [hugBilli, setHugBilli] = useState(false)
+  const [hugFog, setHugFog] = useState(false)
+  const [hugMaxed, setHugMaxed] = useState(false)
+  const [hugZzz, setHugZzz] = useState([])
+  const hugCountRef = useRef(0)
+
   // Initialize Audio Context
   const getAudioContext = () => {
     if (!audioContextRef.current && typeof window !== 'undefined') {
@@ -2821,6 +2838,281 @@ ${deviceInfo.userAgent}`
   // Check if all promise day puzzles complete
   const pdAllDone = pdDone.u && pdDone.m && pdDone.j && pdDone.e
 
+  // ===== HUG DAY - LATE NIGHT HUG DA HUNGAMA LOGIC =====
+  const hugRandomMsgs = [
+    "Ouch! Itna tight ki mera dil vi squeeze ho gaya! 😂",
+    "Hor tight! Pillow jealous ho rahi ae! 😜",
+    "Hug level: Jatt Mode Activated! 🚜🤗",
+    "Teri jappi > Amritsari Chole! Aur oh bahut tasty ne! 😋",
+    "Ab kiss add kar dun? Dream repeat mode on! 💋",
+    "Main drool kar raha tha dream vich... sorry not sorry! 😏",
+    "Whiskers dekh rahi ae judgingly... ignore kar! 🐱",
+    "Tera hug = mera charger! 100% charged! 🔋",
+    "Itni tight jappi? Meri bones crack ho gayi! 😂💀",
+    "Hug count badh rahi... tera addiction dangerous ae! ⚠️",
+    "Dream vich vi itni tight jappi nahi si! 😏",
+    "Tu squeeze karti ae ya wrestling karti ae? 🤼😂",
+    "Mera pillow bhi itna tight hug nahi karda! 🛏️",
+    "Jappi da meter overload ho raha ae! ⚡",
+    "Ek hor? Tu taan greedy ae hugs vich! 😂🤗",
+  ]
+
+  const hugMilestones = {
+    3: {
+      title: 'Warm-Up Overload! 😏',
+      text: "Oye 3 hugs already? Tu taan pro ae! Par mera dil abhi warm-up kar raha... dream wala hug repeat ho raha mind vich! 😏💭 Ab hor tight kar!",
+      effect: 'blush'
+    },
+    7: {
+      title: 'Billi Jealous Mode! 🐱😤',
+      text: "7 hugs! Whiskers jealous ho gayi – boli 'oye Jatt, menu hug kyun nahi? Pillow tere paas, main yahan akeli!' 🐱😤 Ab tu hi bacha le, hor hugs de!",
+      effect: 'billi'
+    },
+    10: {
+      title: 'IRL Hug Pending! 🚚',
+      text: "10 hugs! Ab IRL hug pending – asli wali jaldi de de! Virtual se dil nahi bharda... address confirm kar waise! 🚚😘",
+      effect: 'confetti'
+    },
+    12: {
+      title: 'Tractor Hug Crash! 🚜💥',
+      text: "12 hugs! Itna tight ki mera imaginary tractor vi crash ho gaya – brake fail tere pyar naal! 🚜💥 Ab IRL hug se recover karna padega!",
+      effect: 'tractor'
+    },
+    15: {
+      title: 'OVERHEAT WARNING! 🔥',
+      text: "15+ hugs! Virtual hug vi limit cross kar gayi – screen overheat ho rahi ae! 🔥 Bas kar pagli, pet dukh jauga has has ke! 💀😂",
+      effect: 'overheat'
+    },
+    18: {
+      title: 'Kiss Sneak Attack! 💋',
+      text: "18 hugs! Ab dream upgrade – hug ke saath kiss vi add ho gaya! 😘 Screen fog ho gaya... saaf karne layi hor tap kar! Real wala jaldi plan kar rahe hain shhh 💋",
+      effect: 'kiss'
+    },
+    25: {
+      title: 'ULTIMATE SURRENDER! 🏳️',
+      text: "25+ hugs! Bas kar meri jaan, main surrender kar dita! Tu jeet gayi 🤗🏳️ Pet dukh gaya has has ke, neend vi aa rahi fer se! 😴💀 Ab asli hug/vada: Lifetime unlimited, no oversleep excuse! Love you pagli ❤️",
+      effect: 'chaos'
+    },
+    30: {
+      title: 'HUG LIMIT MAXED! 🤯',
+      text: "30 hugs! Hug factory shutdown! 🏭 Ab WhatsApp pe aa ja real plan banane! Virtual jappi ki vi limit hoti ae... par meri pyar di nahi! 😘❤️ Ab asli wali jappi ka time ae!",
+      effect: 'maxed'
+    }
+  }
+
+  const playHugSound = (type) => {
+    if (!soundEnabled) return
+    const ctx = getAudioContext()
+    if (!ctx) return
+    try {
+      if (type === 'squish') {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(300, ctx.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.15)
+        gain.gain.setValueAtTime(0.35, ctx.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2)
+        osc.start(ctx.currentTime)
+        osc.stop(ctx.currentTime + 0.2)
+        // Bounce back
+        const osc2 = ctx.createOscillator()
+        const gain2 = ctx.createGain()
+        osc2.connect(gain2)
+        gain2.connect(ctx.destination)
+        osc2.type = 'sine'
+        osc2.frequency.setValueAtTime(100, ctx.currentTime + 0.15)
+        osc2.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.3)
+        gain2.gain.setValueAtTime(0.25, ctx.currentTime + 0.15)
+        gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35)
+        osc2.start(ctx.currentTime + 0.15)
+        osc2.stop(ctx.currentTime + 0.35)
+      } else if (type === 'horn') {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.type = 'sawtooth'
+        osc.frequency.setValueAtTime(220, ctx.currentTime)
+        osc.frequency.setValueAtTime(280, ctx.currentTime + 0.15)
+        osc.frequency.setValueAtTime(220, ctx.currentTime + 0.3)
+        gain.gain.setValueAtTime(0.25, ctx.currentTime)
+        gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.4)
+        osc.start(ctx.currentTime)
+        osc.stop(ctx.currentTime + 0.4)
+      } else if (type === 'meow') {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(600, ctx.currentTime)
+        osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.15)
+        osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.35)
+        gain.gain.setValueAtTime(0.3, ctx.currentTime)
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4)
+        osc.start(ctx.currentTime)
+        osc.stop(ctx.currentTime + 0.4)
+      } else if (type === 'crash') {
+        // Tractor crash
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.type = 'sawtooth'
+        osc.frequency.setValueAtTime(150, ctx.currentTime)
+        osc.frequency.linearRampToValueAtTime(30, ctx.currentTime + 0.5)
+        gain.gain.setValueAtTime(0.5, ctx.currentTime)
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5)
+        osc.start(ctx.currentTime)
+        osc.stop(ctx.currentTime + 0.5)
+      } else if (type === 'smooch') {
+        const notes = [800, 1000, 1200, 800]
+        notes.forEach((freq, i) => {
+          const o = ctx.createOscillator()
+          const g = ctx.createGain()
+          o.connect(g)
+          g.connect(ctx.destination)
+          o.type = 'sine'
+          o.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.08)
+          g.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.08)
+          g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.08 + 0.1)
+          o.start(ctx.currentTime + i * 0.08)
+          o.stop(ctx.currentTime + i * 0.08 + 0.1)
+        })
+        return
+      } else if (type === 'lullaby') {
+        // Soft dhol lullaby - gentle low tones
+        const notes = [80, 100, 80, 60]
+        notes.forEach((freq, i) => {
+          const o = ctx.createOscillator()
+          const g = ctx.createGain()
+          o.connect(g)
+          g.connect(ctx.destination)
+          o.type = 'triangle'
+          o.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.25)
+          g.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.25)
+          g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.25 + 0.3)
+          o.start(ctx.currentTime + i * 0.25)
+          o.stop(ctx.currentTime + i * 0.25 + 0.3)
+        })
+        return
+      }
+    } catch(e) {}
+  }
+
+  // Spawn a Zzz particle
+  const spawnZzz = () => {
+    const newZ = {
+      id: Date.now() + Math.random(),
+      left: 10 + Math.random() * 80,
+      size: 0.8 + Math.random() * 0.8,
+      dur: 3 + Math.random() * 2
+    }
+    setHugZzz(prev => [...prev.slice(-12), newZ])
+  }
+
+  // Auto-spawn Zzz on hug day
+  useEffect(() => {
+    if (activeDay !== 'hug') return
+    const interval = setInterval(spawnZzz, 1500)
+    // Play lullaby on load
+    const timer = setTimeout(() => playHugSound('lullaby'), 500)
+    return () => { clearInterval(interval); clearTimeout(timer) }
+  }, [activeDay])
+
+  const handleHug = () => {
+    if (hugMaxed) return
+    const newCount = hugCountRef.current + 1
+    hugCountRef.current = newCount
+    setHugCount(newCount)
+
+    // Squeeze animation
+    setHugSqueeze(true)
+    setTimeout(() => setHugSqueeze(false), 300)
+
+    // Vibration
+    if (navigator.vibrate) navigator.vibrate(200)
+
+    // Sound
+    const sounds = ['squish', 'horn', 'squish', 'squish']
+    playHugSound(sounds[newCount % sounds.length])
+
+    // Random message for non-milestone taps
+    setHugMsg(hugRandomMsgs[Math.floor(Math.random() * hugRandomMsgs.length)])
+    setTimeout(() => { if (hugCountRef.current === newCount) setHugMsg('') }, 2500)
+
+    // Check milestones
+    const milestone = hugMilestones[newCount]
+    if (milestone) {
+      setHugMilestone(milestone)
+      setTimeout(() => setHugMilestone(null), 5000)
+
+      switch (milestone.effect) {
+        case 'blush':
+          setHugBlush(true)
+          playHugSound('squish')
+          setTimeout(() => setHugBlush(false), 2000)
+          break
+        case 'billi':
+          setHugBilli(true)
+          playHugSound('meow')
+          setTimeout(() => setHugBilli(false), 4000)
+          break
+        case 'confetti':
+          triggerConfetti()
+          playSound('celebration')
+          break
+        case 'tractor':
+          setHugTractor(true)
+          playHugSound('crash')
+          triggerConfetti()
+          setTimeout(() => setHugTractor(false), 3000)
+          break
+        case 'overheat':
+          setHugOverheat(true)
+          playSound('error')
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200])
+          setTimeout(() => setHugOverheat(false), 3000)
+          break
+        case 'kiss':
+          setHugKissRain(true)
+          setHugFog(true)
+          playHugSound('smooch')
+          setTimeout(() => { setHugKissRain(false); setHugFog(false) }, 4000)
+          break
+        case 'chaos':
+          setHugChaos(true)
+          playSound('celebration')
+          triggerConfetti()
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200, 100, 400])
+          setTimeout(() => setHugChaos(false), 5000)
+          break
+        case 'maxed':
+          setHugMaxed(true)
+          playSound('celebration')
+          triggerConfetti()
+          setTimeout(() => triggerConfetti(), 1000)
+          break
+      }
+    }
+
+    // At 5 hugs: confetti -> Zzz
+    if (newCount === 5) {
+      triggerConfetti()
+    }
+
+    // Flip hug at 3
+    if (newCount === 3) {
+      setTimeout(() => {
+        setHugFlip(true)
+        setTimeout(() => setHugFlip(false), 4000)
+      }, 2500)
+    }
+  }
+
   return (
     <div onClick={enableSound}>
       {/* Sound Enable Overlay - Shows on first visit */}
@@ -5090,20 +5382,152 @@ ${deviceInfo.userAgent}`
         </section>
       )}
 
-      {/* ========== HUG DAY - COMING SOON ========== */}
+      {/* ========== HUG DAY - LATE NIGHT HUG DA HUNGAMA ========== */}
       {activeDay === 'hug' && (
-        <section className="coming-soon-section hug-theme">
-          <div className="coming-soon-container">
-            <div className="coming-soon-emoji">🤗</div>
-            <h1 className="coming-soon-title">Hug Day</h1>
-            <h2 className="coming-soon-date">12th February</h2>
-            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
-            <p className="coming-soon-text">
-              Hug Day pe virtual jadu ki jhappi! 🤗<br/>
-              Tight wali hug ka content loading... 💕
-            </p>
-            <div className="coming-soon-hearts">🤗 💕 🤗 💕 🤗</div>
-            <p className="coming-soon-hint">*Virtual Hug* 🫂</p>
+        <section className={`hd-section ${hugSqueeze ? 'hd-squeeze' : ''} ${hugChaos ? 'hd-chaos' : ''}`}>
+          {/* Floating Zzz + hearts + pillows background */}
+          <div className="hd-bg-layer">
+            {hugZzz.map(z => (
+              <span key={z.id} className="hd-zzz" style={{ left: `${z.left}%`, fontSize: `${z.size}rem`, animationDuration: `${z.dur}s` }}>
+                💤
+              </span>
+            ))}
+            {['🛏️','❤️','🤗','💕','🛌','❤️','🤗','💕','🛏️','🤗'].map((e, i) => (
+              <span key={i} className="hd-bg-float" style={{ left: `${(i * 10) + 2}%`, animationDelay: `${i * 0.8}s`, animationDuration: `${4 + (i % 3)}s` }}>{e}</span>
+            ))}
+          </div>
+
+          {/* Pink blush overlay */}
+          {hugBlush && <div className="hd-blush-overlay"></div>}
+
+          {/* Overheat red flash */}
+          {hugOverheat && <div className="hd-overheat-overlay"></div>}
+
+          {/* Kiss rain */}
+          {hugKissRain && (
+            <div className="hd-kiss-rain">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <span key={i} className="hd-kiss-emoji" style={{ left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 1.5}s`, animationDuration: `${1.5 + Math.random()}s` }}>💋</span>
+              ))}
+            </div>
+          )}
+
+          {/* Fog overlay */}
+          {hugFog && <div className="hd-fog-overlay" onClick={() => setHugFog(false)}><p>Tap to clear fog! 👆</p></div>}
+
+          {/* Billi popup */}
+          {hugBilli && (
+            <div className="hd-billi-popup">
+              <span className="hd-billi-emoji">🐱</span>
+              <p>Whiskers: &quot;Oye! Menu hug kyun nahi?!&quot; 😤</p>
+            </div>
+          )}
+
+          {/* Tractor zoom */}
+          {hugTractor && (
+            <div className="hd-tractor-zoom">🚜💨</div>
+          )}
+
+          <div className="hd-content">
+            {/* Header */}
+            <div className="hd-header">
+              <h1 className="hd-title">
+                Happy Hug Day, Raima! 🤗
+              </h1>
+              <p className="hd-title-sub">Oye Sohniye, Aaj Page Late Ho Gaya&hellip; Meri Galti Nahi! 😴😂</p>
+            </div>
+
+            {/* Pillow squeeze visual */}
+            <div className={`hd-pillow-area ${hugSqueeze ? 'hd-pillow-squeezed' : ''}`}>
+              <div className="hd-pillow">
+                <span className="hd-pillow-emoji">🛏️</span>
+                <span className="hd-pillow-label">Raima&apos;s Pillow</span>
+                <span className="hd-pillow-arms">🤗</span>
+              </div>
+              <div className="hd-sleepy-jatt">
+                <span className="hd-sleepy-face">😴</span>
+                <span className="hd-sleepy-zzz">💤</span>
+              </div>
+            </div>
+
+            {/* Confession text */}
+            <div className="hd-confession">
+              <p>Arre jaan, aaj subah page update karna si&hellip; par kal raat tere bare soch soch ke neend aa gayi! 😏</p>
+              <p>Dream vich tu si, main tainu tight hug kar raha, kiss kar raha&hellip; itna intensely ki pillow vi crush ho gaya! 🤗💋</p>
+              <p>Subah utha taan alarm baj raha, par main &lsquo;5 min hor&rsquo; bol ke fer so gaya &ndash; teri virtual jappi repeat karte karte! Oversleep ho gaya, page late! Sorry pagli&hellip; par blame tere pyar da! 😂🚜</p>
+              <p className="hd-confession-cta">Ab compensation: Virtual hug unlimited &ndash; click kar ke le le, warna main billi nu hug kar lunga (Whiskers jealous ho rahi ae)! 🐱</p>
+            </div>
+
+            {/* Hug Counter */}
+            <div className="hd-counter">
+              <span className="hd-counter-label">Hugs From Your Sleepy Jatt:</span>
+              <span className="hd-counter-num">{hugCount} 🤗</span>
+              {hugCount > 0 && hugCount < 30 && <span className="hd-counter-sub">(Milestone Loading... 😂)</span>}
+            </div>
+
+            {/* The Big Hug Button */}
+            {!hugMaxed ? (
+              <div className="hd-btn-area">
+                {!hugFlip ? (
+                  <button className="hd-hug-btn" onClick={handleHug}>
+                    <span className="hd-btn-arms">🤗</span>
+                    <span className="hd-btn-text">Click For Tight Hug<br/>From Your Jatt!</span>
+                    <span className="hd-btn-sub">(Unlimited, No Wilt!)</span>
+                  </button>
+                ) : (
+                  <div className="hd-reverse-hug">
+                    <p className="hd-reverse-title">Ab Tu Mujhe Hug De! 🥺</p>
+                    <a
+                      className="hd-reverse-btn"
+                      href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Teri virtual jappi ne hasa ditta! Ab asli wali kab? 😘🤗")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Send Hug Back via WhatsApp! 💚
+                    </a>
+                    <button className="hd-reverse-skip" onClick={() => setHugFlip(false)}>
+                      Nahi abhi nahi 😜 Continue hugging!
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="hd-maxed-out">
+                <div className="hd-maxed-emoji">🤯🤗🏆</div>
+                <h3 className="hd-maxed-title">HUG FACTORY SHUTDOWN!</h3>
+                <p className="hd-maxed-text">30 hugs complete! Ab WhatsApp pe aa ja real plan banane! 😘</p>
+                <a
+                  className="hd-maxed-wa-btn"
+                  href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Maine 30 virtual hugs le liye! Ab asli wali jappi ka time ae! 🤗❤️")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  WhatsApp Pe Aa Ja! 💚📱
+                </a>
+              </div>
+            )}
+
+            {/* Random hug message */}
+            {hugMsg && !hugMilestone && (
+              <div className="hd-random-msg">{hugMsg}</div>
+            )}
+
+            {/* Milestone popup */}
+            {hugMilestone && (
+              <div className="hd-milestone">
+                <div className="hd-milestone-badge">{hugMilestone.title}</div>
+                <p className="hd-milestone-text">{hugMilestone.text}</p>
+              </div>
+            )}
+
+            {/* Outro / Sticky Bottom Promise */}
+            <div className="hd-outro">
+              <div className="hd-outro-divider">🤗 ❤️ 🤗</div>
+              <p className="hd-outro-text">
+                Jaan, aaj Hug Day te vada: Har din tujhe tight hug dunga (virtual taan abhi diya, asli jaldi!). Tu meri favorite pillow ae&hellip; matlab dream girl! Love you more than late-night oversleep! 🤗❤️
+              </p>
+              <p className="hd-outro-sign">&ndash; Tera sleepy Jatt, Lakshay 😴🚜</p>
+            </div>
           </div>
         </section>
       )}
