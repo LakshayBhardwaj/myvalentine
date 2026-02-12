@@ -5532,20 +5532,13 @@ ${deviceInfo.userAgent}`
         </section>
       )}
 
-      {/* ========== KISS DAY - COMING SOON ========== */}
+      {/* ========== KISS DAY ========== */}
       {activeDay === 'kiss' && (
-        <section className="coming-soon-section kiss-theme">
-          <div className="coming-soon-container">
-            <div className="coming-soon-emoji">💋</div>
-            <h1 className="coming-soon-title">Kiss Day</h1>
-            <h2 className="coming-soon-date">13th February</h2>
-            <div className="coming-soon-badge">🚧 UPDATE COMING SOON 🚧</div>
-            <p className="coming-soon-text">
-              Kiss Day ka romantic content coming soon! 💋<br/>
-              Flying kisses unlimited! 😘
-            </p>
-            <div className="coming-soon-hearts">💋 💕 💋 💕 💋</div>
-            <p className="coming-soon-hint">😘😘😘 (ye le advance mein!)</p>
+        <section className="kiss-day-section">
+          <div className="kiss-day-container">
+            <div className="kiss-day-emoji">😞</div>
+            <h1 className="kiss-day-title">Happy Kiss Day</h1>
+            <p className="kiss-day-text">...koi nahi hai kiss karne ko 😔</p>
           </div>
         </section>
       )}
