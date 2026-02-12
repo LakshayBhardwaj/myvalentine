@@ -258,6 +258,38 @@ body {
   background: linear-gradient(135deg, #ec407a 0%, #f48fb1 50%, #f8bbd9 100%);
 }
 
+/* ========== KISS DAY - SAD GREETING ========== */
+.kiss-day-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4a4a4a 0%, #6b6b6b 50%, #8a8a8a 100%);
+}
+
+.kiss-day-container {
+  text-align: center;
+  padding: 40px 30px;
+}
+
+.kiss-day-emoji {
+  font-size: 80px;
+  margin-bottom: 20px;
+}
+
+.kiss-day-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 2.5rem;
+  color: #d0d0d0;
+  margin-bottom: 16px;
+}
+
+.kiss-day-text {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1.2rem;
+  color: #999;
+}
+
 .coming-soon-section.valentine-theme {
   background: linear-gradient(135deg, #e91e63 0%, #f44336 50%, #ff5722 100%);
 }
