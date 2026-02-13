@@ -6005,7 +6005,7 @@ ${deviceInfo.userAgent}`
                     playsInline
                     preload="metadata"
                   >
-                    <source src="/Resigned%20without%20an%20offer%E2%80%A6Now%20living%20in%20%E2%80%9Clet%E2%80%99s%20see%20what%20happens%E2%80%9D%20mode%20%F0%9F%98%AD%F0%9F%92%BCConfidence%20high%2C%20bank%20.mp4" type="video/mp4" />
+                    <source src="/resigned-video.mp4" type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
                 </div>
