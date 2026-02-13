@@ -166,6 +166,21 @@ export default function RoseDayPage() {
   const [hugZzz, setHugZzz] = useState([])
   const hugCountRef = useRef(0)
 
+  // ===== VALENTINE'S DAY - SAD GAANA DRAMA STATES =====
+  const [vdAct, setVdAct] = useState('act1') // act1, act2, act3, end
+  const [vdSadPlaying, setVdSadPlaying] = useState(false)
+  const [vdSadnessBandKar, setVdSadnessBandKar] = useState(false)
+  const [vdCardIndex, setVdCardIndex] = useState(0)
+  const [vdCardFlip, setVdCardFlip] = useState(false)
+  const [vdSadAttempts, setVdSadAttempts] = useState(0)
+  const [vdSadLocked, setVdSadLocked] = useState(false)
+  const [vdHappyMode, setVdHappyMode] = useState(false)
+  const [vdFakeTears, setVdFakeTears] = useState(false)
+  const [vdRecordScratch, setVdRecordScratch] = useState(false)
+  const [vdShowEnd, setVdShowEnd] = useState(false)
+  const sadGaanaRef = useRef(null)
+  const scratchSoundRef = useRef(null)
+
   // Initialize Audio Context
   const getAudioContext = () => {
     if (!audioContextRef.current && typeof window !== 'undefined') {
@@ -2239,6 +2254,180 @@ ${deviceInfo.userAgent}`
       if (countdownRef.current) clearInterval(countdownRef.current)
     }
   }, [timerStarted])
+
+  // ===== VALENTINE'S DAY - SAD GAANA FUNCTIONS =====
+
+  // Auto-play sad gaana when Valentine's Day tab is opened
+  useEffect(() => {
+    if (activeDay === 'valentine' && !vdSadnessBandKar) {
+      // Start playing sad gaana on low volume
+      try {
+        if (!sadGaanaRef.current) {
+          sadGaanaRef.current = new Audio('/Sad_Gaana.mp3')
+          sadGaanaRef.current.loop = true
+        }
+        sadGaanaRef.current.volume = 0.3
+        sadGaanaRef.current.currentTime = 0
+        const playPromise = sadGaanaRef.current.play()
+        if (playPromise) {
+          playPromise.then(() => {
+            setVdSadPlaying(true)
+          }).catch(() => {
+            // Autoplay blocked, will play on interaction
+            setVdSadPlaying(false)
+          })
+        }
+      } catch (e) {
+        console.log('Sad gaana autoplay blocked')
+      }
+    }
+    // Stop when leaving valentine tab
+    if (activeDay !== 'valentine' && sadGaanaRef.current) {
+      sadGaanaRef.current.pause()
+      setVdSadPlaying(false)
+    }
+  }, [activeDay, vdSadnessBandKar])
+
+  // Play sad gaana manually (if autoplay was blocked)
+  const vdPlaySadGaana = () => {
+    try {
+      if (!sadGaanaRef.current) {
+        sadGaanaRef.current = new Audio('/Sad_Gaana.mp3')
+        sadGaanaRef.current.loop = true
+      }
+      sadGaanaRef.current.volume = 0.3
+      sadGaanaRef.current.play()
+      setVdSadPlaying(true)
+    } catch (e) {}
+  }
+
+  // Sadness Band Kar - stop sad song, switch to happy mode
+  const vdStopSadness = () => {
+    setVdSadnessBandKar(true)
+    setVdRecordScratch(true)
+
+    // Stop sad gaana abruptly
+    if (sadGaanaRef.current) {
+      sadGaanaRef.current.pause()
+      sadGaanaRef.current.currentTime = 0
+    }
+    setVdSadPlaying(false)
+
+    // Play record scratch sound effect
+    playSound('escape')
+    setTimeout(() => playSound('celebration'), 300)
+
+    // Trigger confetti and happy mode
+    setTimeout(() => {
+      setVdRecordScratch(false)
+      setVdHappyMode(true)
+      triggerConfetti()
+      setTimeout(() => triggerConfetti(), 800)
+    }, 600)
+  }
+
+  // Act 2 card navigation
+  const vdNextCard = () => {
+    setVdCardFlip(true)
+    // Play 2sec sad snippet then cut to balle balle
+    if (sadGaanaRef.current) {
+      sadGaanaRef.current.volume = 0.4
+      sadGaanaRef.current.play()
+      setTimeout(() => {
+        if (sadGaanaRef.current) {
+          sadGaanaRef.current.pause()
+          sadGaanaRef.current.currentTime = 0
+        }
+        playSound('celebration')
+      }, 2000)
+    } else {
+      playSound('click')
+    }
+    setTimeout(() => {
+      setVdCardFlip(false)
+      setVdCardIndex(prev => prev + 1)
+    }, 400)
+  }
+
+  const vdPrevCard = () => {
+    if (vdCardIndex > 0) {
+      setVdCardFlip(true)
+      playSound('click')
+      setTimeout(() => {
+        setVdCardFlip(false)
+        setVdCardIndex(prev => prev - 1)
+      }, 400)
+    }
+  }
+
+  // Act 3 - Sad Mode Trap
+  const vdTapSadMode = () => {
+    const attempts = vdSadAttempts + 1
+    setVdSadAttempts(attempts)
+
+    if (attempts >= 3) {
+      // Lock sad button after 3 attempts
+      setVdSadLocked(true)
+      playSound('celebration')
+      triggerConfetti()
+      setTimeout(() => triggerConfetti(), 800)
+      return
+    }
+
+    // Play sad gaana for 10 sec then force happy
+    setVdFakeTears(true)
+    if (sadGaanaRef.current) {
+      sadGaanaRef.current.volume = 0.5
+      sadGaanaRef.current.play()
+    }
+
+    const roasts = [
+      "Bali vi thak gaya tere sad attempts se! 😴",
+      "Ek aur try? Oye sadness ka quota khatam! 😂",
+    ]
+
+    setTimeout(() => {
+      if (sadGaanaRef.current) {
+        sadGaanaRef.current.pause()
+        sadGaanaRef.current.currentTime = 0
+      }
+      setVdFakeTears(false)
+      playSound('escape')
+      setTimeout(() => {
+        playSound('celebration')
+        triggerConfetti()
+      }, 300)
+    }, 8000)
+  }
+
+  // Act 3 - Happy Jatt Mode Direct
+  const vdTapHappyMode = () => {
+    if (sadGaanaRef.current) {
+      sadGaanaRef.current.pause()
+      sadGaanaRef.current.currentTime = 0
+    }
+    playSound('celebration')
+    triggerConfetti()
+    setTimeout(() => triggerConfetti(), 600)
+    setVdHappyMode(true)
+  }
+
+  // Navigate between acts
+  const vdGoToAct = (act) => {
+    playSound('whoosh')
+    setVdAct(act)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (sadGaanaRef.current) {
+        sadGaanaRef.current.pause()
+        sadGaanaRef.current = null
+      }
+    }
+  }, [])
 
   // Handle day change with logging
   const handleDayChange = (dayId) => {
@@ -5543,21 +5732,338 @@ ${deviceInfo.userAgent}`
         </section>
       )}
 
-      {/* ========== VALENTINE'S DAY - COMING SOON ========== */}
+      {/* ========== VALENTINE'S DAY - SAD GAANA DRAMA ========== */}
       {activeDay === 'valentine' && (
-        <section className="coming-soon-section valentine-theme">
-          <div className="coming-soon-container">
-            <div className="coming-soon-emoji">💕</div>
-            <h1 className="coming-soon-title">Valentine&apos;s Day</h1>
-            <h2 className="coming-soon-date">14th February</h2>
-            <div className="coming-soon-badge special">✨ GRAND FINALE COMING SOON ✨</div>
-            <p className="coming-soon-text">
-              Valentine&apos;s Day ka MEGA content under preparation! 🎉<br/>
-              Sabse special din ke liye sabse special surprise! 💖
-            </p>
-            <div className="coming-soon-hearts">💕 💖 💕 💖 💕</div>
-            <p className="coming-soon-hint">14 Feb ko yahan milna... kuch bada hone wala hai! 🎁</p>
-          </div>
+        <section className={`vd-section ${vdSadnessBandKar && vdHappyMode ? 'vd-happy' : 'vd-sad'}`}>
+
+          {/* ===== ACT 1: SAD GAANA DRAMA ENTRY ===== */}
+          {vdAct === 'act1' && (
+            <div className="vd-act1">
+              {/* Fake CSS Tears when sad mode active */}
+              {!vdSadnessBandKar && (
+                <div className="vd-tears-container">
+                  {[...Array(20)].map((_, i) => (
+                    <div key={i} className="vd-tear" style={{
+                      left: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 3}s`,
+                      animationDuration: `${1.5 + Math.random() * 2}s`
+                    }}>💧</div>
+                  ))}
+                </div>
+              )}
+
+              {/* Record scratch flash */}
+              {vdRecordScratch && (
+                <div className="vd-record-scratch">
+                  <span>🎵 *SCRATCH* 🎵</span>
+                </div>
+              )}
+
+              {/* Confetti overlay for happy mode */}
+              {vdSadnessBandKar && vdHappyMode && (
+                <div className="vd-happy-overlay">
+                  <div className="vd-happy-text-big">
+                    Oye Hoye! Bali da gaana off – ab dhol on! 🕺❤️
+                  </div>
+                  <p className="vd-happy-sub">Tu hai na, sadness ka chance hi nahi! 🎉💃</p>
+                </div>
+              )}
+
+              <div className="vd-act1-content">
+                <div className="vd-hero-emoji">{vdSadnessBandKar ? '🥳' : '😭'}</div>
+                <div className="vd-wilted-rose">{vdSadnessBandKar ? '🌹' : '🥀'}</div>
+
+                <h1 className="vd-title">
+                  {vdSadnessBandKar
+                    ? "Happy Valentine's Day, Raima! ❤️🎉"
+                    : "Happy Valentine's Day, Raima! ❤️ Par Pehle Thoda Sad Hungama… Bali Da Gaana Sun! 😬💔"
+                  }
+                </h1>
+
+                {!vdSadnessBandKar ? (
+                  <div className="vd-sad-content">
+                    <div className="vd-sad-bullets">
+                      <p className="vd-bullet">😭 &quot;Aaj Valentine&apos;s, par main soch raha – tere bina yeh din kitna sad hoga! Isliye Bali da sad gaana play kar ditta… feel kar na jaan!&quot;</p>
+                      <p className="vd-bullet">🚜😢 &quot;Lyrics sun: &apos;Tere bina dil lagda nahi…&apos; – exactly mera feel tere bina! Tractor vi sad mode vich park ho gaya&quot;</p>
+                      <p className="vd-bullet">😂 &quot;Par wait… yeh sadness sirf trailer si! Ab asli twist aa raha – because TU meri Valentine ae, sadness cancel!&quot;</p>
+                    </div>
+
+                    {!vdSadPlaying && (
+                      <button className="vd-play-btn" onClick={vdPlaySadGaana}>
+                        🎵 Sad Gaana Play Kar! 🎵
+                      </button>
+                    )}
+                    {vdSadPlaying && (
+                      <div className="vd-now-playing">
+                        <span className="vd-music-wave">🎶</span> Bali da sad gaana playing... <span className="vd-music-wave">🎶</span>
+                      </div>
+                    )}
+
+                    <button className="vd-band-kar-btn" onClick={vdStopSadness}>
+                      😭 Sadness Band Kar! 😭
+                    </button>
+                  </div>
+                ) : (
+                  <div className="vd-happy-content">
+                    <p className="vd-happy-msg">Sadness CANCELLED! Ab sirf khushi! 🎊💖</p>
+                    <button className="vd-next-act-btn" onClick={() => vdGoToAct('act2')}>
+                      ➡️ Ab Funny Roast Cards Dekh! 😂
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ===== ACT 2: SAD SE FUNNY ROAST SWIPE CARDS ===== */}
+          {vdAct === 'act2' && (
+            <div className="vd-act2">
+              <h1 className="vd-act2-title">
+                Bali Da Sad Gaana Kyun Play Kiya? 🤔
+              </h1>
+              <p className="vd-act2-sub">Because Tere Bina… (Par Tere Saath Toh Sab Funny Ae!) 😂</p>
+
+              <div className="vd-cards-container">
+                {[
+                  {
+                    sad: "Tere bina: Bali da gaana sun ke ro raha…",
+                    happy: "Tere saath: Teri hasi sun ke pet pakad ke has raha! 😂🤣",
+                    emoji: "😢➡️😂",
+                    bg: "card-bg-1"
+                  },
+                  {
+                    sad: "Tere bina: Tractor vi sad, dust kha raha…",
+                    happy: "Tere saath: Full speed tere layi pataka phodne! 🚜💥",
+                    emoji: "🚜😢➡️🚜💥",
+                    bg: "card-bg-2"
+                  },
+                  {
+                    sad: "Tere bina: Billi nu hug – Whiskers boli 'oye depressed Jatt!' 🐱😿",
+                    happy: "Tere saath: Sirf tujhe lifetime tight jappi! 🤗",
+                    emoji: "🐱😿➡️🤗",
+                    bg: "card-bg-3"
+                  },
+                  {
+                    sad: "Tere bina: Dream vich sad gaana repeat…",
+                    happy: "Tere saath: Dream vich hug-kiss repeat (Hug Day wala upgrade! 😘)",
+                    emoji: "😴😭➡️😴😘",
+                    bg: "card-bg-4"
+                  },
+                  {
+                    sad: "Tere bina: Valentine's akela chole bhature kha ke food poisoning!",
+                    happy: "Tere saath: Saath mein epic stories banayenge! 🍲❤️",
+                    emoji: "🤢➡️🍲❤️",
+                    bg: "card-bg-5"
+                  },
+                  {
+                    sad: "Final Reason:",
+                    happy: "Bali da sad gaana sirf excuse si – asli baat, tu meri Valentine hai, sadness banned forever! 💍",
+                    emoji: "💔➡️💍",
+                    bg: "card-bg-6"
+                  }
+                ].map((card, idx) => (
+                  <div
+                    key={idx}
+                    className={`vd-card ${idx === vdCardIndex ? 'vd-card-active' : ''} ${idx < vdCardIndex ? 'vd-card-done' : ''} ${idx > vdCardIndex ? 'vd-card-next' : ''} ${vdCardFlip && idx === vdCardIndex ? 'vd-card-flip' : ''} ${card.bg}`}
+                  >
+                    <div className="vd-card-emoji">{card.emoji}</div>
+                    <div className="vd-card-sad">
+                      <p>{card.sad}</p>
+                    </div>
+                    <div className="vd-card-happy">
+                      <p>{card.happy}</p>
+                    </div>
+                    <div className="vd-card-number">Card {idx + 1}/6</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="vd-card-nav">
+                {vdCardIndex > 0 && (
+                  <button className="vd-card-prev-btn" onClick={vdPrevCard}>
+                    ⬅️ Pichla
+                  </button>
+                )}
+                {vdCardIndex < 5 ? (
+                  <button className="vd-card-next-btn" onClick={vdNextCard}>
+                    Agla Card ➡️
+                  </button>
+                ) : (
+                  <button className="vd-next-act-btn" onClick={() => vdGoToAct('act3')}>
+                    🎮 Ab Interactive Game! 🕺
+                  </button>
+                )}
+              </div>
+
+              <div className="vd-card-dots">
+                {[0,1,2,3,4,5].map(i => (
+                  <span key={i} className={`vd-dot ${i === vdCardIndex ? 'vd-dot-active' : ''} ${i < vdCardIndex ? 'vd-dot-done' : ''}`}>●</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ===== ACT 3: INTERACTIVE SAD GAANA TO HAPPY DANCE GAME ===== */}
+          {vdAct === 'act3' && (
+            <div className="vd-act3">
+              {/* Fake tears CSS rain for sad mode */}
+              {vdFakeTears && (
+                <div className="vd-tears-container">
+                  {[...Array(30)].map((_, i) => (
+                    <div key={i} className="vd-tear" style={{
+                      left: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 2}s`,
+                      animationDuration: `${1 + Math.random() * 1.5}s`
+                    }}>💧</div>
+                  ))}
+                </div>
+              )}
+
+              <h1 className="vd-act3-title">
+                🎵 Play Bali Sad Gaana… Or Happy Twist? 🎵
+              </h1>
+
+              {!vdSadLocked ? (
+                <div className="vd-act3-buttons">
+                  <button
+                    className="vd-sad-mode-btn"
+                    onClick={vdTapSadMode}
+                    disabled={vdFakeTears}
+                  >
+                    <span className="vd-btn-emoji">😬</span>
+                    <span className="vd-btn-label">Sad Mode</span>
+                    {vdSadAttempts > 0 && (
+                      <span className="vd-sad-counter">({vdSadAttempts}/3 attempts)</span>
+                    )}
+                  </button>
+
+                  <span className="vd-vs">VS</span>
+
+                  <button className="vd-happy-mode-btn" onClick={vdTapHappyMode}>
+                    <span className="vd-btn-emoji">🕺</span>
+                    <span className="vd-btn-label">Happy Jatt Mode</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="vd-locked-result">
+                  <div className="vd-locked-emoji">🎉🎊🥳</div>
+                  <h2 className="vd-locked-title">Auto Valentine Accept Ho Gaya! 🎉</h2>
+                  <p className="vd-locked-text">
+                    Ter sad attempts khatam! Bali vi bola &quot;oye chhod, khush reh!&quot; 😂
+                  </p>
+                  <p className="vd-locked-text">
+                    Sadness nahi chalta yahan! Tu meri Valentine, sirf khushi allowed! ❤️
+                  </p>
+                </div>
+              )}
+
+              {vdFakeTears && (
+                <div className="vd-fake-tears-msg">
+                  <p>Ab ro le… par sirf 10 sec! 😭</p>
+                  <p className="vd-tears-sub">
+                    {vdSadAttempts === 1 ? "Fer sad? Bali vi thak gaya! 😴" : "Ek aur try? Oye sadness ka quota khatam! 😂"}
+                  </p>
+                </div>
+              )}
+
+              {(vdSadLocked || vdHappyMode) && (
+                <div className="vd-act3-happy-result">
+                  <div className="vd-happy-dance">🕺💃🕺💃</div>
+                  <p className="vd-happy-result-text">
+                    Fooled you! Sadness nahi chalta yahan! 😂<br/>
+                    Tu meri Valentine, sirf khushi allowed! ❤️
+                  </p>
+                  <button className="vd-next-act-btn" onClick={() => vdGoToAct('end')}>
+                    🎬 Ab Final Surprise! ➡️
+                  </button>
+                </div>
+              )}
+
+              {!vdSadLocked && !vdHappyMode && !vdFakeTears && (
+                <div className="vd-act3-hint">
+                  <p>👆 Koi bhi choose kar... result toh ek hi hai! 😏</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ===== END SECTION: VIDEO + YOUTUBE + VALENTINE WISH ===== */}
+          {vdAct === 'end' && (
+            <div className="vd-end">
+              <div className="vd-end-wish">
+                <div className="vd-end-hearts">💕💖💕💖💕</div>
+                <h1 className="vd-end-title">Happy Valentine&apos;s Day, Raima! 💝</h1>
+                <p className="vd-end-subtitle">Tu meri Valentine ae… aaj, kal, hamesha! ❤️🥰</p>
+              </div>
+
+              <div className="vd-end-video-section">
+                <h2 className="vd-end-video-title">🎬 Pehle Yeh Dekh… 😂</h2>
+                <div className="vd-video-wrapper">
+                  <video
+                    className="vd-end-video"
+                    controls
+                    playsInline
+                    preload="metadata"
+                  >
+                    <source src="/Resigned%20without%20an%20offer%E2%80%A6Now%20living%20in%20%E2%80%9Clet%E2%80%99s%20see%20what%20happens%E2%80%9D%20mode%20%F0%9F%98%AD%F0%9F%92%BCConfidence%20high%2C%20bank%20.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </div>
+
+              <div className="vd-end-movie-section">
+                <h2 className="vd-end-movie-title">🎬 Chal Ab Ye Movie Dekh! 🍿</h2>
+                <p className="vd-end-movie-sub">Valentine&apos;s Day special movie plan! 💑</p>
+                <a
+                  href="https://youtu.be/l7E0kTvARsA?si=gnkVyMAF4fhlBtFg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="vd-movie-link"
+                >
+                  🎥 Movie Dekh! ➡️
+                </a>
+              </div>
+
+              <div className="vd-end-final">
+                <div className="vd-end-final-emoji">🥰💕</div>
+                <p className="vd-end-final-text">
+                  Bali da sad gaana se happy ending tak – yeh hai tera Valentine&apos;s Day surprise! 💖
+                </p>
+                <p className="vd-end-sign">— Tera Lakshay, Forever ❤️</p>
+              </div>
+            </div>
+          )}
+
+          {/* Act Navigation Bar */}
+          {vdAct !== 'act1' && (
+            <div className="vd-act-nav">
+              <button
+                className={`vd-act-nav-btn ${vdAct === 'act1' ? 'active' : ''}`}
+                onClick={() => vdGoToAct('act1')}
+              >
+                💔 Act 1
+              </button>
+              <button
+                className={`vd-act-nav-btn ${vdAct === 'act2' ? 'active' : ''}`}
+                onClick={() => vdGoToAct('act2')}
+              >
+                🃏 Act 2
+              </button>
+              <button
+                className={`vd-act-nav-btn ${vdAct === 'act3' ? 'active' : ''}`}
+                onClick={() => vdGoToAct('act3')}
+              >
+                🎮 Act 3
+              </button>
+              <button
+                className={`vd-act-nav-btn ${vdAct === 'end' ? 'active' : ''}`}
+                onClick={() => vdGoToAct('end')}
+              >
+                🎬 Finale
+              </button>
+            </div>
+          )}
+
         </section>
       )}
 
